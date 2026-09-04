@@ -13,6 +13,7 @@ import {
   QUESTION_PFDS,
   QUESTION_BOAT_PARTS,
   QUESTION_CLOUDS,
+  QUESTION_FLAGS,
 } from '../drills/colregs';
 
 // Several categories carry questions that must render with NO picture, and it
@@ -72,6 +73,10 @@ describe('questions that must stay undiagrammed', () => {
     // Beaufort forces are numbers and wind shifts are movements over time -
     // neither is drawable. wx-19 asks WHICH form is the dangerous one, so a
     // picture of the dangerous one would hand it over.
+    // The meaning-to-flag direction: sf-19 and sf-20 name the meaning and ask
+    // which flag, so drawing the flag hands the answer over. sf-16 and sf-17
+    // are about how the Code works rather than about any one flag.
+    ['how the Code works, and meaning-to-flag', ['sf-16', 'sf-17', 'sf-18', 'sf-19', 'sf-20'], QUESTION_FLAGS],
     ['Beaufort forces and the wind shift', ['wx-01', 'wx-08', 'wx-18', 'wx-19', 'wx-23', 'wx-24'], QUESTION_CLOUDS],
   ];
 

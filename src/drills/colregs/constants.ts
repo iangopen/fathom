@@ -13,7 +13,8 @@ export type ColregsCategory =
   | 'fire-safety'
   | 'deck-seamanship'
   | 'weather'
-  | 'tides';
+  | 'tides'
+  | 'signal-flags';
 
 export interface ColregsQuestion {
   id: string;
@@ -44,6 +45,7 @@ export const NON_COLREGS_CATEGORIES: ColregsCategory[] = [
   'deck-seamanship',
   'weather',
   'tides',
+  'signal-flags',
 ];
 
 // Distress signals are NOT in that list, and the near miss is worth saying out
@@ -79,6 +81,9 @@ export function isColregsGoverned(question: ColregsQuestion): boolean {
 // "Tides" and "Tidal currents" are two labels rather than one because the
 // distinction between them - the water going up and down against the water
 // going sideways - is the single thing that half that card exists to teach.
+// "International Code of Signals" is the IMO publication itself, and it earns
+// a label of exactly the same kind as IALA-B: a real, published, international
+// system that the Rules do not govern and cannot be cited for.
 export const TOPIC_LABELS = [
   'Ground tackle',
   'Holding ground',
@@ -96,6 +101,7 @@ export const TOPIC_LABELS = [
   'Weather lore',
   'Tides',
   'Tidal currents',
+  'International Code of Signals',
 ] as const;
 
 // --- NAVIGATION LIGHTS (20 questions) ---
@@ -3990,6 +3996,296 @@ const tidesQuestions: ColregsQuestion[] = [
   },
 ];
 
+// --- SIGNAL FLAGS (20 questions) ---
+//
+// Signals and communication, not seamanship, and NOT COLREGS: the
+// International Code of Signals is an IMO publication in its own right, the
+// way IALA is for buoyage, so every explanation here opens with that label
+// rather than with a rule number.
+//
+// WHY FIFTEEN LETTERS AND NOT TWENTY-SIX. The Code gives all twenty-six a
+// single-letter meaning, but they are not equally worth knowing: a boat crew
+// will meet Alpha, Oscar and Bravo on the water and will not meet Uniform or
+// Xray. The fifteen here are the operationally significant ones - the ones
+// that say keep clear of me, I am in trouble, someone is in the water, I am
+// altering course. Drilling the other eleven to the same depth would spend a
+// candidate's attention on the flags least likely to be flying.
+//
+// sf-01 to sf-15 are the identify direction: here is a flag, what is it
+// telling you. Each carries its diagram. sf-16 to sf-20 run the other way or
+// ask about the system, and carry none - see the note on QUESTION_FLAGS in
+// ../index.tsx.
+//
+// Echo and India are the pair candidates reverse, and so are Papa and Quebec.
+// They are drilled apart rather than against each other, and the explanations
+// give the hook rather than just the fact.
+
+const signalFlagQuestions: ColregsQuestion[] = [
+  {
+    id: 'sf-01',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a swallow-tailed flag, white at the hoist and blue at the fly. What is she telling you?',
+    options: [
+      'I have a diver down; keep well clear at slow speed',
+      'I am carrying dangerous cargo',
+      'I require a pilot',
+      'I am altering my course to port',
+    ],
+    correctAnswer: 'I have a diver down; keep well clear at slow speed',
+    explanation:
+      'International Code of Signals: Alpha - white at the hoist, blue at the fly, and swallow-tailed. It means a diver is in the water and the vessel cannot manoeuvre, so pass wide and slow. It is not the same as the red-and-white diagonal sport diver flag, which is a United States convention; Alpha is the international one and is the one that carries weight.',
+  },
+  {
+    id: 'sf-02',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a plain red swallow-tailed flag. What is she telling you?',
+    options: [
+      'I am taking in, discharging or carrying dangerous goods',
+      'I am on fire and need assistance',
+      'My vessel is healthy',
+      'I am operating astern propulsion',
+    ],
+    correctAnswer: 'I am taking in, discharging or carrying dangerous goods',
+    explanation:
+      'International Code of Signals: Bravo - a plain red swallowtail. It flies while explosives, fuel or other dangerous cargo are aboard or being worked, which is why you see it over a fuel dock. The two swallowtails in common use are Alpha and Bravo, and the notch is part of the signal: a solid red rectangle is a different flag entirely.',
+  },
+  {
+    id: 'sf-03',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag of five horizontal bands - blue, white, red, white, blue. What does it mean?',
+    options: ['Affirmative - yes', 'Negative - no', 'I require a pilot', 'Man overboard'],
+    correctAnswer: 'Affirmative - yes',
+    explanation:
+      'International Code of Signals: Charlie - five horizontal bands, blue, white, red, white, blue. It is the Code\'s yes. Its opposite is November, and the two of them together, November over Charlie, is a recognised way of saying a vessel is in distress.',
+  },
+  {
+    id: 'sf-04',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag with a broad blue band between two yellow ones. What is she telling you?',
+    options: [
+      'Keep clear of me; I am manoeuvring with difficulty',
+      'I am altering my course to starboard',
+      'I have a pilot on board',
+      'All persons should report on board',
+    ],
+    correctAnswer: 'Keep clear of me; I am manoeuvring with difficulty',
+    explanation:
+      'International Code of Signals: Delta - a blue band between two yellow ones. It says the vessel cannot be relied on to get out of your way, so give her room. Delta is the warning; Foxtrot is the stronger case where she cannot manoeuvre at all.',
+  },
+  {
+    id: 'sf-05',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag divided horizontally, blue over red. What is she telling you?',
+    options: [
+      'I am altering my course to starboard',
+      'I am altering my course to port',
+      'I require assistance',
+      'I am disabled',
+    ],
+    correctAnswer: 'I am altering my course to starboard',
+    explanation:
+      'International Code of Signals: Echo - blue over red - is turning to starboard, and it carries the same message as a single short blast. Its mirror image is India, turning to port. If you learn only one of the pair, learn Echo, and take India as the other one.',
+  },
+  {
+    id: 'sf-06',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a white flag with a red diamond in the centre. What is she telling you?',
+    options: [
+      'I am disabled; communicate with me',
+      'I require a pilot',
+      'I am carrying dangerous goods',
+      'My vessel is healthy',
+    ],
+    correctAnswer: 'I am disabled; communicate with me',
+    explanation:
+      'International Code of Signals: Foxtrot - a red diamond on white. The vessel has lost the ability to manoeuvre and wants to be spoken to. It is a step past Delta, which only asks for room.',
+  },
+  {
+    id: 'sf-07',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag of six vertical stripes, yellow and blue alternating. What is she asking for?',
+    options: [
+      'I require a pilot',
+      'I have a pilot on board',
+      'I am altering my course to port',
+      'Man overboard',
+    ],
+    correctAnswer: 'I require a pilot',
+    explanation:
+      'International Code of Signals: Golf - six vertical stripes, yellow and blue. It asks for a pilot to be sent. Hotel is its answer, flown once the pilot is aboard, and the pair is worth learning together because a harbour approach is where both actually fly.',
+  },
+  {
+    id: 'sf-08',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag divided vertically, white at the hoist and red at the fly. What is she telling you?',
+    options: [
+      'I have a pilot on board',
+      'I require a pilot',
+      'I am about to proceed to sea',
+      'Keep clear of me',
+    ],
+    correctAnswer: 'I have a pilot on board',
+    explanation:
+      'International Code of Signals: Hotel - white at the hoist, red at the fly. The pilot is aboard and conning her. Golf asked for him; Hotel says he has arrived.',
+  },
+  {
+    id: 'sf-09',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a yellow flag with a black disc in the centre. What is she telling you?',
+    options: [
+      'I am altering my course to port',
+      'I am altering my course to starboard',
+      'I am disabled',
+      'Affirmative - yes',
+    ],
+    correctAnswer: 'I am altering my course to port',
+    explanation:
+      'International Code of Signals: India - a black disc on yellow - is turning to port, and matches the two short blasts that say the same thing. Echo is the starboard half of the pair. Getting the two the wrong way round is the commonest mistake on this whole card.',
+  },
+  {
+    id: 'sf-10',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag of blue and white squares in a chequer. What does it mean?',
+    options: ['Negative - no', 'Affirmative - yes', 'Man overboard', 'I require a pilot'],
+    correctAnswer: 'Negative - no',
+    explanation:
+      'International Code of Signals: November - blue and white squares in a chequer. It is the Code\'s no, and the opposite of Charlie. Flown above Charlie it becomes something else again: the two together are a signal of distress.',
+  },
+  {
+    id: 'sf-11',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a flag divided corner to corner, red above and yellow below. What is she telling you?',
+    options: [
+      'Man overboard',
+      'I am disabled',
+      'I require free pratique',
+      'I am about to proceed to sea',
+    ],
+    correctAnswer: 'Man overboard',
+    explanation:
+      'International Code of Signals: Oscar - red and yellow divided corner to corner. Somebody is in the water. Of every flag in the Code this is the one to know on sight, because it is the one that means a boat near you needs every pair of eyes it can get, right now.',
+  },
+  {
+    id: 'sf-12',
+    category: 'signal-flags',
+    prompt: 'A vessel in harbour flies a blue flag with a white rectangle in the centre. What is she telling her crew?',
+    options: [
+      'All persons should report on board; the vessel is about to proceed to sea',
+      'My vessel is healthy and I request free pratique',
+      'I have a pilot on board',
+      'I am operating astern propulsion',
+    ],
+    correctAnswer:
+      'All persons should report on board; the vessel is about to proceed to sea',
+    explanation:
+      'International Code of Signals: Papa - a white rectangle on blue - is the Blue Peter, and it is the signal to get everyone back aboard because she is sailing. That is the harbour meaning; at sea the same flag is used by a fishing vessel whose nets are fast on an obstruction.',
+  },
+  {
+    id: 'sf-13',
+    category: 'signal-flags',
+    prompt: 'A vessel newly arrived from abroad flies a plain yellow flag. What is she telling you?',
+    options: [
+      'My vessel is healthy and I request free pratique',
+      'I am carrying dangerous goods',
+      'I require assistance',
+      'Negative - no',
+    ],
+    correctAnswer: 'My vessel is healthy and I request free pratique',
+    explanation:
+      'International Code of Signals: Quebec - plain yellow. It is flown on arrival from abroad to declare no sickness aboard and ask for clearance to land. Free pratique is that clearance, and the flag comes down when it is granted.',
+  },
+  {
+    id: 'sf-14',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a white flag with a blue rectangle in the centre. What is she telling you?',
+    options: [
+      'I am operating astern propulsion',
+      'I am altering my course to starboard',
+      'I require a pilot',
+      'I am disabled',
+    ],
+    correctAnswer: 'I am operating astern propulsion',
+    explanation:
+      'International Code of Signals: Sierra - a blue rectangle on white. She is going astern, or at least her engines are, which matters most where a ship is backing out of a berth. It carries the message that three short blasts do.',
+  },
+  {
+    id: 'sf-15',
+    category: 'signal-flags',
+    prompt: 'A vessel flies a white flag with a red diagonal cross on it. What is she telling you?',
+    options: [
+      'I require assistance',
+      'I require a pilot',
+      'I am carrying dangerous goods',
+      'Keep clear of me',
+    ],
+    correctAnswer: 'I require assistance',
+    explanation:
+      'International Code of Signals: Victor - a red saltire on white. It asks for help, without saying the vessel is in danger of being lost; the signals that say that are a separate list. A red X on white is worth remembering as a plain call for assistance.',
+  },
+  {
+    id: 'sf-16',
+    category: 'signal-flags',
+    prompt: 'What is the International Code of Signals for?',
+    options: [
+      'Passing safety messages between vessels that share no common language',
+      'Identifying a vessel\'s nationality and home port',
+      'Recording the movements of a vessel in her log',
+      'Ranking vessels in order of responsibility to keep clear',
+    ],
+    correctAnswer:
+      'Passing safety messages between vessels that share no common language',
+    explanation:
+      'International Code of Signals: The Code exists so that a message about safety can pass between a Greek ship and a Japanese one without either crew speaking the other\'s language. Each signal has one meaning, published identically in every edition, and each edition prints it in its own language. Nationality is what an ensign shows, which is a different flag doing a different job.',
+  },
+  {
+    id: 'sf-17',
+    category: 'signal-flags',
+    prompt: 'What does it mean when a single letter flag is flown by itself?',
+    options: [
+      'It carries a complete meaning of its own, and those meanings are the most urgent in the Code',
+      'It is the first letter of a longer signal still being hoisted',
+      'It is the initial of the vessel\'s name',
+      'It has no meaning until a second flag is hoisted under it',
+    ],
+    correctAnswer:
+      'It carries a complete meaning of its own, and those meanings are the most urgent in the Code',
+    explanation:
+      'International Code of Signals: The single-letter signals were chosen as the most urgent and the most common, precisely so that one flag can say the whole thing. Two-letter and three-letter groups exist for longer messages, but a lone flag is a finished signal, not the start of one.',
+  },
+  {
+    id: 'sf-18',
+    category: 'signal-flags',
+    prompt: 'You see a vessel flying a flag meaning she has a diver in the water. What must you do?',
+    options: [
+      'Keep well clear of her and pass at slow speed',
+      'Stand on, since a vessel with a diver down keeps clear of you',
+      'Sound one prolonged blast and hold your course',
+      'Anchor until the diver is recovered',
+    ],
+    correctAnswer: 'Keep well clear of her and pass at slow speed',
+    explanation:
+      'International Code of Signals: That is Alpha, and the point of it is that a person is under the surface where your propeller is. Keep well off and slow down - your wake and your propeller are both the hazard, and the diver cannot see or hear you coming.',
+  },
+  {
+    id: 'sf-19',
+    category: 'signal-flags',
+    prompt: 'Which single flag is flown to signal a man overboard?',
+    options: ['Oscar', 'Victor', 'Delta', 'November'],
+    correctAnswer: 'Oscar',
+    explanation:
+      'International Code of Signals: Oscar means man overboard - the O of "Oh no, someone is in the water" is as good a hook as any, and it is the one flag on this card worth knowing cold. Victor asks for assistance generally, Delta asks for room, and November is simply no.',
+  },
+  {
+    id: 'sf-20',
+    category: 'signal-flags',
+    prompt: 'Which flag is known as the Blue Peter?',
+    options: ['Papa', 'Bravo', 'Sierra', 'Quebec'],
+    correctAnswer: 'Papa',
+    explanation:
+      'International Code of Signals: Papa is the Blue Peter, hoisted in harbour to call everyone back aboard because the vessel is about to sail. The nickname is old and its origin is disputed; what is not disputed is what it means when it goes up, which is that you have run out of time ashore.',
+  },
+];
+
 // --- COMBINED EXPORT ---
 
 export const COLREGS_QUESTIONS: ColregsQuestion[] = [
@@ -4008,6 +4304,7 @@ export const COLREGS_QUESTIONS: ColregsQuestion[] = [
   ...deckSeamanshipQuestions,
   ...weatherQuestions,
   ...tidesQuestions,
+  ...signalFlagQuestions,
 ];
 
 export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuestion[]> = {
@@ -4026,6 +4323,7 @@ export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuest
   'deck-seamanship': deckSeamanshipQuestions,
   'weather': weatherQuestions,
   'tides': tidesQuestions,
+  'signal-flags': signalFlagQuestions,
 };
 
 export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
@@ -4044,4 +4342,5 @@ export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
   'deck-seamanship': 'Deck Seamanship',
   'weather': 'Weather and Sea State',
   'tides': 'Tides and Currents',
+  'signal-flags': 'Signal Flags',
 };

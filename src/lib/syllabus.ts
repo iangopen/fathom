@@ -181,6 +181,24 @@ export const CATEGORIES: ChartCategory[] = [
     ],
   },
   {
+    id: 'flags',
+    name: 'Signal flags',
+    section: 'Signals and communication',
+    rule: 'International Code of Signals',
+    status: 'live',
+    source: 'signal-flags',
+    blurb:
+      'The single-letter flags that carry a whole message on their own, read the way you meet them - a flag flying off somebody\'s halyard and a decision to make about it. The fifteen that actually matter on the water, not a march through all twenty-six.',
+    topics: [
+      'Alpha: diver down, keep clear',
+      'Bravo: dangerous cargo',
+      'Oscar: man overboard',
+      'Echo and India: altering course',
+      'Golf and Hotel: the pilot',
+      'Papa, the Blue Peter',
+    ],
+  },
+  {
     id: 'anchors',
     name: 'Anchor types',
     section: 'Seamanship',

@@ -36,6 +36,7 @@ import { DistressSignalName } from './components/DistressDisplay';
 import { PfdFormName } from './components/PfdDisplay';
 import { BoatPartName } from './components/BoatPartDisplay';
 import { CloudName } from './components/CloudDisplay';
+import { FlagName } from './components/SignalFlagDisplay';
 
 type DrillState = 'idle' | 'playing' | 'finished';
 type DrillMode = 'practice' | 'exam';
@@ -314,6 +315,33 @@ export const QUESTION_CLOUDS: Partial<Record<string, CloudName>> = {
   'wx-17': 'halo',
 };
 
+// The flag shown for the fifteen identification questions. Same contract as
+// the buoys: the picture is the whole stimulus and names neither the letter
+// nor the meaning.
+//
+// The last five carry no picture, and each for its own reason. sf-16 and sf-17
+// are about how the Code works rather than about one flag. sf-18, sf-19 and
+// sf-20 run the OTHER way - they give the meaning and ask which flag, so a
+// drawing of the answer beside the question would be the answer. That is the
+// same direction rule the navigation lights bank is written against.
+export const QUESTION_FLAGS: Partial<Record<string, FlagName>> = {
+  'sf-01': 'alpha',
+  'sf-02': 'bravo',
+  'sf-03': 'charlie',
+  'sf-04': 'delta',
+  'sf-05': 'echo',
+  'sf-06': 'foxtrot',
+  'sf-07': 'golf',
+  'sf-08': 'hotel',
+  'sf-09': 'india',
+  'sf-10': 'november',
+  'sf-11': 'oscar',
+  'sf-12': 'papa',
+  'sf-13': 'quebec',
+  'sf-14': 'sierra',
+  'sf-15': 'victor',
+};
+
 export const QUESTION_SCENARIOS: Partial<Record<string, ScenarioType>> = {
   'vh-01': 'priority-nuc',
   'vh-02': 'sail-keeps-clear-ram',
@@ -383,6 +411,7 @@ export const CATEGORY_ORDER: CategoryFilter[] = [
   'pfd-types',
   'fire-safety',
   'deck-seamanship',
+  'signal-flags',
   'weather',
   'tides',
 ];
@@ -406,6 +435,7 @@ const CATEGORY_META: Record<CategoryFilter, { label: string; sub: string }> = {
   'deck-seamanship':   { label: 'Deck seamanship',        sub: 'boat, rope and helm'      },
   'weather':           { label: 'Weather and sea state',   sub: 'Beaufort, cloud and lore' },
   'tides':             { label: 'Tides and currents',      sub: 'flood, ebb and slack'     },
+  'signal-flags':      { label: 'Signal flags',            sub: 'single-letter meanings'   },
 };
 
 // The syllabus card a question belongs to, so its answer lands on the right
