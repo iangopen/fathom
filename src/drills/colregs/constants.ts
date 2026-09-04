@@ -11,7 +11,8 @@ export type ColregsCategory =
   | 'vhf-procedure'
   | 'pfd-types'
   | 'fire-safety'
-  | 'deck-seamanship';
+  | 'deck-seamanship'
+  | 'weather';
 
 export interface ColregsQuestion {
   id: string;
@@ -40,6 +41,7 @@ export const NON_COLREGS_CATEGORIES: ColregsCategory[] = [
   'pfd-types',
   'fire-safety',
   'deck-seamanship',
+  'weather',
 ];
 
 // Distress signals are NOT in that list, and the near miss is worth saying out
@@ -68,6 +70,10 @@ export function isColregsGoverned(question: ColregsQuestion): boolean {
 // VHF calls, which are governed by radio regulation rather than by the Rules.
 // "Life-saving equipment" is the Coast Guard's own carriage and approval
 // requirements, which are equipment regulation and not a rule of the road.
+// "Beaufort scale" is Beaufort's own observation scale, kept by the WMO;
+// "Cloud reading" is meteorology; and "Weather lore" is the one label on this
+// list that names no authority whatever, which is the honest thing to say
+// about a rhyme that is right more often than chance and is not a forecast.
 export const TOPIC_LABELS = [
   'Ground tackle',
   'Holding ground',
@@ -80,6 +86,9 @@ export const TOPIC_LABELS = [
   'Hull and deck',
   'Rigging',
   'Helm orders',
+  'Beaufort scale',
+  'Cloud reading',
+  'Weather lore',
 ] as const;
 
 // --- NAVIGATION LIGHTS (20 questions) ---
@@ -3316,6 +3325,342 @@ const deckSeamanshipQuestions: ColregsQuestion[] = [
   },
 ];
 
+// --- WEATHER AND SEA STATE (25 questions) ---
+//
+// Seamanship, not COLREGS. Three topics that are one skill approached three
+// ways - reading what the weather is about to do off what can be seen from the
+// deck with no instrument in your hand:
+//
+//   wx-01 to wx-12   the Beaufort scale                "Beaufort scale"
+//   wx-13 to wx-20   what a cloud form foretells       "Cloud reading"
+//   wx-21 to wx-25   the sky and the wind shift        "Weather lore"
+//
+// ON THE SPEED FIGURES. The Beaufort scale is defined by what the SEA does,
+// not by an anemometer: force 4 is "small waves, fairly frequent whitecaps",
+// and the wind speeds printed beside each force are equivalents fitted to
+// those descriptions afterwards. Different tables therefore give slightly
+// different cutoffs and neither is wrong. So no question here turns on a
+// boundary knot: they ask the name of a force, the sea state at a force, or a
+// speed given as "about", with distractors far enough apart that the choice of
+// source table cannot decide the answer. wx-12 asks about the discrepancy
+// outright, because a candidate who has read two tables has already met it.
+//
+// Force 9 is "strong gale", which some tables print as "severe gale". It is
+// one force under two names, so the two are never offered against each other.
+
+const weatherQuestions: ColregsQuestion[] = [
+  {
+    id: 'wx-01',
+    category: 'weather',
+    prompt: 'What does the Beaufort scale measure?',
+    options: [
+      'Wind force, estimated from its observed effect on the sea and on shore',
+      'Wave height in feet, measured from trough to crest',
+      'Barometric pressure, read off the ship\'s barometer',
+      'The distance a wind has blown over open water',
+    ],
+    correctAnswer:
+      'Wind force, estimated from its observed effect on the sea and on shore',
+    explanation:
+      'Beaufort scale: It is an observation scale, not an instrument reading. Beaufort wrote it for men who had no anemometer and did have eyes, so every force is defined by what the sea is doing - the wind speeds beside the forces were fitted to those descriptions long afterwards.',
+  },
+  {
+    id: 'wx-02',
+    category: 'weather',
+    prompt: 'How many forces does the Beaufort scale have?',
+    options: [
+      '13, numbered 0 to 12',
+      '12, numbered 1 to 12',
+      '10, numbered 0 to 9',
+      '17, numbered 0 to 16',
+    ],
+    correctAnswer: '13, numbered 0 to 12',
+    explanation:
+      'Beaufort scale: Thirteen forces, 0 through 12. Counting the names and arriving at twelve is the commonest slip - force 0 is a force, and it is calm. A few national services extend the numbering past 12 for tropical cyclones, but the scale proper stops at hurricane force.',
+  },
+  {
+    id: 'wx-03',
+    category: 'weather',
+    prompt: 'What is force 0 on the Beaufort scale called?',
+    options: ['Calm', 'Light air', 'Slack', 'Still'],
+    correctAnswer: 'Calm',
+    explanation:
+      'Beaufort scale: Force 0 is Calm, under about 1 knot, and the sea is like a mirror. Force 1 is Light air - the first force whose name admits any wind at all.',
+  },
+  {
+    id: 'wx-04',
+    category: 'weather',
+    prompt: 'The sea is like a mirror, without a ripple anywhere on it. What force is this?',
+    options: ['Force 0', 'Force 1', 'Force 2', 'Force 3'],
+    correctAnswer: 'Force 0',
+    explanation:
+      'Beaufort scale: A mirror sea is force 0, Calm. The very first thing wind does to water is raise ripples with the appearance of scales but no foam on them, and that is already force 1.',
+  },
+  {
+    id: 'wx-05',
+    category: 'weather',
+    prompt: 'What is force 12, the top of the Beaufort scale, called?',
+    options: ['Hurricane force', 'Violent storm', 'Severe storm', 'Typhoon force'],
+    correctAnswer: 'Hurricane force',
+    explanation:
+      'Beaufort scale: Force 12 is hurricane force, from about 64 knots up, with the air full of foam and spray and the sea white all over. Violent storm is force 11, one below it. The name says the wind is of hurricane strength; it does not say the system is a hurricane, which is a different question about a different thing.',
+  },
+  {
+    id: 'wx-06',
+    category: 'weather',
+    prompt: 'What is force 8 called?',
+    options: ['Gale', 'Near gale', 'Strong gale', 'Strong breeze'],
+    correctAnswer: 'Gale',
+    explanation:
+      'Beaufort scale: Force 8 is a gale, beginning around 34 knots, with moderately high waves and foam blown in well-marked streaks along the wind. This is the force a gale warning is named for, which is why 34 knots is the most useful threshold on the whole scale.',
+  },
+  {
+    id: 'wx-07',
+    category: 'weather',
+    prompt: 'What is force 7 called?',
+    options: ['Near gale', 'Gale', 'Strong breeze', 'Moderate gale'],
+    correctAnswer: 'Near gale',
+    explanation:
+      'Beaufort scale: Force 7 is a near gale - the sea heaps up and white foam begins to blow in streaks. It is the last force below gale strength, which is why its name keeps pointing at the one above it.',
+  },
+  {
+    id: 'wx-08',
+    category: 'weather',
+    prompt: 'At roughly what wind speed does force 8, a gale, begin?',
+    options: ['About 34 knots', 'About 12 knots', 'About 22 knots', 'About 64 knots'],
+    correctAnswer: 'About 34 knots',
+    explanation:
+      'Beaufort scale: A gale starts at about 34 knots. Take its neighbours with it and the scale has a spine to hang the rest on - about 22 knots at force 6, about 34 at force 8, about 48 at force 10, about 64 at force 12. Tables differ by a knot here and there, which is why these are "about" and not exact.',
+  },
+  {
+    id: 'wx-09',
+    category: 'weather',
+    prompt: 'At about which force do whitecaps first begin to appear on the sea?',
+    options: ['Force 3', 'Force 1', 'Force 6', 'Force 8'],
+    correctAnswer: 'Force 3',
+    explanation:
+      'Beaufort scale: At force 3, a gentle breeze of roughly 7 to 10 knots, the wavelet crests begin to break and scattered whitecaps appear. By force 4 they are fairly frequent and by force 6 the crests are extensive and blowing spray. The first whitecap is the most useful mark on the scale because you can watch it happen.',
+  },
+  {
+    id: 'wx-10',
+    category: 'weather',
+    prompt: 'What is force 6 called?',
+    options: ['Strong breeze', 'Fresh breeze', 'Near gale', 'Moderate breeze'],
+    correctAnswer: 'Strong breeze',
+    explanation:
+      'Beaufort scale: Force 6 is a strong breeze, around 22 to 27 knots, with large waves, extensive white crests and some spray. It is the top of the breezes - force 5 is the fresh breeze below it, and force 7 is the first of the gales in all but name.',
+  },
+  {
+    id: 'wx-11',
+    category: 'weather',
+    prompt: 'What is force 11 called?',
+    options: ['Violent storm', 'Storm', 'Strong gale', 'Hurricane force'],
+    correctAnswer: 'Violent storm',
+    explanation:
+      'Beaufort scale: Force 10 is a storm, force 11 a violent storm, force 12 hurricane force. Force 9, below them, is a strong gale - printed in some tables as a severe gale, which is the same force under another name and not an extra entry on the scale.',
+  },
+  {
+    id: 'wx-12',
+    category: 'weather',
+    prompt:
+      'Two published Beaufort tables give slightly different wind speeds for the same force. What explains this?',
+    options: [
+      'The forces are defined by observed sea state, and the speeds beside them are fitted equivalents',
+      'One of the two tables contains an error and should not be used',
+      'One table is in knots and the other is in nautical miles per hour',
+      'The scale is revised each year and the older table has expired',
+    ],
+    correctAnswer:
+      'The forces are defined by observed sea state, and the speeds beside them are fitted equivalents',
+    explanation:
+      'Beaufort scale: The description is the definition and the speed is the gloss, so two tables that fit the equivalents a knot apart are both honest. Knots and nautical miles per hour are the same unit, which rules that answer out by itself. What it means in practice is that the sea is what you are reading, and a boundary knot is never the thing an answer turns on.',
+  },
+  {
+    id: 'wx-13',
+    category: 'weather',
+    prompt:
+      'High, thin, wispy streaks of cloud with hooked tails - mares\' tails - appear. What do they foretell?',
+    options: [
+      'A change in the weather in roughly 24 hours, but no rain from these clouds themselves',
+      'Rain within the hour',
+      'Settled fair weather for several days to come',
+      'An immediate risk of squalls and lightning',
+    ],
+    correctAnswer:
+      'A change in the weather in roughly 24 hours, but no rain from these clouds themselves',
+    explanation:
+      'Cloud reading: Cirrus is ice crystal cloud far too high to rain on anybody. It runs out ahead of an approaching system, so it is a warning with about a day\'s notice on it - useful exactly because nothing has happened yet when you see it.',
+  },
+  {
+    id: 'wx-14',
+    category: 'weather',
+    prompt:
+      'Detached heaped clouds with flat bases and bright cauliflower tops drift across a blue sky. What do they indicate?',
+    options: [
+      'Fair weather',
+      'Rain within the hour',
+      'An approaching warm front',
+      'Fog forming by nightfall',
+    ],
+    correctAnswer: 'Fair weather',
+    explanation:
+      'Cloud reading: Scattered fair-weather cumulus is the sky doing nothing worse than convecting on a decent day. What is worth watching is the behaviour rather than the cloud: cumulus that keeps building upward through the afternoon instead of drifting along is on its way to becoming something else.',
+  },
+  {
+    id: 'wx-15',
+    category: 'weather',
+    prompt:
+      'A cloud has grown into a towering dark mass with a flattened, spreading top. What does it mean for a small boat?',
+    options: [
+      'Immediate danger - squalls, lightning and violent wind shifts',
+      'A change of weather in about 24 hours',
+      'Steady light rain for the rest of the day',
+      'Fair weather with good visibility',
+    ],
+    correctAnswer: 'Immediate danger - squalls, lightning and violent wind shifts',
+    explanation:
+      'Cloud reading: That is cumulonimbus, and it is the one cloud form that is an emergency rather than a forecast. It carries lightning, hail, a squall front that can arrive ahead of the rain, and a wind that shifts hard and without warning. Get in, get sail off her, get life jackets on - do not wait to see what it does.',
+  },
+  {
+    id: 'wx-16',
+    category: 'weather',
+    prompt:
+      'The sky fills with small white cloudlets in a rippled, regular pattern - a mackerel sky. What does it foretell?',
+    options: [
+      'Rain is likely within 24 hours',
+      'Settled weather for the next several days',
+      'A squall within the hour',
+      'The wind is about to drop to a flat calm',
+    ],
+    correctAnswer: 'Rain is likely within 24 hours',
+    explanation:
+      'Cloud reading: A mackerel sky is cirrocumulus or altocumulus in ranks, and it goes with the moisture and instability running ahead of a front. "Mackerel sky and mares\' tails make tall ships carry low sails" pairs it with cirrus for the same reason - both are the high leading edge of a system that has not reached you yet.',
+  },
+  {
+    id: 'wx-17',
+    category: 'weather',
+    prompt: 'A bright ring appears around the sun. What does it usually indicate?',
+    options: [
+      'An approaching front, with a change of weather to follow',
+      'Settled high pressure and continued fair weather',
+      'That the wind is about to back suddenly',
+      'Fog within the hour',
+    ],
+    correctAnswer: 'An approaching front, with a change of weather to follow',
+    explanation:
+      'Cloud reading: A halo is light refracted through ice crystals in a high, thin veil of cloud, and that veil is the leading edge of a front spreading over you. The old saying carries the same observation about the moon - a ring around it means wet weather soon.',
+  },
+  {
+    id: 'wx-18',
+    category: 'weather',
+    prompt: 'What causes a halo around the sun or the moon?',
+    options: [
+      'Light refracted through ice crystals in high cloud',
+      'Water droplets in fog close to the surface',
+      'Dust and salt haze lifted off the sea by strong wind',
+      'Smoke from shore held down under an inversion',
+    ],
+    correctAnswer: 'Light refracted through ice crystals in high cloud',
+    explanation:
+      'Cloud reading: Ice crystals in a thin, high sheet of cloud bend the light into a ring. That is what makes the halo a forecast at all - it is evidence of high cirrostratus overhead, which is evidence of a front on its way. Neither fog nor haze can produce one.',
+  },
+  {
+    id: 'wx-19',
+    category: 'weather',
+    prompt: 'Which cloud form calls for action now rather than a forecast for tomorrow?',
+    options: ['Cumulonimbus', 'Cirrus', 'Cirrocumulus', 'Fair-weather cumulus'],
+    correctAnswer: 'Cumulonimbus',
+    explanation:
+      'Cloud reading: Cirrus and a mackerel sky are each about a day\'s notice, and fair-weather cumulus is notice of nothing. Cumulonimbus is the exception on the list - the danger is under it and it is minutes away, not tomorrow.',
+  },
+  {
+    id: 'wx-20',
+    category: 'weather',
+    prompt:
+      'A tall storm cloud has spread out into a flat anvil shape at its top. What does the anvil tell you?',
+    options: [
+      'The cloud has grown to its full height and the storm is at its most dangerous',
+      'The cloud is decaying and the danger has passed',
+      'The cloud is too high to produce any weather at the surface',
+      'The wind at the surface is about to drop away',
+    ],
+    correctAnswer:
+      'The cloud has grown to its full height and the storm is at its most dangerous',
+    explanation:
+      'Cloud reading: The anvil is the top of the thunderhead meeting stable air it cannot rise through and spreading sideways instead. It marks a mature storm, not a spent one, and the anvil usually leans out ahead of the storm in the direction it is travelling - which is a hint about where it is going.',
+  },
+  {
+    id: 'wx-21',
+    category: 'weather',
+    prompt: 'What does "red sky at night, sailor\'s delight" traditionally mean?',
+    options: [
+      'Fair weather is likely, because the clear air is to the west where the weather comes from',
+      'A gale is likely before morning',
+      'The wind will back overnight',
+      'Fog is likely to form before dawn',
+    ],
+    correctAnswer:
+      'Fair weather is likely, because the clear air is to the west where the weather comes from',
+    explanation:
+      'Weather lore: In middle latitudes weather generally travels west to east. A red sunset is the setting sun lighting departing cloud through clear air away to the westward - and that clear air is what is coming next. It is a rule of thumb, worth something and not worth a forecast.',
+  },
+  {
+    id: 'wx-22',
+    category: 'weather',
+    prompt: 'What does "red sky at morning, sailors take warning" traditionally mean?',
+    options: [
+      'Bad weather is likely, because the clear air is to the east and has already gone past',
+      'The day will be fair but unusually hot',
+      'The tide will run harder than usual',
+      'Visibility will be good all day',
+    ],
+    correctAnswer:
+      'Bad weather is likely, because the clear air is to the east and has already gone past',
+    explanation:
+      'Weather lore: The rising sun in the east lights cloud arriving from the west, and the clear gap it shines through is the good weather leaving astern of it. It is the evening saying run the other way round, off the same reasoning.',
+  },
+  {
+    id: 'wx-23',
+    category: 'weather',
+    prompt: 'The wind is backing. What is it doing, and what does it suggest?',
+    options: [
+      'Shifting counterclockwise, suggesting a low pressure system approaching and worsening weather',
+      'Shifting clockwise, suggesting high pressure and improving weather',
+      'Dropping away steadily towards a calm',
+      'Increasing in strength without changing direction',
+    ],
+    correctAnswer:
+      'Shifting counterclockwise, suggesting a low pressure system approaching and worsening weather',
+    explanation:
+      'Weather lore: Backing is counterclockwise - southwest to south to southeast - and in the northern hemisphere it commonly means a low is coming your way. Read it against the barometer: a backing wind and a falling glass together are worth far more than either on its own.',
+  },
+  {
+    id: 'wx-24',
+    category: 'weather',
+    prompt: 'The wind is veering. What is it doing, and what does it suggest?',
+    options: [
+      'Shifting clockwise, suggesting high pressure and generally improving weather',
+      'Shifting counterclockwise, suggesting a low approaching',
+      'Blowing in gusts from no settled direction',
+      'Backing under another name',
+    ],
+    correctAnswer:
+      'Shifting clockwise, suggesting high pressure and generally improving weather',
+    explanation:
+      'Weather lore: Veering is clockwise - south to southwest to west - and it is the shift that typically follows a front through, with the glass rising behind it. The pair is worth learning as opposites: backing counterclockwise and getting worse, veering clockwise and getting better.',
+  },
+  {
+    id: 'wx-25',
+    category: 'weather',
+    prompt:
+      'The wind has shifted from southwest round to west, and then to northwest. What has it done?',
+    options: ['Veered', 'Backed', 'Hauled aft', 'Freshened'],
+    correctAnswer: 'Veered',
+    explanation:
+      'Weather lore: Southwest to west to northwest is clockwise, so the wind has veered. The two words describe which way the shift turns and say nothing at all about strength - a wind can veer and drop, or back and freshen, and the two observations are read separately.',
+  },
+];
+
 // --- COMBINED EXPORT ---
 
 export const COLREGS_QUESTIONS: ColregsQuestion[] = [
@@ -3332,6 +3677,7 @@ export const COLREGS_QUESTIONS: ColregsQuestion[] = [
   ...pfdTypesQuestions,
   ...fireSafetyQuestions,
   ...deckSeamanshipQuestions,
+  ...weatherQuestions,
 ];
 
 export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuestion[]> = {
@@ -3348,6 +3694,7 @@ export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuest
   'pfd-types': pfdTypesQuestions,
   'fire-safety': fireSafetyQuestions,
   'deck-seamanship': deckSeamanshipQuestions,
+  'weather': weatherQuestions,
 };
 
 export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
@@ -3364,4 +3711,5 @@ export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
   'pfd-types': 'PFD Types',
   'fire-safety': 'Fire Safety',
   'deck-seamanship': 'Deck Seamanship',
+  'weather': 'Weather and Sea State',
 };

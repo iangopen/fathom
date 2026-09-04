@@ -11,6 +11,7 @@ import {
   QUESTION_DISTRESS,
   QUESTION_PFDS,
   QUESTION_BOAT_PARTS,
+  QUESTION_CLOUDS,
 } from '../drills/colregs';
 import { LightDisplay } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
@@ -22,6 +23,7 @@ import { BuoyDisplay } from '../drills/colregs/components/BuoyDisplay';
 import { DistressDisplay } from '../drills/colregs/components/DistressDisplay';
 import { PfdDisplay } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
+import { CloudDisplay } from '../drills/colregs/components/CloudDisplay';
 
 // 75 of the 78 bank questions are answered from a picture rather than from the
 // prompt text - "identify this vessel from what she is showing". The canvas
@@ -98,6 +100,9 @@ function resolveVisual(questionId: string, revealed: boolean): React.ReactNode {
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
   if (boatPart) return <BoatPartDisplay part={boatPart} label="Highlighted" />;
+
+  const cloud = QUESTION_CLOUDS[questionId];
+  if (cloud) return <CloudDisplay type={cloud} label="Sky" />;
 
   return null;
 }

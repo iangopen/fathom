@@ -35,6 +35,7 @@ import { BuoyName } from './components/BuoyDisplay';
 import { DistressSignalName } from './components/DistressDisplay';
 import { PfdFormName } from './components/PfdDisplay';
 import { BoatPartName } from './components/BoatPartDisplay';
+import { CloudName } from './components/CloudDisplay';
 
 type DrillState = 'idle' | 'playing' | 'finished';
 type DrillMode = 'practice' | 'exam';
@@ -295,6 +296,24 @@ export const QUESTION_BOAT_PARTS: Partial<Record<string, BoatPartName>> = {
   'dk-13': 'port-side',
 };
 
+// The cloud form shown for the five identification questions. Same contract as
+// the buoys and the anchors: the picture is the whole stimulus and names
+// nothing.
+//
+// Only the identify direction is drawn. wx-19 asks which form calls for action
+// now and wx-18 asks what makes a halo - the first would be answered outright
+// by drawing the storm cloud, and the second is about ice crystals, which no
+// silhouette can show. The Beaufort half of the card carries no picture at all:
+// see the note at the head of CloudDisplay.tsx for why a drawn sea state would
+// be inventing a distinction the drawing cannot really hold.
+export const QUESTION_CLOUDS: Partial<Record<string, CloudName>> = {
+  'wx-13': 'cirrus',
+  'wx-14': 'cumulus',
+  'wx-15': 'cumulonimbus',
+  'wx-16': 'mackerel',
+  'wx-17': 'halo',
+};
+
 export const QUESTION_SCENARIOS: Partial<Record<string, ScenarioType>> = {
   'vh-01': 'priority-nuc',
   'vh-02': 'sail-keeps-clear-ram',
@@ -364,6 +383,7 @@ export const CATEGORY_ORDER: CategoryFilter[] = [
   'pfd-types',
   'fire-safety',
   'deck-seamanship',
+  'weather',
 ];
 
 // `sub` is the descriptor only - the question count is prepended at render
@@ -383,6 +403,7 @@ const CATEGORY_META: Record<CategoryFilter, { label: string; sub: string }> = {
   'pfd-types':         { label: 'PFD types',              sub: 'types and levels'         },
   'fire-safety':       { label: 'Fire safety',            sub: 'classes and agents'       },
   'deck-seamanship':   { label: 'Deck seamanship',        sub: 'boat, rope and helm'      },
+  'weather':           { label: 'Weather and sea state',   sub: 'Beaufort, cloud and lore' },
 };
 
 // The syllabus card a question belongs to, so its answer lands on the right

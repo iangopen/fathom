@@ -9,6 +9,7 @@ import {
   QUESTION_DISTRESS,
   QUESTION_PFDS,
   QUESTION_BOAT_PARTS,
+  QUESTION_CLOUDS,
 } from '../drills/colregs';
 
 // Several categories carry questions that must render with NO picture, and it
@@ -65,6 +66,10 @@ describe('questions that must stay undiagrammed', () => {
     ['PFD regulation questions', ['pf-06', 'pf-07', 'pf-08', 'pf-09', 'pf-10', 'pf-11', 'pf-12', 'pf-13', 'pf-14', 'pf-15', 'pf-16'], QUESTION_PFDS],
     // Rope terms and helm orders - nothing on the hull to highlight.
     ['rope terms and helm orders', ['dk-14', 'dk-20', 'dk-27'], QUESTION_BOAT_PARTS],
+    // Beaufort forces are numbers and wind shifts are movements over time -
+    // neither is drawable. wx-19 asks WHICH form is the dangerous one, so a
+    // picture of the dangerous one would hand it over.
+    ['Beaufort forces and the wind shift', ['wx-01', 'wx-08', 'wx-18', 'wx-19', 'wx-23', 'wx-24'], QUESTION_CLOUDS],
   ];
 
   for (const [name, ids, map] of cases) {

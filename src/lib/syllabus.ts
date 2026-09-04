@@ -253,6 +253,24 @@ export const CATEGORIES: ChartCategory[] = [
     ],
   },
   {
+    id: 'weather',
+    name: 'Weather and sea state',
+    section: 'Seamanship',
+    rule: 'Beaufort, cloud and lore',
+    status: 'live',
+    source: 'weather',
+    blurb:
+      'Reading the weather off the deck with nothing in your hand: the thirteen Beaufort forces and the sea that names each one, what a cloud form is telling you and how long you have, and the two old sayings that are actually worth something.',
+    topics: [
+      'The 13 Beaufort forces, 0 to 12',
+      'Sea state and the first whitecap',
+      'Cirrus, cumulus and cumulonimbus',
+      'Mackerel sky and a halo',
+      'Red sky at night and at morning',
+      'Backing and veering wind',
+    ],
+  },
+  {
     id: 'buoyage',
     name: 'Buoyage / IALA marks',
     section: 'Aids to navigation',
