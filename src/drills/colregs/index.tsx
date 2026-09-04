@@ -384,6 +384,7 @@ export const CATEGORY_ORDER: CategoryFilter[] = [
   'fire-safety',
   'deck-seamanship',
   'weather',
+  'tides',
 ];
 
 // `sub` is the descriptor only - the question count is prepended at render
@@ -404,6 +405,7 @@ const CATEGORY_META: Record<CategoryFilter, { label: string; sub: string }> = {
   'fire-safety':       { label: 'Fire safety',            sub: 'classes and agents'       },
   'deck-seamanship':   { label: 'Deck seamanship',        sub: 'boat, rope and helm'      },
   'weather':           { label: 'Weather and sea state',   sub: 'Beaufort, cloud and lore' },
+  'tides':             { label: 'Tides and currents',      sub: 'flood, ebb and slack'     },
 };
 
 // The syllabus card a question belongs to, so its answer lands on the right

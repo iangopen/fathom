@@ -2,7 +2,10 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { VisualPanel, hasVisual } from '../components/VisualPanel';
-import { COLREGS_QUESTIONS } from '../drills/colregs/constants';
+import {
+  COLREGS_QUESTIONS,
+  COLREGS_QUESTIONS_BY_CATEGORY,
+} from '../drills/colregs/constants';
 import {
   QUESTION_ANCHORS,
   QUESTION_BUOYS,
@@ -81,4 +84,18 @@ describe('questions that must stay undiagrammed', () => {
       }
     });
   }
+});
+
+// Tides is the one live category with no diagram anywhere in it, and that is a
+// decision rather than a gap: every question on it is about something that
+// happens over hours - water rising, a stream turning, a range widening across
+// a fortnight - and the only way to draw that is a curve with labelled axes,
+// which is a picture of a graph and not of the sea. An arrow captioned "flood"
+// would simply be ti-16's answer printed beside it.
+describe('the tides card stays text-only', () => {
+  it('has no question carrying a picture', () => {
+    const tides = COLREGS_QUESTIONS_BY_CATEGORY['tides'];
+    expect(tides.length).toBeGreaterThan(0);
+    expect(tides.filter((q) => hasVisual(q.id)).map((q) => q.id)).toEqual([]);
+  });
 });

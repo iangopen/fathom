@@ -271,6 +271,24 @@ export const CATEGORIES: ChartCategory[] = [
     ],
   },
   {
+    id: 'tides',
+    name: 'Tides and currents',
+    section: 'Seamanship',
+    rule: 'Tides and tidal currents',
+    status: 'live',
+    source: 'tides',
+    blurb:
+      'Flood, ebb and the slack between them; springs and neaps and the moon that sets them; and the distinction the whole card turns on - the tide is the water going up and down, the tidal current is the water going sideways, and they do not always turn together.',
+    topics: [
+      'Flood, ebb and slack water',
+      'Spring and neap tides',
+      'New, full and quarter moons',
+      'Range, and the king tide',
+      'Tide against tidal current',
+      'Wind against tide',
+    ],
+  },
+  {
     id: 'buoyage',
     name: 'Buoyage / IALA marks',
     section: 'Aids to navigation',

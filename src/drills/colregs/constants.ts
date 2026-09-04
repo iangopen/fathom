@@ -12,7 +12,8 @@ export type ColregsCategory =
   | 'pfd-types'
   | 'fire-safety'
   | 'deck-seamanship'
-  | 'weather';
+  | 'weather'
+  | 'tides';
 
 export interface ColregsQuestion {
   id: string;
@@ -42,6 +43,7 @@ export const NON_COLREGS_CATEGORIES: ColregsCategory[] = [
   'fire-safety',
   'deck-seamanship',
   'weather',
+  'tides',
 ];
 
 // Distress signals are NOT in that list, and the near miss is worth saying out
@@ -74,6 +76,9 @@ export function isColregsGoverned(question: ColregsQuestion): boolean {
 // "Cloud reading" is meteorology; and "Weather lore" is the one label on this
 // list that names no authority whatever, which is the honest thing to say
 // about a rhyme that is right more often than chance and is not a forecast.
+// "Tides" and "Tidal currents" are two labels rather than one because the
+// distinction between them - the water going up and down against the water
+// going sideways - is the single thing that half that card exists to teach.
 export const TOPIC_LABELS = [
   'Ground tackle',
   'Holding ground',
@@ -89,6 +94,8 @@ export const TOPIC_LABELS = [
   'Beaufort scale',
   'Cloud reading',
   'Weather lore',
+  'Tides',
+  'Tidal currents',
 ] as const;
 
 // --- NAVIGATION LIGHTS (20 questions) ---
@@ -3661,6 +3668,328 @@ const weatherQuestions: ColregsQuestion[] = [
   },
 ];
 
+// --- TIDES AND CURRENTS (21 questions) ---
+//
+// Seamanship, not COLREGS. Two topics, and the whole card is built around
+// keeping them apart:
+//
+//   ti-01 to ti-13   the tide, which is vertical         "Tides"
+//   ti-14 to ti-21   the tidal current, which is not     "Tidal currents"
+//
+// The tide is the water going up and down; the tidal current is the water
+// going sideways because of it. They are caused by the same thing and they do
+// NOT reliably turn at the same moment, and a candidate who has not had that
+// separated out will answer half of this card by guessing. That is why the two
+// halves carry different labels: the badge under the verdict says which of the
+// two the question was actually about.
+//
+// ENTIRELY TEXT-BASED, ON PURPOSE. There is no honest still picture of a tide.
+// Every one of these is a thing that happens over hours - water rising, a
+// current turning, a range widening across a fortnight - and the only way to
+// draw it is a curve with the axes labelled, which is a diagram of a graph and
+// not of the sea. A drawn arrow saying "flood" would be the answer to ti-16
+// printed on the page. Fire safety made the same call for the same reason.
+
+const tidesQuestions: ColregsQuestion[] = [
+  {
+    id: 'ti-01',
+    category: 'tides',
+    prompt: 'What is a flood tide?',
+    options: [
+      'The incoming tide, when the water level is rising',
+      'The outgoing tide, when the water level is falling',
+      'The moment the tide stops before it turns',
+      'A tide that has risen higher than predicted',
+    ],
+    correctAnswer: 'The incoming tide, when the water level is rising',
+    explanation:
+      'Tides: Flood is the tide coming in and the level rising, from low water up to high water. It has nothing to do with flooding in the sense of water where it should not be - it is simply the name of the half of the cycle in which the tide is making.',
+  },
+  {
+    id: 'ti-02',
+    category: 'tides',
+    prompt: 'What is an ebb tide?',
+    options: [
+      'The outgoing tide, when the water level is falling',
+      'The incoming tide, when the water level is rising',
+      'The lowest level the tide reaches in a month',
+      'The pause between one tide and the next',
+    ],
+    correctAnswer: 'The outgoing tide, when the water level is falling',
+    explanation:
+      'Tides: Ebb is the tide going out and the level falling, from high water down to low water. Flood and ebb are the two halves of the cycle, and between each of them is the pause the next question is about.',
+  },
+  {
+    id: 'ti-03',
+    category: 'tides',
+    prompt: 'What is slack water?',
+    options: [
+      'The brief period around the turn when there is little or no current running',
+      'The deepest water in a channel at low tide',
+      'Water sheltered from the wind by high ground',
+      'The whole period between high water and low water',
+    ],
+    correctAnswer:
+      'The brief period around the turn when there is little or no current running',
+    explanation:
+      'Tides: Slack water is the short pause as the stream stops before running the other way. It is the easiest water to anchor in, to pick up a mooring in and to cross a busy channel in - and it is short, so it is planned for rather than waited for.',
+  },
+  {
+    id: 'ti-04',
+    category: 'tides',
+    prompt: 'What is a spring tide?',
+    options: [
+      'A tide with an unusually large range, at new and full moon',
+      'A tide with an unusually small range, at the quarter moons',
+      'Any tide occurring in the spring of the year',
+      'A tide raised by strong onshore wind rather than by the moon',
+    ],
+    correctAnswer: 'A tide with an unusually large range, at new and full moon',
+    explanation:
+      'Tides: Springs are the big tides - higher high water and lower low water, so the greatest range. They come round at new and full moon, roughly twice a month. The name is from the water springing up, not from the season, which is the trap in the wrong answers here.',
+  },
+  {
+    id: 'ti-05',
+    category: 'tides',
+    prompt: 'What is a neap tide?',
+    options: [
+      'A tide with an unusually small range, at the quarter moons',
+      'A tide with an unusually large range, at new and full moon',
+      'The last tide before a storm',
+      'A tide that fails to turn at the predicted time',
+    ],
+    correctAnswer: 'A tide with an unusually small range, at the quarter moons',
+    explanation:
+      'Tides: Neaps are the small tides - the high water is lower and the low water higher than usual, so the range is least. They fall at the first and last quarter moons, about a week either side of springs.',
+  },
+  {
+    id: 'ti-06',
+    category: 'tides',
+    prompt: 'At which phases of the moon do spring tides occur?',
+    options: [
+      'New moon and full moon',
+      'First quarter and last quarter',
+      'Full moon only',
+      'New moon only',
+    ],
+    correctAnswer: 'New moon and full moon',
+    explanation:
+      'Tides: At new and full moon the sun, the earth and the moon are in line, so the sun\'s pull adds to the moon\'s and the range is greatest. Both phases give springs, which is why they come about every fortnight rather than once a month.',
+  },
+  {
+    id: 'ti-07',
+    category: 'tides',
+    prompt: 'At which phases of the moon do neap tides occur?',
+    options: [
+      'The first and last quarter moons',
+      'New moon and full moon',
+      'The three days after a full moon',
+      'Only when the moon is at its furthest from the earth',
+    ],
+    correctAnswer: 'The first and last quarter moons',
+    explanation:
+      'Tides: At the quarters the sun and moon are at right angles as seen from the earth, so their pulls work across each other instead of together and the range is smallest. Springs and neaps alternate about every seven days for that reason.',
+  },
+  {
+    id: 'ti-08',
+    category: 'tides',
+    prompt: 'Why do spring tides have the largest range?',
+    options: [
+      'The sun and moon are in line, so their pulls add together',
+      'The moon is closest to the earth at those times',
+      'The sun and moon are at right angles, so their pulls cancel',
+      'The prevailing wind is strongest at new and full moon',
+    ],
+    correctAnswer: 'The sun and moon are in line, so their pulls add together',
+    explanation:
+      'Tides: The moon does most of the work and the sun adds roughly half as much again. In line - which is what new and full moon means - the two pull the same way and the range is greatest. The moon\'s distance does vary and does matter, but it is a separate effect and not what makes a tide a spring.',
+  },
+  {
+    id: 'ti-09',
+    category: 'tides',
+    prompt: 'Why do neap tides have the smallest range?',
+    options: [
+      'The sun and moon are at right angles, so their pulls work against each other',
+      'The sun and moon are in line, so their pulls add together',
+      'The moon is furthest from the earth at those times',
+      'There is no moon in the sky at all during neaps',
+    ],
+    correctAnswer:
+      'The sun and moon are at right angles, so their pulls work against each other',
+    explanation:
+      'Tides: At the quarters the sun is pulling across the moon\'s line rather than along it, so it partly cancels what the moon is doing. The high water is lower and the low water higher, and the range can be roughly half what it is at springs.',
+  },
+  {
+    id: 'ti-10',
+    category: 'tides',
+    prompt: 'What is a king tide?',
+    options: [
+      'An especially high spring tide, well above the ordinary run of them',
+      'The highest tide ever recorded at a given place',
+      'A tide raised by a storm surge rather than by the moon',
+      'The first spring tide of the calendar year',
+    ],
+    correctAnswer: 'An especially high spring tide, well above the ordinary run of them',
+    explanation:
+      'Tides: King tide is a popular rather than a technical term for the highest of the spring tides, when the moon is both new or full and near its closest to the earth. It is still an ordinary predicted tide - what makes it worth a name is that it is the one that floods low-lying docks and ramps on a perfectly calm day.',
+  },
+  {
+    id: 'ti-11',
+    category: 'tides',
+    prompt: 'What is the range of a tide?',
+    options: [
+      'The difference in height between high water and the low water beside it',
+      'The distance the water moves horizontally up a beach',
+      'The height of high water above the charted depth',
+      'How far up a river the tide can be felt',
+    ],
+    correctAnswer:
+      'The difference in height between high water and the low water beside it',
+    explanation:
+      'Tides: Range is the vertical difference between a high water and the low water next to it. It is the figure that changes most between springs and neaps, and it is a height - the horizontal distance the water covers on a flat beach follows from it but is not the same thing.',
+  },
+  {
+    id: 'ti-12',
+    category: 'tides',
+    prompt: 'On most coasts of the United States, how many high tides are there in a day?',
+    options: [
+      'Two, roughly every 12 hours and 25 minutes',
+      'One, roughly every 24 hours',
+      'Four, roughly every 6 hours',
+      'It varies daily with the weather',
+    ],
+    correctAnswer: 'Two, roughly every 12 hours and 25 minutes',
+    explanation:
+      'Tides: Two highs and two lows a day is the semidiurnal pattern most of the country sees. The extra 25 minutes is why the tide comes later each day - the cycle follows the moon, not the clock. Parts of the Gulf coast run a single daily tide instead, which is why the tide table for the actual place is what you read.',
+  },
+  {
+    id: 'ti-13',
+    category: 'tides',
+    prompt: 'A spring tide is predicted for late December. Is that possible?',
+    options: [
+      'Yes - "spring" refers to the water springing up, not to the season',
+      'No - spring tides occur only in the spring months',
+      'Yes, but only in the southern hemisphere, where the seasons are reversed',
+      'No - a tide in December would be a neap by definition',
+    ],
+    correctAnswer: 'Yes - "spring" refers to the water springing up, not to the season',
+    explanation:
+      'Tides: Springs come round with the moon roughly every fortnight, all year. The word is the old sense of springing or welling up, as a spring of water does, and has nothing to do with the season - which makes this the most reliable wrong answer on the whole card.',
+  },
+  {
+    id: 'ti-14',
+    category: 'tides',
+    prompt: 'What is the difference between a tide and a tidal current?',
+    options: [
+      'A tide is the vertical rise and fall of the water; a tidal current is its horizontal movement',
+      'A tide is caused by the moon; a tidal current is caused by the wind',
+      'A tide is measured in a harbour; a tidal current is measured at sea',
+      'They are two names for the same thing',
+    ],
+    correctAnswer:
+      'A tide is the vertical rise and fall of the water; a tidal current is its horizontal movement',
+    explanation:
+      'Tidal currents: The tide goes up and down and the current goes sideways. One is a depth and the other is a speed and a direction, and they answer different questions - the tide tells you whether you will float over the bar, the current tells you where the boat is actually going while you steer.',
+  },
+  {
+    id: 'ti-15',
+    category: 'tides',
+    prompt: 'Does the tidal current always turn at the same moment as high or low water?',
+    options: [
+      'No - the current can go on running for some time after the tide has turned',
+      'Yes - the current turns exactly at high and low water everywhere',
+      'Yes, but only during spring tides',
+      'No - the current turns exactly halfway between high and low water everywhere',
+    ],
+    correctAnswer:
+      'No - the current can go on running for some time after the tide has turned',
+    explanation:
+      'Tidal currents: The two are related but not locked together, and how far apart they run depends on the place. In many harbour entrances the stream keeps ebbing well after low water. It is the reason the tables are published separately - a tide table and a current table are two different books, and reading the height when you needed the stream is a real mistake with a real outcome.',
+  },
+  {
+    id: 'ti-16',
+    category: 'tides',
+    prompt: 'Which way does a flood current run?',
+    options: [
+      'Toward shore and up into harbours, bays and rivers',
+      'Away from shore and out to sea',
+      'Along the coast, parallel to the shoreline',
+      'Whichever way the wind is blowing at the time',
+    ],
+    correctAnswer: 'Toward shore and up into harbours, bays and rivers',
+    explanation:
+      'Tidal currents: A flood current sets inward, carrying water in to raise the level as the tide floods. In a river mouth it runs upstream, which can stop a weak stream or reverse it outright for a few hours.',
+  },
+  {
+    id: 'ti-17',
+    category: 'tides',
+    prompt: 'Which way does an ebb current run?',
+    options: [
+      'Seaward, out of harbours, bays and rivers',
+      'Shoreward, into harbours and bays',
+      'Always downwind',
+      'It circles the harbour and does not leave it',
+    ],
+    correctAnswer: 'Seaward, out of harbours, bays and rivers',
+    explanation:
+      'Tidal currents: An ebb current sets outward as the water drains away. At a river mouth the ebb runs with the river\'s own flow, so it is usually the stronger of the two streams and the one that builds the worst water on a bar.',
+  },
+  {
+    id: 'ti-18',
+    category: 'tides',
+    prompt: 'You must anchor in a narrow channel with a strong stream. Which moment is easiest?',
+    options: [
+      'Slack water, when there is little current to set the boat',
+      'The middle of the flood, when the current is at its strongest',
+      'The middle of the ebb, when the current is at its strongest',
+      'It makes no difference to anchoring',
+    ],
+    correctAnswer: 'Slack water, when there is little current to set the boat',
+    explanation:
+      'Tidal currents: At slack the boat stays where you put her while the anchor sets, instead of being carried down over her own cable. The same reasoning applies to picking up a mooring, coming alongside and putting a swimmer in the water - the current is doing nothing for that short window, so the manoeuvre is the only thing you have to think about.',
+  },
+  {
+    id: 'ti-19',
+    category: 'tides',
+    prompt:
+      'A boat makes 6 knots through the water against a 2 knot current. What is her speed over the ground?',
+    options: ['4 knots', '8 knots', '6 knots', '3 knots'],
+    correctAnswer: '4 knots',
+    explanation:
+      'Tidal currents: Six through the water less two of foul current is four made good over the ground. Turn round and run with the same stream and you make eight, which is why a passage is planned around the stream rather than against it - the same boat and the same engine can take twice as long.',
+  },
+  {
+    id: 'ti-20',
+    category: 'tides',
+    prompt: 'Why is "wind against tide" a warning?',
+    options: [
+      'Wind blowing against the current builds a short, steep and dangerous sea',
+      'The two cancel out and leave the water dangerously still',
+      'It makes the tide rise higher than predicted',
+      'It stops a sailing boat from tacking',
+    ],
+    correctAnswer:
+      'Wind blowing against the current builds a short, steep and dangerous sea',
+    explanation:
+      'Tidal currents: A stream running into the wind stacks the waves up shorter and steeper than the same wind would raise on still water, and the worst of it is over a bar or in an inlet where the stream runs hardest. The same wind with the tide under it can leave the water almost easy - the wind alone does not tell you what you will find.',
+  },
+  {
+    id: 'ti-21',
+    category: 'tides',
+    prompt:
+      'The chart shows 4 feet of water at a spot and the tide table gives a height of 3 feet at the time you will be there. What depth should you expect?',
+    options: [
+      'About 7 feet - the height of tide is added to the charted depth',
+      'About 4 feet - the charted depth already allows for the tide',
+      'About 3 feet - the tide height replaces the charted depth',
+      'About 1 foot - the height of tide is subtracted from the charted depth',
+    ],
+    correctAnswer: 'About 7 feet - the height of tide is added to the charted depth',
+    explanation:
+      'Tides: A charted sounding is measured down from a datum near the low water mark, so it is close to the worst case rather than what is there now. The height of tide is added to it to get the depth of the moment. Reading the sounding alone is safe; forgetting that the tide can also be falling toward it is what puts a keel in the mud.',
+  },
+];
+
 // --- COMBINED EXPORT ---
 
 export const COLREGS_QUESTIONS: ColregsQuestion[] = [
@@ -3678,6 +4007,7 @@ export const COLREGS_QUESTIONS: ColregsQuestion[] = [
   ...fireSafetyQuestions,
   ...deckSeamanshipQuestions,
   ...weatherQuestions,
+  ...tidesQuestions,
 ];
 
 export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuestion[]> = {
@@ -3695,6 +4025,7 @@ export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuest
   'fire-safety': fireSafetyQuestions,
   'deck-seamanship': deckSeamanshipQuestions,
   'weather': weatherQuestions,
+  'tides': tidesQuestions,
 };
 
 export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
@@ -3712,4 +4043,5 @@ export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
   'fire-safety': 'Fire Safety',
   'deck-seamanship': 'Deck Seamanship',
   'weather': 'Weather and Sea State',
+  'tides': 'Tides and Currents',
 };
