@@ -192,41 +192,91 @@ function cloudBody(type: CloudName): React.ReactNode {
       );
 
     // One cloud filling the whole frame from the sea to the top of it: a dark
-    // base almost on the water, a hard-edged tower, and an anvil spreading
-    // sideways where it has stopped rising. The anvil leans to the right, the
-    // way it does ahead of the storm's travel.
+    // base almost on the water, a broad convective tower, and an anvil
+    // spreading far out sideways where the tower has hit air it cannot rise
+    // through. The anvil is drawn out further to the right, the way it leans
+    // ahead of the storm's travel.
+    //
+    // THIS IS NOT AN ATOMIC MUSHROOM, AND IT TOOK THREE TRIES NOT TO BE. It was
+    // first drawn as a tower that NARROWED as it rose with a separate rounded
+    // cap balanced on top - which is a stem with a cloud on it, and is not what
+    // a candidate has to recognise off the stern of a boat. A storm head is one
+    // column of rising air that gets wider all the way up and then, at the
+    // ceiling it cannot climb through, keeps going sideways instead. Three
+    // things carry that here, and dropping any one of them brings the mushroom
+    // straight back:
+    //
+    //   1. The tower widens as it rises - 80 across at the base, about 110 at
+    //      the shoulders - and its sides are drawn in and out rather than
+    //      straight. Straight parallel sides made a bucket of it.
+    //   2. The anvil is 202 across against that 80, and it is THICK over the
+    //      tower and thin at the wings. Drawn as a uniformly flat plate it read
+    //      as the brim of a hat however wide it got.
+    //   3. The anvil is painted FIRST and the tower over it, so the tower's
+    //      head tucks under the anvil's bulk and the boundary between them is a
+    //      curve. Painted the other way round, the seam runs dead horizontal
+    //      and no amount of width fixes it.
+    //
+    // The right wing runs out further than the left, which is the anvil leaning
+    // ahead of the storm's travel - and a hint about which way it is going.
     case 'cumulonimbus':
       return (
         <g>
-          {/* Anvil, struck flat against the air above and drawn out downwind */}
+          {/* Anvil first, and the tower painted over it - so the tower's head
+              intrudes into the anvil and the boundary between them is a curve
+              rather than a straight line. Drawn the other way round, with the
+              anvil laid flat over a flat-topped tower, the seam runs dead
+              horizontal and the whole thing reads as a top hat. */}
           <path
-            d="M 46 40 C 40 28, 62 18, 86 20 C 96 10, 132 10, 142 22
-               C 172 20, 196 28, 198 40 C 190 48, 150 50, 120 48
-               C 92 50, 56 48, 46 40 Z"
+            d="M 16 46
+               C 22 36, 40 32, 62 32
+               C 70 14, 94 6, 116 9
+               C 140 12, 154 22, 160 34
+               C 192 34, 218 42, 214 50
+               C 192 60, 150 63, 110 62
+               C 70 62, 30 56, 16 46 Z"
             fill={CLOUD_LIGHT}
             stroke={CLOUD_MID}
             strokeWidth="1"
             strokeLinejoin="round"
           />
-          {/* The tower, hard-edged and boiling, narrowing towards the base */}
+          {/* The tower: one column widening as it rises and doming over at the
+              head, where it pushes up into the anvil. The sides are drawn in
+              and out rather than straight - a convective tower is boiling, and
+              straight sides made a bucket of it. */}
           <path
-            d="M 78 46 C 66 62, 70 80, 64 96 C 58 112, 62 128, 66 140
-               L 158 140 C 160 126, 154 110, 150 94 C 146 76, 152 60, 142 46 Z"
+            d="M 70 140
+               C 58 118, 70 100, 60 84
+               C 54 72, 58 62, 64 56
+               C 74 48, 92 46, 110 46
+               C 128 46, 148 48, 158 56
+               C 164 62, 163 74, 158 86
+               C 152 102, 162 118, 150 140 Z"
             fill={CLOUD_DARK}
             stroke={CLOUD_MID}
             strokeWidth="1"
             strokeLinejoin="round"
           />
+          {/* The fibrous underside of the anvil, drawn ONLY where the anvil
+              hangs out past the tower. Run right across, these read as a bright
+              bar laid over the tower rather than as cloud being drawn out
+              sideways - which is the whole thing they are here to say. */}
+          <g stroke={CLOUD_MID} strokeWidth="1.1" opacity={0.8} fill="none">
+            <path d="M 20 50 C 32 56, 46 60, 60 62" />
+            <path d="M 30 55 C 40 59, 50 62, 62 64" />
+            <path d="M 210 50 C 196 56, 180 60, 164 62" />
+            <path d="M 198 55 C 188 60, 176 63, 162 65" />
+          </g>
           {/* The base, darker still and hanging almost on the water */}
           <path
-            d="M 62 128 C 84 122, 138 122, 160 128 C 158 138, 152 144, 140 145
-               L 82 145 C 70 144, 63 138, 62 128 Z"
+            d="M 68 126 C 90 120, 130 120, 152 126 C 150 135, 143 142, 130 143
+               L 90 143 C 77 142, 69 135, 68 126 Z"
             fill={CLOUD_BASE}
           />
           {/* Rain shaft under the base */}
-          <g stroke={CLOUD_BASE} strokeWidth="1.6" opacity={0.55} strokeLinecap="round">
-            {[78, 92, 106, 120, 134, 148].map((x) => (
-              <line key={x} x1={x} y1={145} x2={x - 5} y2={HORIZON_Y + 2} />
+          <g stroke={CLOUD_BASE} strokeWidth="1.8" opacity={0.55} strokeLinecap="round">
+            {[80, 94, 108, 122, 136, 148].map((x) => (
+              <line key={x} x1={x} y1={143} x2={x - 7} y2={HORIZON_Y + 6} />
             ))}
           </g>
         </g>
