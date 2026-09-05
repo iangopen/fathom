@@ -273,7 +273,7 @@ export const CATEGORIES: ChartCategory[] = [
   {
     id: 'weather',
     name: 'Weather and sea state',
-    section: 'Seamanship',
+    section: 'Weather and tides',
     rule: 'Beaufort, cloud and lore',
     status: 'live',
     source: 'weather',
@@ -291,7 +291,7 @@ export const CATEGORIES: ChartCategory[] = [
   {
     id: 'tides',
     name: 'Tides and currents',
-    section: 'Seamanship',
+    section: 'Weather and tides',
     rule: 'Tides and tidal currents',
     status: 'live',
     source: 'tides',
@@ -344,19 +344,35 @@ export const CATEGORIES: ChartCategory[] = [
   },
 ];
 
-// Seamanship sits last because it is the section that is going to grow: it is
-// the home for the knowledge a candidate is examined on that no rule, annex or
-// buoyage system governs - anchors first, with PFD types and fire safety
-// earmarked behind them. The four sections above it are each anchored to a
-// published source (the COLREGS, its annexes, IALA, U.S. Chart No. 1); this
-// one is defined by the absence of one, which is why it could not be folded
-// into any of them. See NON_COLREGS_CATEGORIES in ../drills/colregs/constants.
+// The first four sections are each anchored to a published source - the
+// COLREGS and its annexes, the International Code of Signals, IALA and U.S.
+// Chart No. 1. The last two are not, and that is the line between them and
+// everything above.
+//
+// Seamanship is the boat and her gear: anchors, PFDs, fire safety and the
+// working vocabulary of the deck. Four cards about equipment you can put your
+// hand on and words you have to know.
+//
+// Weather and tides was carved out of Seamanship once it had six cards, and
+// the split is not just about size. Weather and tides are the ENVIRONMENT
+// rather than the boat - nothing on either card is about a piece of kit, and
+// both are read off the sky and the water rather than off anything aboard.
+// Splitting them left Seamanship as the four boat-and-gear cards it had always
+// really been, and gave the two environment cards a name that says what they
+// are.
+//
+// Order is deliberate: the sections a candidate is examined on out of a
+// publication come first, in the order the publications sit in; the two that
+// rest on observation come last. Adding a seventh here puts a seventh card on
+// the hub and a seventh line in About with no other edit - see sections()
+// below, and NON_COLREGS_CATEGORIES in ../drills/colregs/constants.
 export const SECTION_ORDER: string[] = [
   'Navigation',
   'Rules of the road',
   'Signals and communication',
   'Aids to navigation',
   'Seamanship',
+  'Weather and tides',
 ];
 
 export function categoryById(id: string): ChartCategory | undefined {

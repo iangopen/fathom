@@ -3340,9 +3340,11 @@ const deckSeamanshipQuestions: ColregsQuestion[] = [
 
 // --- WEATHER AND SEA STATE (25 questions) ---
 //
-// Seamanship, not COLREGS. Three topics that are one skill approached three
-// ways - reading what the weather is about to do off what can be seen from the
-// deck with no instrument in your hand:
+// Not COLREGS, and not seamanship either in the boat-and-gear sense - this and
+// tides are the two cards about the ENVIRONMENT rather than the vessel, which
+// is why they were split out into their own syllabus section. Three topics
+// that are one skill approached three ways: reading what the weather is about
+// to do off what can be seen from the deck with no instrument in your hand.
 //
 //   wx-01 to wx-12   the Beaufort scale                "Beaufort scale"
 //   wx-13 to wx-20   what a cloud form foretells       "Cloud reading"
@@ -3676,8 +3678,9 @@ const weatherQuestions: ColregsQuestion[] = [
 
 // --- TIDES AND CURRENTS (21 questions) ---
 //
-// Seamanship, not COLREGS. Two topics, and the whole card is built around
-// keeping them apart:
+// Not COLREGS. Like weather, this is a card about the water rather than about
+// the boat, which is what put the two of them in a section of their own. Two
+// topics, and the whole card is built around keeping them apart:
 //
 //   ti-01 to ti-13   the tide, which is vertical         "Tides"
 //   ti-14 to ti-21   the tidal current, which is not     "Tidal currents"
