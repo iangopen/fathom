@@ -60,9 +60,16 @@ const ALL_TEXT = GOVERNED.map((q) => ({
 const TOPIC_OPENER = new RegExp(`^(?:${TOPIC_LABELS.join('|')}): \\S`);
 
 describe('citation format', () => {
+  // An Annex citation counts here the way it counts in "gives every question
+  // at least one citation" below: the distress signals card is governed and
+  // is cited to Annex IV rather than to a numbered rule, so counting rule
+  // tokens alone would let that card's growth trip this guard. The rule
+  // regex is still held to finding something on its own.
   it('finds citations to check (guards against a dead regex)', () => {
-    const total = ALL_TEXT.reduce((n, q) => n + citationsIn(q.text).length, 0);
-    expect(total).toBeGreaterThan(GOVERNED.length);
+    const rules = ALL_TEXT.reduce((n, q) => n + citationsIn(q.text).length, 0);
+    const annexes = ALL_TEXT.filter((q) => ANNEX_TOKEN.test(q.text)).length;
+    expect(rules).toBeGreaterThan(GOVERNED.length / 2);
+    expect(rules + annexes).toBeGreaterThan(GOVERNED.length);
   });
 
   it.each(ALL_TEXT.map((q) => [q.id, q.text] as const))(

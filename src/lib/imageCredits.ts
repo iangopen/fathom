@@ -12,7 +12,7 @@
 // displayed as they stand.
 //
 // Keys are `<kind>:<name>`, where `<name>` is the AnchorTypeName / CloudName /
-// BuoyName the display components switch on.
+// BuoyName / DistressSignalName / PfdFormName the display components switch on.
 
 export interface ImageCredit {
   /** What the photograph shows, in the app's own vocabulary. */
@@ -170,9 +170,54 @@ export const IMAGE_CREDITS: Record<string, ImageCredit> = {
     license: 'CC BY-SA 2.0',
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
   },
+
+  'distress:hand-flare': {
+    subject: 'A red hand flare held up at night',
+    title: 'Signal flare during a rescue training mission.jpg',
+    source: COMMONS + 'Signal_flare_during_a_rescue_training_mission.jpg',
+    author: 'U.S. Air Force photo by Staff Sgt. Bennie J. Davis III',
+    license: 'Public domain',
+    licenseUrl: '',
+  },
+  'distress:orange-smoke': {
+    subject: 'A floating orange smoke signal',
+    title: 'Smoke buoy.jpg',
+    source: COMMONS + 'Smoke_buoy.jpg',
+    author: 'heb@Wikimedia Commons',
+    license: 'CC BY-SA 2.5',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.5/',
+  },
+  'distress:dye-marker': {
+    subject: 'A sea dye marker spreading in the water',
+    title: 'Sea dye marker.JPG',
+    source: COMMONS + 'Sea_dye_marker.JPG',
+    author: 'U.S. Air Force photo by Airman 1st Class Alexxis Pons Abascal',
+    license: 'Public domain',
+    licenseUrl: '',
+  },
+
+  'pfd:flotation-aid': {
+    subject: 'A zip-front flotation vest',
+    title: 'Red life jacket.jpg',
+    source: COMMONS + 'Red_life_jacket.jpg',
+    author: 'Santeri Viinamäki',
+    license: 'CC BY-SA 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+  },
+  'pfd:ring-buoy': {
+    subject: 'A ring buoy with grab lines, floating',
+    title: 'Lifebelt in Water 1.jpg',
+    source: COMMONS + 'Lifebelt_in_Water_1.jpg',
+    author: 'Das Robert',
+    license: 'CC BY-SA 3.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/',
+  },
 };
 
 /** The credit for one rendered image, or undefined if it has none. */
-export function creditFor(kind: 'anchor' | 'cloud' | 'buoy', name: string): ImageCredit | undefined {
+export function creditFor(
+  kind: 'anchor' | 'cloud' | 'buoy' | 'distress' | 'pfd',
+  name: string
+): ImageCredit | undefined {
   return IMAGE_CREDITS[`${kind}:${name}`];
 }

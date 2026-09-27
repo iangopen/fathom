@@ -73,9 +73,26 @@ describe('questions that must stay undiagrammed', () => {
     ],
     // Annex IV signals with no drawable form - a gun at intervals, a spoken
     // Mayday, an EPIRB alert.
-    ['undrawable distress signals', ['di-09', 'di-10', 'di-11', 'di-12', 'di-13', 'di-14', 'di-15', 'di-16'], QUESTION_DISTRESS],
+    // di-17 to di-24 add the radio alerts, the canvas panel, the inland strobe
+    // and Rule 36 - a channel number, a rule and a light's rhythm, none of which
+    // a picture can hold without printing the answer.
+    [
+      'undrawable distress signals',
+      ['di-09', 'di-10', 'di-11', 'di-12', 'di-13', 'di-14', 'di-15', 'di-16', 'di-17', 'di-18', 'di-21', 'di-22', 'di-23', 'di-24'],
+      QUESTION_DISTRESS,
+    ],
     // Carriage rules and servicing, not "identify this device".
-    ['PFD regulation questions', ['pf-06', 'pf-07', 'pf-08', 'pf-09', 'pf-10', 'pf-11', 'pf-12', 'pf-13', 'pf-14', 'pf-15', 'pf-16'], QUESTION_PFDS],
+    // pf-17 to pf-30 are children, fit, inflatable upkeep, condition, stowage
+    // and the exemptions - rules about a device, not what one looks like.
+    [
+      'PFD regulation questions',
+      [
+        'pf-06', 'pf-07', 'pf-08', 'pf-09', 'pf-10', 'pf-11', 'pf-12', 'pf-13', 'pf-14', 'pf-15', 'pf-16',
+        'pf-17', 'pf-18', 'pf-19', 'pf-20', 'pf-21', 'pf-22', 'pf-23', 'pf-24', 'pf-25', 'pf-26', 'pf-27',
+        'pf-28', 'pf-29', 'pf-30',
+      ],
+      QUESTION_PFDS,
+    ],
     // Rope terms and helm orders - nothing on the hull to highlight.
     ['rope terms and helm orders', ['dk-14', 'dk-20', 'dk-27'], QUESTION_BOAT_PARTS],
     // Beaufort forces are numbers and wind shifts are movements over time -

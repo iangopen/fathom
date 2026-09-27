@@ -9,7 +9,7 @@ kept.
 app reads, and `src/__tests__/imageCredits.test.ts` fails if an image ships
 without an entry in it. Keep the two in step when you add an image.
 
-All sixteen were downloaded from Wikimedia Commons, checked at full resolution
+All twenty-one were downloaded from Wikimedia Commons, checked at full resolution
 for text or branding that would name the answer, then cropped and resized to
 640×480 (the 4:3 the drill panels use). Cropping and rescaling is all that was
 done; nothing was retouched. The special-mark source is a 602px Geograph
@@ -59,6 +59,29 @@ from British, Danish and Spanish waters. A Region A lateral mark is the reverse
 of ours - a red CAN is a port mark there - so the green can is a Region B mark,
 from the United States.
 
+## Distress signals — `src/assets/distress/`, rendered by `DistressDisplay`
+
+| File | Shows | Source | Author | Licence |
+| --- | --- | --- | --- | --- |
+| `hand-flare.jpg` | A red hand flare held up at night | [Signal flare during a rescue training mission.jpg](https://commons.wikimedia.org/wiki/File:Signal_flare_during_a_rescue_training_mission.jpg) | U.S. Air Force photo by Staff Sgt. Bennie J. Davis III | Public domain (US federal work) |
+| `orange-smoke.jpg` | A floating orange smoke signal | [Smoke buoy.jpg](https://commons.wikimedia.org/wiki/File:Smoke_buoy.jpg) | heb@Wikimedia Commons | [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/) |
+| `dye-marker.jpg` | A sea dye marker spreading in the water | [Sea dye marker.JPG](https://commons.wikimedia.org/wiki/File:Sea_dye_marker.JPG) | U.S. Air Force photo by Airman 1st Class Alexxis Pons Abascal | Public domain (US federal work) |
+
+Six distress forms are **still drawn**, because no licensed photograph was
+found at all: the parachute flare in the air, the red star rocket, the
+November-over-Charlie hoist, the square flag with a ball, the arms signal and
+flames on a vessel.
+
+## PFDs — `src/assets/pfd/`, rendered by `PfdDisplay`
+
+| File | Shows | Source | Author | Licence |
+| --- | --- | --- | --- | --- |
+| `flotation-aid.jpg` | A zip-front flotation vest | [Red life jacket.jpg](https://commons.wikimedia.org/wiki/File:Red_life_jacket.jpg) | Santeri Viinamäki | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| `ring-buoy.jpg` | A ring buoy with grab lines, floating | [Lifebelt in Water 1.jpg](https://commons.wikimedia.org/wiki/File:Lifebelt_in_Water_1.jpg) | Das Robert | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+
+Three PFD forms are **still drawn**: the offshore collar jacket, the throwable
+cushion and the inflatable. See the PFD rejections below.
+
 ## Leak check
 
 These are identification questions, so an image that names its own answer is
@@ -97,6 +120,19 @@ text *answer the question*, not merely is there any.
   unreadable even at full resolution. The isolated danger mark has a small
   maker's monogram on its lantern box, not a word. The safe water mark has
   scratched, unreadable characters on one white stripe.
+
+The distress and PFD photographs were held to the strict rule from the start,
+not revised to it afterwards: no legible text of any kind - a place name, a web
+address, a maker's badge - judged at the size the panel actually draws on a 2x
+screen, and confirmed in the running app. Each of the five was opened in the
+quiz, in the real Observed panel, at 1x (204x153 CSS px) and again with the page
+rendered at 2x (408x306 device px, drawn from the same 640px file).
+
+- `hand-flare.jpg` - the flare case carries a printed label; at 2x it is a few
+  pale streaks with no letter shapes. No other text in frame.
+- `flotation-aid.jpg` - one small maker's badge on the left chest. At 2x it is
+  a white patch about twelve pixels wide with nothing readable in it.
+- `orange-smoke.jpg`, `dye-marker.jpg`, `ring-buoy.jpg` - no text in frame.
 
 ## Rejected, and why
 
@@ -159,3 +195,53 @@ Kept here so the next category does not re-tread the same ground:
   buoy, of a green-topped junction can, of a US range pair, or of a Western
   Rivers crossing daymark. The Dutch junction buoys on Commons are Region A,
   where the same colours mean the opposite, and were not considered.
+
+### Distress signals
+
+- *Distress flare mg 6522 / 6523 / 6524* - flares photographed on a table,
+  unfired, and covered in printed instructions.
+- *Lifeboat pyrotechnics* - **PARA RED ROCKET MK 8**, **RED HANDFLARE MK8** and
+  **LIFESMOKE** printed on the cases. The name of the answer, three times.
+- *Smoke signal 1* - an orange smoke canister unfired on a chart, labelled
+  **BUOYANT ORANGE SMOKE** in several languages.
+- *Cohete paracaidas* - a parachute rocket disassembled on a table, labelled.
+- *Feux main* (hand flares on a yacht) - a 527px original with the flare a
+  few pixels across; too small to read as anything at panel size.
+- *Flickr - Official U.S. Navy Imagery - An officer lights a flare* - the
+  flare is small beside a close-up helmeted face, and the frame reads as a
+  portrait rather than a signal.
+- *Lifeboatman with flare* - RNLI lettering on the helmet, and it is orange
+  smoke from a swimmer, not a floating canister.
+- *June 2020 Baltic Fleet submarine rescue exercise* - a distant smoke plume on
+  a flat sea; loses to *Smoke buoy*, which shows the canister.
+- *Gemini 4 Recovery with Green Marker Dye* (NASA) - the dye is there, but a
+  spacecraft and a raft fill the frame.
+- *Sjöräddningsövning 2014a* - a rescue exercise with two craft and a person in
+  the water; the flare is incidental.
+- No licensed photograph was found of a red parachute flare in the air, a red
+  star shell, a November-over-Charlie hoist, a square flag with a ball, the
+  arms signal or flames on a vessel.
+
+### PFDs
+
+- *Green life jacket* - a clean flotation vest, but its approval label is
+  plainly legible on the front.
+- *Personal flotation device.JPG* - a rack of offshore jackets stencilled
+  **FRONT** and with size and stock numbers.
+- *Kamizelka ratunkowa KR-7* and *US-Lifevest* - museum pieces behind glass,
+  with a caption card and glare.
+- *Life jacket mg 6576* - an inflatable with its whole instruction panel
+  printed on the bladder.
+- *Lifejacket with PLB fitted inside* - maker's logos and a beacon's labels.
+- *Selbstaufblasende Schwimmweste BW P1210264* (public domain) - text-free, but
+  it does not show the cylinder pf-05 describes and reads as an army vest over
+  a shirt. The drawing is the clearer picture, so the inflatable stays drawn.
+- *Life vests* - a loaner rack with a **BORROW LIFE JACKETS HERE** sign.
+- *Estonia lifering*, *Life Belt (13431570545)*, *Life preserver
+  (37584592321)*, *Livredningsbøye*, *Lifebuoy.jpg* - ring buoys lettered with a
+  ship's name, a place, a maker or a post number.
+- *Lifebelt against yellow* - a **NEXT LIFEBELT** sign beside it and **W11** on
+  the ring.
+- *Lifebuoy by the pool* - fragments of lettering on the ring.
+- No licensed photograph was found of an offshore collar jacket without text
+  on it, or of a throwable cushion at all.

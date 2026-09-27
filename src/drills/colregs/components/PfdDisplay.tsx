@@ -1,5 +1,8 @@
 import React from 'react';
 
+import flotationAid from '../../../assets/pfd/flotation-aid.jpg';
+import ringBuoy from '../../../assets/pfd/ring-buoy.jpg';
+
 export type PfdFormName =
   | 'offshore-vest'
   | 'flotation-aid'
@@ -7,13 +10,30 @@ export type PfdFormName =
   | 'throwable-cushion'
   | 'inflatable';
 
+// The two forms shown as PHOTOGRAPHS; the other three are still drawn.
+type PhotoForm = 'flotation-aid' | 'ring-buoy';
+type DrawnForm = Exclude<PfdFormName, PhotoForm>;
+
 interface PfdDisplayProps {
   form: PfdFormName;
   label?: string;
 }
 
-// 220x170, drawn to the same contract as AnchorDisplay and BuoyDisplay: the
-// player names the device from its form, so NOTHING here may name it in text.
+// PHOTOGRAPHS where a licensed one passes, 220x170 drawings elsewhere, to the
+// same contract as AnchorDisplay and BuoyDisplay: the player names the device
+// from its form, so NOTHING here may name it in text.
+//
+// THE PHOTOGRAPHS answer to the strict rule set by the buoyage card: no legible
+// text of any kind at the size the panel draws, judged on a 2x screen and
+// checked in the running app. Life jackets are covered in text - makers'
+// names, approval labels, size bands, type codes - and ring buoys carry the
+// name of their ship or pier, so this is the rule most candidates fail. Two
+// passed: a zip-front flotation vest whose one small maker's badge cannot be
+// read at panel size, and a ring buoy with grab lines floating in a pool. No
+// licensed photograph was found of an offshore collar jacket without text on
+// it, or of a throwable cushion at all, and the one inflatable found did not
+// show its cylinder or read clearly as a life jacket - those three are still
+// drawn. See IMAGE-CREDITS.md for the candidates turned down.
 //
 // The union is named for the FORM, not for the type code, and that is not
 // squeamishness about naming things. The Coast Guard is retiring the Type I-V
@@ -47,7 +67,7 @@ const foam = {
   strokeLinejoin: 'round' as const,
 };
 
-function pfdBody(form: PfdFormName): React.ReactNode {
+function pfdBody(form: DrawnForm): React.ReactNode {
   switch (form) {
     // The offshore yoke: a deep collar that sits behind the head, and two
     // heavy chest panels. The collar is the working part - it is what floats
@@ -71,55 +91,6 @@ function pfdBody(form: PfdFormName): React.ReactNode {
           <g stroke={DETAIL} strokeWidth="1">
             <line x1={72} y1={92} x2={94} y2={92} />
             <line x1={126} y1={92} x2={148} y2={92} />
-          </g>
-        </g>
-      );
-
-    // The zip-front vest: armholes, no collar, and it stops at the waist. The
-    // absence of the collar is the whole difference from the yoke above, so
-    // the neck is drawn open and empty.
-    case 'flotation-aid':
-      return (
-        <g>
-          <path
-            d="M 72 56 L 96 46 C 104 56, 116 56, 124 46 L 148 56 C 154 62, 156 72, 154 82 L 144 78 L 144 134 C 122 140, 98 140, 76 134 L 76 78 L 66 82 C 64 72, 66 62, 72 56 Z"
-            {...foam}
-          />
-          {/* Zip up the front */}
-          <line x1={110} y1={52} x2={110} y2={137} stroke={DETAIL} strokeWidth="1.6" />
-          <g stroke={STRAP} strokeWidth="2.6" strokeLinecap="round">
-            <line x1={80} y1={112} x2={140} y2={112} />
-          </g>
-          <rect x={104} y={108} width={12} height={9} rx={2} fill={PLATE_FILL} stroke={HARDWARE} strokeWidth="1.2" />
-        </g>
-      );
-
-    // A ring with grab lines round the outside. It is thrown, never worn, and
-    // the grab lines are what say so - they are there for someone already in
-    // the water to hold on to.
-    case 'ring-buoy':
-      return (
-        <g>
-          <circle cx={110} cy={86} r={54} fill="none" stroke={FOAM_EDGE} strokeWidth="1.2" />
-          <circle cx={110} cy={86} r={26} fill="none" stroke={FOAM_EDGE} strokeWidth="1.2" />
-          <path
-            d="M 110 32 A 54 54 0 1 1 110 140 A 54 54 0 1 1 110 32 Z M 110 60 A 26 26 0 1 0 110 112 A 26 26 0 1 0 110 60 Z"
-            fill={FOAM_FILL}
-            fillRule="evenodd"
-            opacity={0.95}
-          />
-          {/* Grab lines, seized to the ring at four points */}
-          <g fill="none" stroke={STRAP} strokeWidth="2">
-            <path d="M 110 32 C 138 34, 160 56, 162 84" />
-            <path d="M 162 88 C 160 116, 138 138, 110 140" />
-            <path d="M 110 140 C 82 138, 60 116, 58 88" />
-            <path d="M 58 84 C 60 56, 82 34, 110 32" />
-          </g>
-          <g fill={PLATE_FILL} stroke={HARDWARE} strokeWidth="1.2">
-            <circle cx={110} cy={32} r={3.4} />
-            <circle cx={164} cy={86} r={3.4} />
-            <circle cx={110} cy={140} r={3.4} />
-            <circle cx={56} cy={86} r={3.4} />
           </g>
         </g>
       );
@@ -191,6 +162,19 @@ function pfdBody(form: PfdFormName): React.ReactNode {
   }
 }
 
+// Sources and licences are in src/lib/imageCredits.ts. Each is 640x480.
+const PFD_IMAGES: Record<PhotoForm, string> = {
+  'flotation-aid': flotationAid,
+  'ring-buoy': ringBuoy,
+};
+
+// Alt text describes the FRAME, never the device.
+const ALT = 'Photograph of a flotation device, shown for identification';
+
+function isPhoto(form: PfdFormName): form is PhotoForm {
+  return form in PFD_IMAGES;
+}
+
 export const PfdDisplay: React.FC<PfdDisplayProps> = ({ form, label }) => (
   <div className="flex flex-col items-center gap-3 select-none w-full">
     {label && (
@@ -198,9 +182,23 @@ export const PfdDisplay: React.FC<PfdDisplayProps> = ({ form, label }) => (
     )}
 
     <div className="w-full max-w-[240px] rounded-xl border border-slate-800 bg-slate-900/60 p-3 backdrop-blur-sm">
-      <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
-        {pfdBody(form)}
-      </svg>
+      {isPhoto(form) ? (
+        <img
+          src={PFD_IMAGES[form]}
+          alt={ALT}
+          width={640}
+          height={480}
+          draggable={false}
+          className="w-full h-auto rounded-lg"
+          style={{ display: 'block', aspectRatio: '4 / 3', objectFit: 'cover' }}
+        />
+      ) : (
+        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+          {pfdBody(form)}
+        </svg>
+      )}
     </div>
   </div>
 );
+
+export { PFD_IMAGES };

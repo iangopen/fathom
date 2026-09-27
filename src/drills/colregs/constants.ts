@@ -2264,7 +2264,7 @@ const chartSymbolsQuestions: ColregsQuestion[] = [
   },
 ];
 
-// --- DISTRESS SIGNALS (16 questions) ---
+// --- DISTRESS SIGNALS (24 questions) ---
 //
 // These ARE COLREGS. Annex IV to the 1972 Convention is headed "Distress
 // Signals" and lists them, and Rule 37 is the rule that sends a vessel in
@@ -2301,7 +2301,7 @@ const distressSignalsQuestions: ColregsQuestion[] = [
     id: 'di-02',
     category: 'distress-signals',
     prompt:
-      'A person on the deck of a small boat is holding up a burning red light at the end of a short case. What are they signalling?',
+      'A person is holding up a burning red light at the end of a short case. What are they signalling?',
     options: [
       'Distress - a hand flare showing a red light',
       'That the vessel is under sail and about to alter course',
@@ -2522,6 +2522,137 @@ const distressSignalsQuestions: ColregsQuestion[] = [
     correctAnswer: 'A white flare',
     explanation:
       'Annex IV: Every distress pyrotechnic on the list is red, or orange in the case of smoke. A white flare is not on it - white is used to say "I am here, I have seen you", most often to warn a vessel closing on a collision course that she has not been seen. Firing white where red was meant will be read as no distress at all.',
+  },
+
+  // The radio and electronic end of the list. Annex IV names each of these in
+  // its own paragraph 1, so they carry the ordinary citation.
+  {
+    id: 'di-17',
+    category: 'distress-signals',
+    prompt:
+      'A DSC-equipped VHF set sends a distress alert when its red button is held. On which VHF channel does Annex IV list that alert?',
+    options: ['Channel 70', 'Channel 16', 'Channel 13', 'Channel 9'],
+    correctAnswer: 'Channel 70',
+    explanation:
+      'Annex IV: A distress alert by digital selective calling on VHF channel 70 - or on the listed MF/HF DSC frequencies - is a distress signal in its own right. Channel 70 carries only digital calls; the voice Mayday that follows is made on channel 16, which is why the two numbers are so often confused.',
+  },
+  {
+    id: 'di-18',
+    category: 'distress-signals',
+    prompt:
+      'A ship triggers a distress alert through her Inmarsat satellite terminal rather than by radio. Is that on the list of distress signals?',
+    options: [
+      'Yes - a ship-to-shore distress alert from the ship earth station of a mobile satellite service is listed',
+      'No - only signals that another vessel can see or hear are distress signals',
+      'Only if it is followed within a minute by a Mayday on channel 16',
+      'Only outside the range of any coast radio station',
+    ],
+    correctAnswer:
+      'Yes - a ship-to-shore distress alert from the ship earth station of a mobile satellite service is listed',
+    explanation:
+      'Annex IV: The list names a ship-to-shore distress alert transmitted by the ship\'s Inmarsat or other mobile satellite service ship earth station. A distress signal does not have to be seen or heard by a neighbour - this one goes straight to a rescue coordination centre ashore.',
+  },
+  {
+    id: 'di-19',
+    category: 'distress-signals',
+    prompt:
+      'On your X-band radar a line of twelve dots appears, running outward from one bearing. What is producing it?',
+    options: [
+      'A search and rescue radar transponder - a survival craft signal on the distress list',
+      'A racon on a navigation mark, identifying the mark',
+      'Interference from another vessel\'s radar',
+      'A vessel engaged in towing, showing on radar',
+    ],
+    correctAnswer:
+      'A search and rescue radar transponder - a survival craft signal on the distress list',
+    explanation:
+      'Annex IV: Signals transmitted by radiocommunication systems, including survival craft radar transponders, are on the list. A SART answers a searching radar with a line of twelve dots running outward from its position; the dot nearest the centre of the screen is where the survival craft is.',
+  },
+
+  // Annex IV paragraph 3 is a different kind of entry. It does not add to the
+  // list of distress signals in paragraph 1 - it "draws attention" to two more
+  // signals that help a searcher, and the difference is the question.
+  {
+    id: 'di-20',
+    category: 'distress-signals',
+    prompt:
+      'A vivid green-yellow stain is spreading across the water from a small packet. What is it, and where does it stand in Annex IV?',
+    options: [
+      'A dye marker - Annex IV draws attention to it as a supplementary signal for being found, not as one of its listed distress signals',
+      'A dye marker - listed in Annex IV as a distress signal in its own right, the same as a red flare',
+      'A pollution marker, showing where a vessel has discharged fuel',
+      'A signal that divers are down in the area',
+    ],
+    correctAnswer:
+      'A dye marker - Annex IV draws attention to it as a supplementary signal for being found, not as one of its listed distress signals',
+    explanation:
+      'Annex IV: The dye marker appears in the annex\'s closing paragraph, where attention is drawn to it alongside the International Code of Signals and the search and rescue manual - not in the list of distress signals. Its job is to make a person or a raft visible from the air once a search is already on.',
+  },
+  {
+    id: 'di-21',
+    category: 'distress-signals',
+    prompt:
+      'Survivors spread a sheet of orange canvas with a black square and a black circle on it. What is it for?',
+    options: [
+      'Identification from the air - Annex IV draws attention to it as a signal for searching aircraft',
+      'To show that the survivors need medical assistance',
+      'To show that the survivors have water but no food',
+      'To mark the survivors\' landing site for a boat',
+    ],
+    correctAnswer:
+      'Identification from the air - Annex IV draws attention to it as a signal for searching aircraft',
+    explanation:
+      'Annex IV: A piece of orange-coloured canvas with a black square and circle, or another appropriate symbol, is the second of the two signals the annex draws attention to "for identification from the air". Like the dye marker it helps a search already under way find you; it is not on the list of distress signals itself.',
+  },
+
+  // One entry the United States adds for its own waters, and the International
+  // rule it has to be read against.
+  {
+    id: 'di-22',
+    category: 'distress-signals',
+    prompt:
+      'On US inland waters, a high-intensity white light is flashing from a small boat at about sixty times a minute. What does it mean?',
+    options: [
+      'Distress - the Inland Rules\' Annex IV lists a high-intensity white light flashing 50 to 70 times a minute',
+      'Nothing - white lights are never distress signals',
+      'That the vessel is a law enforcement vessel',
+      'That the vessel is engaged in diving operations',
+    ],
+    correctAnswer:
+      'Distress - the Inland Rules\' Annex IV lists a high-intensity white light flashing 50 to 70 times a minute',
+    explanation:
+      'Annex IV: The Inland Rules add one signal the International list does not have - a high-intensity white light flashing at regular intervals from 50 to 70 times per minute. It is the exception to "white is never distress", and it applies on inland waters only.',
+  },
+  {
+    id: 'di-23',
+    category: 'distress-signals',
+    prompt:
+      'You are not in distress, but you need to get the attention of a vessel that is standing into danger. What do the Rules allow?',
+    options: [
+      'Light or sound signals that cannot be mistaken for any signal authorised elsewhere, or a searchlight beam directed at the danger without embarrassing any vessel',
+      'Any of the distress signals, so long as you cancel them by radio afterwards',
+      'Five short blasts only, since that is the one signal meant for attention',
+      'Nothing - a vessel may only use the signals listed elsewhere in the Rules',
+    ],
+    correctAnswer:
+      'Light or sound signals that cannot be mistaken for any signal authorised elsewhere, or a searchlight beam directed at the danger without embarrassing any vessel',
+    explanation:
+      'Rule 36 is the rule for this case: any vessel may make light or sound signals that cannot be mistaken for a signal authorised elsewhere, or direct her searchlight in the direction of the danger so long as she does not embarrass another vessel. The distress signals are the one thing it cannot be - that is Annex IV\'s prohibition.',
+  },
+  {
+    id: 'di-24',
+    category: 'distress-signals',
+    prompt:
+      'Under the International Rules, what does Rule 36 say about using a strobe light to attract another vessel\'s attention?',
+    options: [
+      'High-intensity intermittent or revolving lights, such as strobes, shall be avoided',
+      'A strobe is the recommended way to attract attention at night',
+      'A strobe may be used only when the other vessel is more than two miles off',
+      'A strobe is a distress signal everywhere, so it may never be used',
+    ],
+    correctAnswer: 'High-intensity intermittent or revolving lights, such as strobes, shall be avoided',
+    explanation:
+      'Rule 36 of the International Rules ends by saying that high-intensity intermittent or revolving lights, such as strobe lights, shall be avoided, and that an attention light must not be mistakable for an aid to navigation. The Inland version of the rule has no such sentence - on inland waters a white light flashing 50 to 70 times a minute is a distress signal instead, which is exactly why the International rule keeps strobes out of ordinary use.',
   },
 ];
 
@@ -2750,7 +2881,7 @@ const vhfProcedureQuestions: ColregsQuestion[] = [
   },
 ];
 
-// --- PFD TYPES (16 questions) ---
+// --- PFD TYPES (30 questions) ---
 //
 // Seamanship, not COLREGS: what a boat has to carry and how a device is
 // approved is Coast Guard equipment regulation, so these explanations open
@@ -2998,6 +3129,218 @@ const pfdTypesQuestions: ColregsQuestion[] = [
     correctAnswer: 'Where the device is suitable to use, and what it should not be relied on for',
     explanation:
       'Life-saving equipment: The icon panel is the plain-language half of the new label - the water the device is meant for, whether it must be worn to count, whether it needs to be inflated, and warnings such as its not being intended to turn an unconscious wearer. It exists because "Type III" told a first-time buyer nothing at all.',
+  },
+
+  // Children. The federal wear rule, the size bands a child's device is sold
+  // in, and why an adult jacket on a child does not count.
+  {
+    id: 'pf-17',
+    category: 'pfd-types',
+    prompt:
+      'Under the federal rule, when must a child under 13 aboard a recreational vessel be wearing a Coast Guard-approved PFD?',
+    options: [
+      'Whenever the vessel is underway, unless the child is below decks or in an enclosed cabin',
+      'Only when the vessel is more than a mile from shore',
+      'Only on vessels under 16 feet',
+      'Only when the child cannot swim',
+    ],
+    correctAnswer:
+      'Whenever the vessel is underway, unless the child is below decks or in an enclosed cabin',
+    explanation:
+      'Life-saving equipment: A child under 13 must be wearing an appropriate approved PFD while the vessel is underway, unless below decks or in an enclosed cabin. Where a state has its own statute setting an age for children to wear one, the state\'s rule applies on its waters instead - so the age can differ from state to state, but the rule itself is everywhere.',
+  },
+  {
+    id: 'pf-18',
+    category: 'pfd-types',
+    prompt: 'A child weighs 40 pounds. Which size of PFD is labelled for them?',
+    options: [
+      'Child - 30 to 50 pounds',
+      'Infant - under 30 pounds',
+      'Youth - 50 to 90 pounds',
+      'Adult - any adult jacket with the straps pulled tight',
+    ],
+    correctAnswer: 'Child - 30 to 50 pounds',
+    explanation:
+      'Life-saving equipment: Children\'s devices are sized by weight, not age: infant under 30 pounds, child 30 to 50, youth 50 to 90, and adult above that. The weight range is printed on the label, which is where the fit requirement is read from - and on either labelling scheme, Type or Level.',
+  },
+  {
+    id: 'pf-19',
+    category: 'pfd-types',
+    prompt:
+      'An adult life jacket is put on a 45-pound child, with every strap cinched as tight as it goes. Does it meet the carriage requirement for that child?',
+    options: [
+      'No - a PFD must be of an appropriate size and fit for the wearer, as marked on its label',
+      'Yes - any approved wearable counts for any person aboard',
+      'Yes, provided the child is also wearing a whistle',
+      'Only on inland waters',
+    ],
+    correctAnswer: 'No - a PFD must be of an appropriate size and fit for the wearer, as marked on its label',
+    explanation:
+      'Life-saving equipment: Each required PFD has to be of an appropriate size and fit for the person it is meant for, as marked on the approval label. An adult jacket on a small child rides up over the face and the child can slip straight out of it, which is the exact failure the size rule is written against.',
+  },
+  {
+    id: 'pf-20',
+    category: 'pfd-types',
+    prompt:
+      'You have fastened a life jacket on someone. What is the quick check that it actually fits?',
+    options: [
+      'Lift it by the shoulders - it should not ride up past the chin or ears',
+      'Check that you can fit a fist between the jacket and the chest',
+      'Make sure the bottom edge reaches below the hips',
+      'Have them take a deep breath and check the straps do not creak',
+    ],
+    correctAnswer: 'Lift it by the shoulders - it should not ride up past the chin or ears',
+    explanation:
+      'Life-saving equipment: Fastened and snug, a jacket lifted at the shoulders should stay put. If it slides up over the chin or the ears it is too big or too loose, and in the water it will do the same thing - float up round the head instead of holding the wearer\'s mouth clear.',
+  },
+
+  // Inflatables. What they are not approved for, how they fire, and what keeps
+  // one serviceable - which is most of what owning one involves.
+  {
+    id: 'pf-21',
+    category: 'pfd-types',
+    prompt: 'Who are inflatable life jackets NOT approved for?',
+    options: [
+      'Anyone under 16, or anyone weighing less than 80 pounds',
+      'Anyone over 60',
+      'Anyone on inland waters',
+      'Anyone operating a vessel over 26 feet',
+    ],
+    correctAnswer: 'Anyone under 16, or anyone weighing less than 80 pounds',
+    explanation:
+      'Life-saving equipment: Inflatables are not approved for people under 16 or under 80 pounds. An inflatable needs its wearer to fire it or to rely on an automatic system, and a child in the water unexpectedly cannot be counted on for either - which is why every child\'s device is inherently buoyant foam.',
+  },
+  {
+    id: 'pf-22',
+    category: 'pfd-types',
+    prompt: 'What is the difference between a manual and an automatic inflatable life jacket?',
+    options: [
+      'A manual one inflates only when the wearer pulls the tab; an automatic one also fires by itself when it is immersed',
+      'A manual one is inflated by mouth only; an automatic one uses a gas cylinder',
+      'A manual one is for inland water and an automatic one is for offshore',
+      'There is no difference except the colour of the pull tab',
+    ],
+    correctAnswer:
+      'A manual one inflates only when the wearer pulls the tab; an automatic one also fires by itself when it is immersed',
+    explanation:
+      'Life-saving equipment: Both fire the same gas cylinder. A manual inflatable waits for the wearer to pull the tab, which a person knocked unconscious cannot do; an automatic one has a water-sensing mechanism that fires it on immersion, and can still be pulled by hand. Both carry an oral tube as the fallback.',
+  },
+  {
+    id: 'pf-23',
+    category: 'pfd-types',
+    prompt: 'What must be true of an inflatable life jacket for it to be in serviceable condition?',
+    options: [
+      'Its inflation system is armed with a full gas cylinder, its status indicators show it ready, and its oral tube and chamber are sound',
+      'It has been inflated at least once in the past season',
+      'It is stored inflated so that it is ready to wear',
+      'It has a manufacturer\'s receipt kept aboard',
+    ],
+    correctAnswer:
+      'Its inflation system is armed with a full gas cylinder, its status indicators show it ready, and its oral tube and chamber are sound',
+    explanation:
+      'Life-saving equipment: An inflatable is only serviceable with a properly armed system and a full cylinder, working status indicators, a chamber that holds air, an unobstructed oral tube and a manual pull that can be reached. The status indicator - usually a green tab or window - is the part you check before every trip, because a fired or missing cylinder looks exactly like a good one from the outside.',
+  },
+  {
+    id: 'pf-24',
+    category: 'pfd-types',
+    prompt: 'Your inflatable fired when you went over the side. What has to happen before it counts as a life jacket again?',
+    options: [
+      'It must be rearmed with a new cylinder and fresh firing parts, then checked, before it is worn again',
+      'Nothing - once dry it can be deflated and worn as before',
+      'It must be sent to the Coast Guard for re-approval',
+      'It can be worn as it is, inflated by mouth when needed',
+    ],
+    correctAnswer:
+      'It must be rearmed with a new cylinder and fresh firing parts, then checked, before it is worn again',
+    explanation:
+      'Life-saving equipment: A fired cylinder is empty. Until the jacket is rearmed - a new cylinder, and on an automatic the water-sensing cartridge too - it is not properly armed and so not serviceable. Rearming kits are sold for exactly this, and carrying one aboard is how a jacket that saved you once is ready to do it again.',
+  },
+  {
+    id: 'pf-25',
+    category: 'pfd-types',
+    prompt: 'What is the oral inflation tube on an inflatable life jacket for?',
+    options: [
+      'To inflate or top up the chamber by mouth if the cylinder fails, or to add air after it fires',
+      'To let air out slowly so the jacket sinks for storage',
+      'To blow a distress signal, like a whistle',
+      'To test the gas cylinder before each trip',
+    ],
+    correctAnswer:
+      'To inflate or top up the chamber by mouth if the cylinder fails, or to add air after it fires',
+    explanation:
+      'Life-saving equipment: The oral tube is the backup to the gas: it inflates the chamber by mouth if the cylinder does not fire, and tops it up if it has softened. It is also how the jacket is deflated after use - the cap reversed on the valve. That it must be unobstructed is part of the serviceability requirement.',
+  },
+
+  // Condition, stowage and the length and craft exemptions.
+  {
+    id: 'pf-26',
+    category: 'pfd-types',
+    prompt:
+      'An old foam jacket has a torn cover with foam showing, and the foam inside has gone hard. Does it still count toward the carriage requirement?',
+    options: [
+      'No - a PFD with torn fabric that could let buoyant material escape, or hardened or waterlogged filling, is not serviceable',
+      'Yes - it is still Coast Guard approved, so it counts',
+      'Yes, provided it is kept as a spare rather than worn',
+      'Only if it is also marked with a performance level',
+    ],
+    correctAnswer:
+      'No - a PFD with torn fabric that could let buoyant material escape, or hardened or waterlogged filling, is not serviceable',
+    explanation:
+      'Life-saving equipment: Approval is not enough - a required PFD must be serviceable and legibly marked with its approval number. Tears that can let foam escape, filling that has hardened, shrunk or become waterlogged, rotten straps and broken buckles all take it out of the count, because each is lost buoyancy or a jacket that will not stay on.',
+  },
+  {
+    id: 'pf-27',
+    category: 'pfd-types',
+    prompt:
+      'The wearable life jackets are still in their plastic wrap, locked in a forward locker. What does the stowage rule require?',
+    options: [
+      'Wearable PFDs must be readily accessible, and the throwable must be immediately available',
+      'Any stowage is acceptable as long as the right number is aboard',
+      'They must be kept in their original packaging to stay approved',
+      'Only the throwable has a stowage requirement',
+    ],
+    correctAnswer:
+      'Wearable PFDs must be readily accessible, and the throwable must be immediately available',
+    explanation:
+      'Life-saving equipment: The rule sets two standards. Wearables must be readily accessible - reachable in an emergency without digging, unwrapping or unlocking. The throwable must be immediately available, because it is useful only in the first few seconds after someone goes over. Jackets in shrink-wrap in a locked locker meet neither.',
+  },
+  {
+    id: 'pf-28',
+    category: 'pfd-types',
+    prompt: 'A 17-foot canoe carries a wearable PFD for each person. Does it also need a throwable?',
+    options: [
+      'No - canoes and kayaks 16 feet or more are exempt from carrying the additional throwable',
+      'Yes - every vessel 16 feet or more must carry a throwable',
+      'Yes, but only on coastal waters',
+      'No - canoes are exempt from carrying any PFD at all',
+    ],
+    correctAnswer:
+      'No - canoes and kayaks 16 feet or more are exempt from carrying the additional throwable',
+    explanation:
+      'Life-saving equipment: The throwable is required on vessels 16 feet and over, with an exemption for canoes and kayaks of that length. The wearable for each person still applies to them - the exemption is from the throwable only, which is the whole of what it covers.',
+  },
+  {
+    id: 'pf-29',
+    category: 'pfd-types',
+    prompt: 'Which of these is exempt from the requirement to carry ANY PFD?',
+    options: [
+      'A sailboard',
+      'A 14-foot rowing dinghy',
+      'A personal watercraft',
+      'A fishing kayak',
+    ],
+    correctAnswer: 'A sailboard',
+    explanation:
+      'Life-saving equipment: Sailboards are exempt from carrying any PFD, and so are racing shells, rowing sculls, racing canoes and racing kayaks. A dinghy, a PWC and an ordinary kayak all still carry a wearable for each person aboard. The exemptions are narrow and named, not a general allowance for small craft.',
+  },
+  {
+    id: 'pf-30',
+    category: 'pfd-types',
+    prompt: 'A new life jacket is labelled Level 100. Which of the older type codes is it closest to?',
+    options: ['Type II', 'Type I', 'Type IV', 'Type V'],
+    correctAnswer: 'Type II',
+    explanation:
+      'Life-saving equipment: Level 100 sits between the flotation aid and the offshore jacket, where the Type II near-shore vest was: more support than a Level 70, and some ability to turn a wearer, without the full buoyancy of a Level 150. Both labels are current, and a boat may carry either, so the mapping has to be known in both directions.',
   },
 ];
 

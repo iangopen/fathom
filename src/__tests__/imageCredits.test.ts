@@ -3,8 +3,11 @@ import { IMAGE_CREDITS, creditFor } from '../lib/imageCredits';
 import { ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
 import { CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
 import { BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
+import { DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
+import { PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 
-// The anchors, the clouds and most of the buoys are photographs now, and every one of them is
+// The anchors, the clouds and some of the buoys, distress signals and PFDs
+// are photographs now, and every one of them is
 // somebody else's work used under a licence - public domain, CC0, or a CC
 // licence that REQUIRES attribution. src/lib/imageCredits.ts is where that
 // attribution is kept, and a credits file is only worth having if it cannot
@@ -19,6 +22,8 @@ const KINDS = [
   ['anchor', ANCHOR_IMAGES],
   ['cloud', CLOUD_IMAGES],
   ['buoy', BUOY_IMAGES],
+  ['distress', DISTRESS_IMAGES],
+  ['pfd', PFD_IMAGES],
 ] as const;
 
 describe('every shipped photograph is credited', () => {

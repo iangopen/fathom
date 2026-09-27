@@ -1,5 +1,9 @@
 import React from 'react';
 
+import dyeMarker from '../../../assets/distress/dye-marker.jpg';
+import handFlare from '../../../assets/distress/hand-flare.jpg';
+import orangeSmoke from '../../../assets/distress/orange-smoke.jpg';
+
 export type DistressSignalName =
   | 'parachute-flare'
   | 'hand-flare'
@@ -8,16 +12,34 @@ export type DistressSignalName =
   | 'flag-nc'
   | 'flag-and-ball'
   | 'arms'
-  | 'flames';
+  | 'flames'
+  // Not on the Annex IV list itself - one of the two signals the annex draws
+  // attention to for being found from the air. Photographed only.
+  | 'dye-marker';
+
+// The three signals shown as PHOTOGRAPHS. Everything else is still drawn below,
+// for want of a licensed photograph that passes, not by choice.
+type PhotoSignal = 'hand-flare' | 'orange-smoke' | 'dye-marker';
+type DrawnSignal = Exclude<DistressSignalName, PhotoSignal>;
 
 interface DistressDisplayProps {
   signal: DistressSignalName;
   label?: string;
 }
 
-// Side elevation, 220x170, drawn to the same contract as AnchorDisplay and
-// BuoyDisplay: the player names the signal from the picture, so NOTHING here
-// may name it in text.
+// PHOTOGRAPHS where a licensed one passes, and side-elevation drawings, 220x170,
+// everywhere else - the same split BuoyDisplay makes, and the same contract:
+// the player names the signal from the picture, so NOTHING here may name it.
+//
+// THE PHOTOGRAPHS answer to the strict rule set by the buoyage card: no
+// legible text of any kind at the size the panel draws, judged on a 2x screen
+// (the 204px panel shows about 408 pixels of the 640px file), and checked in
+// the running app, not estimated. Three passed - a hand flare held up at night,
+// an orange smoke canister floating on the sea, and a dye marker spreading in
+// the water. Commons has no licensed photograph of a parachute flare in the
+// air, a red star shell, a November-Charlie hoist, a square flag with a ball,
+// the arms signal or flames on a vessel, so those six are still drawn. The
+// candidates that were tried and turned down are in IMAGE-CREDITS.md.
 //
 // Only the signals that HAVE a visual form are here. A distress signal sent by
 // radiotelegraphy, a spoken Mayday, an EPIRB alert and a gun fired at
@@ -39,7 +61,6 @@ const SMOKE = 'rgba(148,163,184,0.28)';
 
 const SIGNAL_RED = '#d8382c';
 const SIGNAL_GLOW = 'rgba(216,56,44,0.22)';
-const SIGNAL_ORANGE = '#e08334';
 const SIGNAL_ORANGE_SOFT = 'rgba(224,131,52,0.35)';
 const FLAG_BLUE = '#1d4e89';
 const FLAG_RED = '#a8332c';
@@ -76,7 +97,7 @@ function flagField(x: number, y: number, w: number, h: number, fill: React.React
   );
 }
 
-function signalBody(signal: DistressSignalName): React.ReactNode {
+function signalBody(signal: DrawnSignal): React.ReactNode {
   switch (signal) {
     // A red light descending slowly under a canopy. The shroud lines and the
     // canopy are what separate it from a hand flare and from a star shell.
@@ -104,68 +125,6 @@ function signalBody(signal: DistressSignalName): React.ReactNode {
             stroke={SMOKE}
             strokeWidth="5"
             strokeLinecap="round"
-          />
-        </g>
-      );
-
-    // Held in the fist, burning at the top. The grip is what says hand-held,
-    // so it is drawn as a fist on the case rather than left to be inferred.
-    case 'hand-flare':
-      return (
-        <g>
-          <rect
-            x={96} y={62} width={26} height={62} rx={4}
-            fill={PLATE_FILL} stroke={PLATE_STROKE} strokeWidth="1.2"
-            transform="rotate(-14 109 93)"
-          />
-          <g transform="rotate(-14 109 93)">
-            <line x1={96} y1={84} x2={122} y2={84} stroke={DETAIL_STROKE} strokeWidth="1.1" />
-            {/* The fist */}
-            <rect
-              x={90} y={96} width={38} height={30} rx={9}
-              fill={PLATE_FILL} stroke={PLATE_STROKE} strokeWidth="1.2"
-            />
-            <g stroke={DETAIL_STROKE} strokeWidth="1">
-              <line x1={94} y1={105} x2={124} y2={105} />
-              <line x1={94} y1={113} x2={124} y2={113} />
-            </g>
-          </g>
-          {flareLight(102, 52, 10)}
-          {/* Sparks off the head */}
-          <g stroke={SIGNAL_RED} strokeWidth="1.6" strokeLinecap="round">
-            <line x1={86} y1={34} x2={82} y2={26} />
-            <line x1={104} y1={30} x2={104} y2={20} />
-            <line x1={118} y1={36} x2={124} y2={28} />
-          </g>
-        </g>
-      );
-
-    // A canister giving off a dense coloured plume. The short water line is
-    // there because the canister floats - it is the one thing that makes the
-    // plume read as coming from the water rather than from a chimney.
-    case 'orange-smoke':
-      return (
-        <g>
-          <g fill={SIGNAL_ORANGE_SOFT}>
-            <circle cx={104} cy={98} r={17} />
-            <circle cx={122} cy={78} r={20} />
-            <circle cx={100} cy={62} r={17} />
-            <circle cx={126} cy={44} r={15} />
-            <circle cx={148} cy={56} r={12} />
-          </g>
-          <g fill={SIGNAL_ORANGE} opacity={0.85}>
-            <circle cx={106} cy={96} r={9} />
-            <circle cx={118} cy={80} r={9} />
-            <circle cx={104} cy={66} r={7} />
-          </g>
-          <rect
-            x={92} y={110} width={30} height={26} rx={3}
-            fill={PLATE_FILL} stroke={PLATE_STROKE} strokeWidth="1.2"
-          />
-          <line x1={92} y1={118} x2={122} y2={118} stroke={DETAIL_STROKE} strokeWidth="1.1" />
-          <line
-            x1={44} y1={136} x2={176} y2={136}
-            stroke={DETAIL_STROKE} strokeWidth="1.4" strokeLinecap="round"
           />
         </g>
       );
@@ -302,6 +261,21 @@ function signalBody(signal: DistressSignalName): React.ReactNode {
   }
 }
 
+// Sources and licences are in src/lib/imageCredits.ts. Each is 640x480, the
+// 4:3 the 220x170 drawings are close to, so the panel keeps its shape.
+const DISTRESS_IMAGES: Record<PhotoSignal, string> = {
+  'hand-flare': handFlare,
+  'orange-smoke': orangeSmoke,
+  'dye-marker': dyeMarker,
+};
+
+// Alt text describes the FRAME, never the signal.
+const ALT = 'Photograph of a signal, shown for identification';
+
+function isPhoto(signal: DistressSignalName): signal is PhotoSignal {
+  return signal in DISTRESS_IMAGES;
+}
+
 export const DistressDisplay: React.FC<DistressDisplayProps> = ({ signal, label }) => (
   <div className="flex flex-col items-center gap-3 select-none w-full">
     {label && (
@@ -309,9 +283,23 @@ export const DistressDisplay: React.FC<DistressDisplayProps> = ({ signal, label 
     )}
 
     <div className="w-full max-w-[240px] rounded-xl border border-slate-800 bg-slate-900/60 p-3 backdrop-blur-sm">
-      <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
-        {signalBody(signal)}
-      </svg>
+      {isPhoto(signal) ? (
+        <img
+          src={DISTRESS_IMAGES[signal]}
+          alt={ALT}
+          width={640}
+          height={480}
+          draggable={false}
+          className="w-full h-auto rounded-lg"
+          style={{ display: 'block', aspectRatio: '4 / 3', objectFit: 'cover' }}
+        />
+      ) : (
+        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+          {signalBody(signal)}
+        </svg>
+      )}
     </div>
   </div>
 );
+
+export { DISTRESS_IMAGES };

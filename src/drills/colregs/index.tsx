@@ -272,6 +272,9 @@ export const QUESTION_DISTRESS: Partial<Record<string, DistressSignalName>> = {
   'di-06': 'flag-and-ball',
   'di-07': 'arms',
   'di-08': 'flames',
+  // The dye marker is not on the Annex IV list - di-20 asks exactly that - but
+  // what it looks like on the water is the stimulus, so it is pictured.
+  'di-20': 'dye-marker',
 };
 
 // The PFD shown for the five identification questions, keyed by FORM rather
