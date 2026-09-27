@@ -1507,7 +1507,7 @@ const anchorTypesQuestions: ColregsQuestion[] = [
   },
 ];
 
-// --- BUOYAGE (18 questions) ---
+// --- BUOYAGE (30 questions) ---
 //
 // Not COLREGS: the buoyage system is IALA's, and the ICW overlay on top of it
 // is the US Coast Guard's, so these explanations open with a topic label from
@@ -1515,8 +1515,8 @@ const anchorTypesQuestions: ColregsQuestion[] = [
 //
 // Everything here is written for IALA Region B, the region the United States
 // lies in, because that is the water this app is studied for. Region A is not
-// footnoted into every answer - it is drilled head-on in the last two
-// questions instead, which is where a boater who has chartered abroad needs
+// footnoted into every answer - it is drilled head-on in by-17 and by-18
+// instead, which is where a boater who has chartered abroad needs
 // it. The one thing that must never be blurred is which parts differ: the
 // LATERAL marks reverse between the regions and nothing else does.
 //
@@ -1694,7 +1694,7 @@ const buoyageQuestions: ColregsQuestion[] = [
     id: 'by-12',
     category: 'buoyage',
     prompt:
-      'A can buoy is painted solid yellow and carries a single yellow X-shaped topmark. What is it?',
+      'A buoy is painted solid yellow and carries a single yellow X-shaped topmark. What is it?',
     options: [
       'A special mark',
       'A safe water mark',
@@ -1796,6 +1796,207 @@ const buoyageQuestions: ColregsQuestion[] = [
     correctAnswer: 'Cardinal, isolated danger, safe water and special marks',
     explanation:
       'IALA-B: Four of the five mark types are worldwide. A north cardinal is black over yellow with two cones up in every port on earth; so are the two black spheres of an isolated danger, the vertical red and white stripes of safe water, and the plain yellow of a special mark. Only the laterals change sides at the region boundary, which is why they are the ones to check on arrival.',
+  },
+
+  // Preferred-channel marks. A junction mark is a lateral mark with a band of
+  // the other colour round its middle, and it is read by its TOP band alone:
+  // the top colour and the shape say which lateral mark to treat it as.
+  {
+    id: 'by-19',
+    category: 'buoyage',
+    prompt:
+      'Returning from seaward, you come to a nun buoy banded red, green, red - red on top - where the channel divides. How do you pass it to stay in the preferred channel?',
+    options: [
+      'Keep it on your starboard side',
+      'Keep it on your port side',
+      'Either side - the green band marks it as a mid-channel mark',
+      'Keep well clear on every side - the bands mark it as a danger',
+    ],
+    correctAnswer: 'Keep it on your starboard side',
+    explanation:
+      'IALA-B: A preferred-channel mark is read by its topmost band. Red on top, on a nun, means treat it as a starboard-hand mark and leave it to starboard returning from sea - which puts the preferred channel to port of the mark. The green band says only that there is a secondary channel on its other side.',
+  },
+  {
+    id: 'by-20',
+    category: 'buoyage',
+    prompt:
+      'Returning from seaward, you come to a can buoy banded green, red, green - green on top - where the channel divides. How do you pass it to stay in the preferred channel?',
+    options: [
+      'Keep it on your port side',
+      'Keep it on your starboard side',
+      'Either side - the red band marks it as a mid-channel mark',
+      'Keep well clear on every side - the bands mark it as a danger',
+    ],
+    correctAnswer: 'Keep it on your port side',
+    explanation:
+      'IALA-B: Green on top, on a can, means treat the junction mark as a port-hand mark and leave it to port returning from sea, which puts the preferred channel to starboard of it. The middle band is the other channel, still navigable but secondary; the top band is the one to steer by.',
+  },
+
+  // Daybeacons. The same lateral meaning as the buoys, carried by a daymark on
+  // a fixed structure - and in the United States the daymark's SHAPE does the
+  // work the buoy's can or nun shape does.
+  {
+    id: 'by-21',
+    category: 'buoyage',
+    prompt:
+      'Entering a channel from seaward, you see a piling carrying a green SQUARE board with a reflective green border. What is it?',
+    options: [
+      'A port-hand daybeacon - leave it to port',
+      'A starboard-hand daybeacon - leave it to starboard',
+      'An information mark - read the chart for its meaning',
+      'A range mark - line it up with the one behind it',
+    ],
+    correctAnswer: 'A port-hand daybeacon - leave it to port',
+    explanation:
+      'US ATON: A green square daymark is the fixed equivalent of the green can - a port-hand mark, left to port returning from seaward, carrying odd numbers. Square for port is the same pairing the can buoy and the ICW square use.',
+  },
+  {
+    id: 'by-22',
+    category: 'buoyage',
+    prompt:
+      'Entering a channel from seaward, you see a piling carrying a red TRIANGULAR board with a reflective red border. What is it?',
+    options: [
+      'A starboard-hand daybeacon - leave it to starboard',
+      'A port-hand daybeacon - leave it to port',
+      'A regulatory mark warning of danger',
+      'A crossing mark - the channel changes banks here',
+    ],
+    correctAnswer: 'A starboard-hand daybeacon - leave it to starboard',
+    explanation:
+      'US ATON: A red triangular daymark is the fixed equivalent of the red nun - a starboard-hand mark, left to starboard returning from seaward, carrying even numbers. The triangle points up the way the nun does.',
+  },
+  {
+    id: 'by-23',
+    category: 'buoyage',
+    prompt:
+      'Why should you not treat a buoy\'s charted position as a fixed, exact position the way you can a daybeacon\'s?',
+    options: [
+      'A buoy swings on its mooring and can be dragged, sunk or carried off station, while a beacon stands on a fixed structure',
+      'A buoy is only charted approximately, but it never moves from where it was laid',
+      'Buoys are repositioned every season, so the chart is always a year out of date',
+      'A buoy\'s charted position is exact; it is the daybeacon that may be moved',
+    ],
+    correctAnswer:
+      'A buoy swings on its mooring and can be dragged, sunk or carried off station, while a beacon stands on a fixed structure',
+    explanation:
+      'US ATON: A buoy rides at the end of a chain in a circle round its sinker, and ice, storms, current and collisions move it further. The Coast Guard\'s own guidance is not to rely on a floating aid alone for a fix - take it from something fixed ashore or a beacon on a pile, and treat the buoy as a warning of where the danger is.',
+  },
+
+  // Ranges. Two marks, the rear one farther away and higher, that put you on a
+  // line when you see them one above the other.
+  {
+    id: 'by-24',
+    category: 'buoyage',
+    prompt:
+      'Ahead you see two marks on shore, one behind and higher than the other, and as you come on course the rear one appears directly above the front one. What are they telling you?',
+    options: [
+      'You are on the range line - the centreline of the channel they mark',
+      'You are at the entrance of a channel that divides behind them',
+      'The water between you and the marks is a controlled area',
+      'You should pass between the two marks',
+    ],
+    correctAnswer: 'You are on the range line - the centreline of the channel they mark',
+    explanation:
+      'US ATON: A range is a pair of marks set so that, seen one directly above the other, they put you on a line - usually the centreline of a dredged channel. The front mark is lower and nearer, the rear mark higher and farther, and keeping them in line is how you hold a straight course down the cut with no other reference.',
+  },
+  {
+    id: 'by-25',
+    category: 'buoyage',
+    prompt:
+      'Steering on a range, you see the rear mark appear to the RIGHT of the front mark. Which way are you off the line, and which way do you come back?',
+    options: [
+      'You are to the right of the line - come left to bring them back in line',
+      'You are to the left of the line - come right to bring them back in line',
+      'You are to the right of the line - come further right',
+      'You are on the line - the marks are never exactly in line',
+    ],
+    correctAnswer: 'You are to the right of the line - come left to bring them back in line',
+    explanation:
+      'US ATON: The nearer, front mark shifts more as you move, so from right of the line the rear mark appears to the right of it. The rear mark shows which side you have strayed to; steer away from that side until the two stand in line again.',
+  },
+
+  // The Western Rivers - the Mississippi and the rivers that feed it - are
+  // buoyed on a variant of the system, and the two differences a visiting
+  // boater meets first are these.
+  {
+    id: 'by-26',
+    category: 'buoyage',
+    prompt:
+      'On the Western Rivers system, what do the numbers on lights and daybeacons tell you?',
+    options: [
+      'Their distance in statute miles along the river from a fixed point - not which side to pass them',
+      'Which side to pass them on - odd numbers to port and even to starboard, as on the coast',
+      'The depth of water beside the mark, in feet',
+      'The order they were laid in, counted from the river mouth',
+    ],
+    correctAnswer:
+      'Their distance in statute miles along the river from a fixed point - not which side to pass them',
+    explanation:
+      'US ATON: On the Western Rivers the buoys are not numbered at all, and the numbers on lights and daybeacons are river miles from a fixed reference point, with no lateral meaning. Side is read from colour and shape alone - which is why a coastal habit of reading odd and even gets a boater nowhere there.',
+  },
+  {
+    id: 'by-27',
+    category: 'buoyage',
+    prompt:
+      'On the Western Rivers, a DIAMOND-shaped daymark stands on the river bank. What is it telling you?',
+    options: [
+      'The channel crosses from one side of the river to the other here',
+      'The channel runs close along this bank',
+      'There is a danger in the water off this bank',
+      'Boats must keep out of the water beside this bank',
+    ],
+    correctAnswer: 'The channel crosses from one side of the river to the other here',
+    explanation:
+      'US ATON: A crossing daymark is diamond-shaped and marks where the channel leaves one bank to cross to the other. Its counterpart, the passing daymark - a square or triangle - says the channel runs along the bank it stands on.',
+  },
+
+  // Regulatory marks. White with orange shapes, and the shape alone carries the
+  // category - the words inside it, on the real thing, say only the detail.
+  {
+    id: 'by-28',
+    category: 'buoyage',
+    prompt:
+      'A white buoy carries an open orange DIAMOND, with nothing inside it. What category of regulatory mark is it?',
+    options: [
+      'Danger - rocks, a wreck, a dam or some other hazard',
+      'Exclusion - boats keep out',
+      'Controlled area - a speed limit or other restriction',
+      'Information - directions or a place name',
+    ],
+    correctAnswer: 'Danger - rocks, a wreck, a dam or some other hazard',
+    explanation:
+      'US ATON: On a regulatory mark the orange shape says what kind of message it is. An open diamond is danger; the word inside, where there is one - ROCK, DAM, SNAG - names which. White with orange is never a lateral mark, so it gives no side to pass on.',
+  },
+  {
+    id: 'by-29',
+    category: 'buoyage',
+    prompt:
+      'A white buoy carries an orange DIAMOND with an orange CROSS inside it. What does it mean?',
+    options: [
+      'Boats keep out of the area it marks',
+      'Danger ahead - proceed with caution',
+      'A speed limit or no-wake zone is in force',
+      'A channel junction - either side is navigable',
+    ],
+    correctAnswer: 'Boats keep out of the area it marks',
+    explanation:
+      'US ATON: The cross inside the diamond turns "danger" into "exclusion": boats are not permitted in the area at all - a swimming beach, a dam spillway, a restricted zone. It is the strongest of the four regulatory shapes, and the only one that closes water rather than warning about it.',
+  },
+  {
+    id: 'by-30',
+    category: 'buoyage',
+    prompt:
+      'A white buoy carries an orange CIRCLE. What category of regulatory mark is it?',
+    options: [
+      'Controlled area - an operating restriction such as a speed limit or no wake',
+      'Danger - a hazard in the water nearby',
+      'Exclusion - boats keep out',
+      'Information - directions, distances or a place name',
+    ],
+    correctAnswer:
+      'Controlled area - an operating restriction such as a speed limit or no wake',
+    explanation:
+      'US ATON: The circle marks a controlled area - you may enter, but under a restriction, which is written inside it: 5 MPH, NO WAKE, NO ANCHORING. The fourth shape, an orange square or rectangle, carries information rather than a rule, such as directions or the name of a place.',
   },
 ];
 

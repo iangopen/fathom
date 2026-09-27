@@ -61,8 +61,16 @@ describe('questions that must stay undiagrammed', () => {
     // "Which anchor for this bottom?" - an-01..an-05 are the identification
     // questions and keep their silhouettes.
     ['anchor bottom-matching', ['an-06', 'an-07', 'an-08', 'an-09', 'an-10', 'an-11', 'an-12', 'an-13'], QUESTION_ANCHORS],
-    // How the lateral and cardinal systems work, not what one mark looks like.
-    ['buoyage system rules', ['by-03', 'by-08', 'by-10', 'by-13', 'by-16', 'by-17', 'by-18'], QUESTION_BUOYS],
+    // How the lateral and cardinal systems work, not what one mark looks like -
+    // and, from by-23 on, how far to trust a buoy, which way to steer off a
+    // range, what a river-mile board counts, and what an orange shape on a
+    // white mark says. A photograph of a regulatory mark would print its own
+    // answer inside the shape.
+    [
+      'buoyage system rules',
+      ['by-03', 'by-08', 'by-10', 'by-13', 'by-16', 'by-17', 'by-18', 'by-23', 'by-25', 'by-26', 'by-28', 'by-29', 'by-30'],
+      QUESTION_BUOYS,
+    ],
     // Annex IV signals with no drawable form - a gun at intervals, a spoken
     // Mayday, an EPIRB alert.
     ['undrawable distress signals', ['di-09', 'di-10', 'di-11', 'di-12', 'di-13', 'di-14', 'di-15', 'di-16'], QUESTION_DISTRESS],

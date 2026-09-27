@@ -11,8 +11,8 @@
 // a long-press on the panel - it reads this map; the strings are written to be
 // displayed as they stand.
 //
-// Keys are `<kind>:<name>`, where `<name>` is the AnchorTypeName / CloudName
-// the display components switch on.
+// Keys are `<kind>:<name>`, where `<name>` is the AnchorTypeName / CloudName /
+// BuoyName the display components switch on.
 
 export interface ImageCredit {
   /** What the photograph shows, in the app's own vocabulary. */
@@ -120,9 +120,59 @@ export const IMAGE_CREDITS: Record<string, ImageCredit> = {
     license: 'CC BY-SA 4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
   },
+
+  'buoy:port-hand': {
+    subject: 'Green can buoy, Genesee River, Rochester, New York',
+    title: 'Green buoy Genesee River (3795382796).jpg',
+    source: COMMONS + 'Green_buoy_Genesee_River_(3795382796).jpg',
+    author: 'Carl Mueller',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  'buoy:cardinal-south': {
+    subject: 'South cardinal buoy off St Mawes, Cornwall',
+    title: 'South cardinal buoy off St Mawes (4950686323).jpg',
+    source: COMMONS + 'South_cardinal_buoy_off_St_Mawes_(4950686323).jpg',
+    author: 'Tim Green from Bradford',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+  },
+  'buoy:cardinal-east': {
+    subject: 'East cardinal buoy on the Manacles, Falmouth',
+    title: 'Cardinale Est "Manacle" (Falmouth, GB).jpg',
+    source: COMMONS + 'Cardinale_Est_%22Manacle%22_(Falmouth,_GB).jpg',
+    author: 'Alvaro',
+    license: 'CC BY 2.5',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.5/',
+  },
+  'buoy:isolated-danger': {
+    subject: 'Isolated danger buoy off Valencia',
+    title: '2020-08-17 Boia enfront de la costa de València i Port Sapatja.jpg',
+    source:
+      COMMONS + '2020-08-17_Boia_enfront_de_la_costa_de_Val%C3%A8ncia_i_Port_Sapatja.jpg',
+    author: 'Pacopac',
+    license: 'CC BY-SA 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+  },
+  'buoy:safe-water': {
+    subject: 'Safe water buoy in the Limfjord, Denmark',
+    title: 'Limfjord safe water mark.jpg',
+    source: COMMONS + 'Limfjord_safe_water_mark.jpg',
+    author: 'Paul Fox',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
+  'buoy:special': {
+    subject: 'Special mark buoy off Seahill, Belfast Lough',
+    title: 'Buoy off Seahill - geograph.org.uk - 920114.jpg',
+    source: COMMONS + 'Buoy_off_Seahill_-_geograph.org.uk_-_920114.jpg',
+    author: 'Ross',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+  },
 };
 
 /** The credit for one rendered image, or undefined if it has none. */
-export function creditFor(kind: 'anchor' | 'cloud', name: string): ImageCredit | undefined {
+export function creditFor(kind: 'anchor' | 'cloud' | 'buoy', name: string): ImageCredit | undefined {
   return IMAGE_CREDITS[`${kind}:${name}`];
 }

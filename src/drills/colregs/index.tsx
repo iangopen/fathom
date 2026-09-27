@@ -226,6 +226,19 @@ export const QUESTION_ANCHORS: Partial<Record<string, AnchorTypeName>> = {
 // safe water is on, what the two regions share - have no diagram on purpose.
 // A picture of one mark beside a question about the system would illustrate an
 // answer that is not being asked for.
+//
+// by-19 to by-30 extend the card, and only by-19 carries a picture - a
+// drawing, since the one junction photograph found had legible letters on
+// it. The rest split two ways. by-23, by-25, by-26 and by-28 to by-30 are
+// meaning questions - how far to trust a buoy, which way to steer off a range,
+// what a river-mile board counts, what an orange shape on a white mark says -
+// and a regulatory mark would be the worst picture of all, because the real
+// thing prints its message inside the shape. by-20, by-21, by-22, by-24 and by-27 are
+// identification questions that WOULD take a photograph, but no licensed one
+// passed: every US daybeacon photographed on Commons shows its number, and
+// none of a green-topped junction can, a range pair or a Western Rivers
+// crossing daymark turned up at all. The prompt describes the mark in full,
+// the way it always has, so each is answerable as text.
 export const QUESTION_BUOYS: Partial<Record<string, BuoyName>> = {
   'by-01': 'port-hand',
   'by-02': 'starboard-hand',
@@ -238,6 +251,7 @@ export const QUESTION_BUOYS: Partial<Record<string, BuoyName>> = {
   'by-12': 'special',
   'by-14': 'icw-triangle',
   'by-15': 'icw-square',
+  'by-19': 'junction-red-top',
 };
 
 // The distress signal shown for the eight that have a visual form. The rest of
