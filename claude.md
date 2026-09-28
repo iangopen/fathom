@@ -4,8 +4,6 @@ Vite + React + TypeScript app deployed to GitHub Pages at:
 https://iangopenbusinessai-lab.github.io/fathom/
 
 ## Stack
-- The chart-table design system: CSS custom properties + a stylesheet in
-  ChartFrame. See "Design system" below.
 - Tailwind CSS (CDN in index.html) — now only inside the drill *diagrams*
   (CompassRose, LightDisplay and friends), which were never restyled.
 
@@ -146,37 +144,28 @@ Every drill follows this structure:
   static render cannot see a reconciliation bug.
 
 ## Photographic assets
-Two of the visual categories are PHOTOGRAPHS rather than drawings, and this is
-a pilot: `AnchorDisplay` and `CloudDisplay` render `<img>` from
-`src/assets/anchors/` and `src/assets/clouds/` instead of hand-built SVG. The
-line art for both went through several rounds of correction without reading as
-the real thing, and five anchors told apart by shape - or a mackerel sky, which
-is a texture - are exactly where an illustration has to beat a photograph to be
-worth drawing. The rest of the diagrams (day shapes, nav lights, buoyage,
-flags, PFDs, boat parts, vessel hierarchy) are still drawn; the plan is to
-follow the same route once this is proven.
+Anchors and clouds are PHOTOGRAPHS, not drawings: `AnchorDisplay` and
+`CloudDisplay` render `<img>` from `src/assets/`. The line art for both went
+through several rounds of correction without reading as the real thing, and
+five anchors told apart by shape - or a mackerel sky, which is a texture - are
+exactly where an illustration has to beat a photograph to be worth drawing.
+Every other visual category is still drawn, and follows one at a time.
 
-- Prop contracts did not change. Only what those two components render did, so
-  `QUESTION_ANCHORS` / `QUESTION_CLOUDS` and `VisualPanel` were untouched, and
-  the "OBSERVED" panel chrome around them is the same one every diagram sits in.
-- Images are imported as modules from `src/assets/`, NOT put in `public/` -
-  Vite then hashes them and prefixes the `/fathom/` base by itself, so nothing
-  has to thread `import.meta.env.BASE_URL` through a component. Each is 640x480,
-  the 4:3 the old 220x170 viewBox was close to.
-- **The leak rule survives the move, in a new form.** A drawing could not name
-  its own answer because it carried no text; a photograph can - a maker's plate,
-  a fluke stamped with its pattern name, a caption baked into a product shot.
-  Every candidate is checked at full resolution BEFORE it is cropped, and a
-  second anchor of a different type in frame counts as a leak too. The
-  bottom-matching questions (an-06 … an-13) still get no picture at all.
-- **Every image is public domain or Creative Commons, and the CC ones require
-  attribution.** `src/lib/imageCredits.ts` is the authoritative record and
-  `IMAGE-CREDITS.md` is the same table for a human, including what was rejected
-  and why. `src/__tests__/imageCredits.test.ts` fails if an image ships without
-  a credit, or if a BY licence is recorded with no author - a credits file is
-  only worth having if it cannot quietly fall behind. If no properly licensed
-  image can be found for a form, leave that one on its drawing and say so
-  rather than reaching for an unlicensed one.
+Two rules, and they are the reason this is here rather than in the skill:
+
+- **No image may name its own answer.** A drawing could not leak because it
+  carried no text; a photograph can - a maker's plate, a fluke stamped with its
+  pattern name, a caption baked into a product shot - and a second specimen of
+  a different type in frame counts too. Vet every candidate at full resolution
+  BEFORE cropping. The bottom-matching questions (an-06 … an-13) still get no
+  picture at all.
+- **No image ships without a licence and a credit.** Public domain or Creative
+  Commons only; the CC ones require attribution. If no properly licensed image
+  can be found for a form, leave that one on its drawing and SAY SO rather than
+  reaching for an unlicensed one.
+
+How to source, vet, crop and wire one up - and the credits files those rules
+are enforced by - is in the `fathom-imagery` skill, not here.
 
 ## Deployment
 Pushing to main deploys automatically - see .github/workflows/ci.yml, which
@@ -194,14 +183,6 @@ recreated after the remove step. Never deploy with `-d .` or `--dotfiles`.
 
 PWA plumbing (manifest, service worker, runtime <head> injection) and the app
 icon/favicon workflow live in the `fathom-assets` skill, not here.
-
-## Planned Drills
-- [x] compass — Compass & Relative Bearing
-- [x] colregs — Rules of the Road
-  - Navigation lights (visual ID)
-  - Sound signals (blast-pattern diagram + Web Audio playback)
-  - Vessel hierarchy (give-way scenarios)
-  - Day shapes (visual ID)
 
 ## Notes
 - The project was renamed NauticalMaster → Fathom (repo, Pages URL, Vite base,
