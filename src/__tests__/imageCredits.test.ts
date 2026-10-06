@@ -44,16 +44,42 @@ describe('every shipped photograph is credited', () => {
     expect(Object.keys(IMAGE_CREDITS).filter(k => !shipped.has(k))).toEqual([]);
   });
 
-  // A credit that names no licence, or a CC licence that names no author, is
-  // not attribution - it is a note that attribution was skipped.
-  it('names a licence for every image, and an author for every CC-BY licence', () => {
+  // A credit that names no licence, or no author, is not attribution - it is a
+  // note that attribution was skipped. Every photo is credited on-site now, so
+  // there is no waiver for CC0 or public domain either: the credit line under
+  // the panel shows author and licence for all of them, and links both.
+  it('has an author, licence, licence URL, source URL and page id for every image', () => {
     const bad: string[] = [];
     for (const [key, c] of Object.entries(IMAGE_CREDITS)) {
-      if (!c.license || !c.source || !c.subject) bad.push(`${key}: incomplete`);
-      // CC0 and public-domain dedications waive the attribution requirement;
-      // every other CC licence here is a BY licence and does not.
-      const waived = c.license === 'CC0' || c.license === 'Public domain';
-      if (!waived && (!c.author || !c.licenseUrl)) bad.push(`${key}: unattributed ${c.license}`);
+      for (const field of ['subject', 'title', 'author', 'license'] as const) {
+        if (!c[field].trim()) bad.push(`${key}: no ${field}`);
+      }
+      for (const field of ['source', 'licenseUrl'] as const) {
+        if (!/^https:\/\/\S+$/.test(c[field])) bad.push(`${key}: ${field} is not an https URL`);
+      }
+      if (!Number.isInteger(c.pageId) || c.pageId <= 0) bad.push(`${key}: no Commons page id`);
+    }
+    expect(bad).toEqual([]);
+  });
+
+  // The licence name and its URL are typed separately, so they can drift: a
+  // "CC BY-SA 4.0" pointing at the 3.0 deed is a wrong licence statement.
+  it('links each Creative Commons licence to its own deed', () => {
+    const bad: string[] = [];
+    for (const [key, c] of Object.entries(IMAGE_CREDITS)) {
+      const cc = c.license.match(/^CC (BY(?:-SA)?) (\d\.\d)$/);
+      if (cc) {
+        const deed = `https://creativecommons.org/licenses/${cc[1].toLowerCase()}/${cc[2]}/`;
+        if (c.licenseUrl !== deed) bad.push(`${key}: ${c.license} -> ${c.licenseUrl}`);
+      } else if (c.license === 'CC0') {
+        if (c.licenseUrl !== 'https://creativecommons.org/publicdomain/zero/1.0/') bad.push(`${key}: CC0 deed`);
+      } else if (c.license === 'Public domain') {
+        if (!c.licenseUrl.startsWith('https://commons.wikimedia.org/wiki/Template:PD-')) {
+          bad.push(`${key}: public domain without its Commons licence tag`);
+        }
+      } else {
+        bad.push(`${key}: unrecognised licence "${c.license}"`);
+      }
     }
     expect(bad).toEqual([]);
   });
