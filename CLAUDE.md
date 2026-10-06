@@ -165,7 +165,11 @@ Two rules, and they are the reason this is here rather than in the skill:
   reaching for an unlicensed one.
 
 ### How credits render
-All 21 photos are credited on-site, in two places, from `src/lib/imageCredits.ts`:
+All 21 photos are credited on-site, in two places, from `src/lib/imageCredits.ts`.
+17 of them are CC BY / BY-SA and legally need it (that is the portfolio
+audit's "17 uncredited"); the other 4 - three public domain, one CC0 - are
+credited anyway, so the rule is simply "every photo". Since this landed the
+suite is 12 files / 1017 tests.
 
 - **Under each photo**, inside the instrument panel: `PhotoCredit`, wired in
   `VisualPanel` (which decides per question whether the visual is a photo -

@@ -9,8 +9,10 @@
 //
 // Two places render these: the credit line under each photograph in
 // VisualPanel, and the Credits list on the About screen. Under a question the
-// line shows author, licence and a "Source" link and nothing else - `title`
-// and `subject` name the answer, so they appear only on the About screen.
+// line shows author (linked to the file page by id) and licence (linked to
+// its deed) and nothing else - `title` and `subject` name the answer, so the
+// title is added only once the question is answered, and the subject appears
+// only on the About screen.
 //
 // Keys are `<kind>:<name>`, where `<name>` is the AnchorTypeName / CloudName /
 // BuoyName / DistressSignalName / PfdFormName the display components switch on.
