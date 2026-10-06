@@ -7,9 +7,10 @@
 // every image a drill can render has an entry here, so an image added without
 // a credit fails the suite rather than shipping unattributed.
 //
-// Nothing surfaces these in the UI yet. When something does - an About section,
-// a long-press on the panel - it reads this map; the strings are written to be
-// displayed as they stand.
+// Two places render these: the credit line under each photograph in
+// VisualPanel, and the Credits list on the About screen. Under a question the
+// line shows author, licence and a "Source" link and nothing else - `title`
+// and `subject` name the answer, so they appear only on the About screen.
 //
 // Keys are `<kind>:<name>`, where `<name>` is the AnchorTypeName / CloudName /
 // BuoyName / DistressSignalName / PfdFormName the display components switch on.
@@ -21,15 +22,22 @@ export interface ImageCredit {
   title: string;
   /** The file's description page - where the licence claim actually lives. */
   source: string;
-  /** Author as the source names them, or '' where the source names none. */
+  /** Author as the source names them. Shown under unanswered questions. */
   author: string;
   /** Licence short name, e.g. 'CC BY-SA 4.0', 'CC0', 'Public domain'. */
   license: string;
-  /** Deed URL, or '' for public domain files that carry no deed. */
+  /** Deed URL; for public domain, the Commons licence tag the file carries. */
   licenseUrl: string;
 }
 
 const COMMONS = 'https://commons.wikimedia.org/wiki/File:';
+
+// Public-domain files carry no Creative Commons deed, so their licence link is
+// the Commons licence tag on the file page - the statement of WHY the file is
+// public domain (PD-self for the uploader's own release, PD-USGov-Military-Air
+// Force for US Air Force photographs).
+const PD_SELF = 'https://commons.wikimedia.org/wiki/Template:PD-self';
+const PD_USAF = 'https://commons.wikimedia.org/wiki/Template:PD-USGov-Military-Air_Force';
 
 export const IMAGE_CREDITS: Record<string, ImageCredit> = {
   'anchor:fluke': {
@@ -44,9 +52,11 @@ export const IMAGE_CREDITS: Record<string, ImageCredit> = {
     subject: 'Plow (CQR pattern) anchor',
     title: 'Genuine CQR.jpg',
     source: COMMONS + 'Genuine_CQR.jpg',
-    author: '',
+    // Commons has no machine-readable author: the uploader released it under
+    // PD-self, and the file's original description reads "Author: C Smith".
+    author: 'C Smith / Badmonkey',
     license: 'Public domain',
-    licenseUrl: '',
+    licenseUrl: PD_SELF,
   },
   'anchor:claw': {
     subject: 'Claw (Bruce pattern) anchor',
@@ -177,7 +187,7 @@ export const IMAGE_CREDITS: Record<string, ImageCredit> = {
     source: COMMONS + 'Signal_flare_during_a_rescue_training_mission.jpg',
     author: 'U.S. Air Force photo by Staff Sgt. Bennie J. Davis III',
     license: 'Public domain',
-    licenseUrl: '',
+    licenseUrl: PD_USAF,
   },
   'distress:orange-smoke': {
     subject: 'A floating orange smoke signal',
@@ -193,7 +203,7 @@ export const IMAGE_CREDITS: Record<string, ImageCredit> = {
     source: COMMONS + 'Sea_dye_marker.JPG',
     author: 'U.S. Air Force photo by Airman 1st Class Alexxis Pons Abascal',
     license: 'Public domain',
-    licenseUrl: '',
+    licenseUrl: PD_USAF,
   },
 
   'pfd:flotation-aid': {

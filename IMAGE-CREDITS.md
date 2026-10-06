@@ -20,7 +20,7 @@ original, so it is upscaled slightly to fill the frame and reads a little soft.
 | File | Shows | Source | Author | Licence |
 | --- | --- | --- | --- | --- |
 | `fluke.jpg` | Fluke (Danforth pattern) anchor | [Anchor.jpg](https://commons.wikimedia.org/wiki/File:Anchor.jpg) | Eric Schmuttenmaer | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
-| `plow.jpg` | Plow (CQR pattern) anchor | [Genuine CQR.jpg](https://commons.wikimedia.org/wiki/File:Genuine_CQR.jpg) | — | Public domain |
+| `plow.jpg` | Plow (CQR pattern) anchor | [Genuine CQR.jpg](https://commons.wikimedia.org/wiki/File:Genuine_CQR.jpg) | C Smith / Badmonkey (PD-self; Commons records no machine-readable author) | [Public domain](https://commons.wikimedia.org/wiki/Template:PD-self) |
 | `claw.jpg` | Claw (Bruce pattern) anchor | [Bruce anchor in Gdansk.jpg](https://commons.wikimedia.org/wiki/File:Bruce_anchor_in_Gdansk.jpg) | LukaszKatlewa | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | `grapnel.jpg` | Grapnel anchor | [Hel MOW kotwica 03.jpg](https://commons.wikimedia.org/wiki/File:Hel_MOW_kotwica_03.jpg) | Zala | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
 | `mushroom.jpg` | Mushroom anchor | [Een paddenstoelanker (01).JPG](https://commons.wikimedia.org/wiki/File:Een_paddenstoelanker_(01).JPG) | S.J. de Waard | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
@@ -63,9 +63,9 @@ from the United States.
 
 | File | Shows | Source | Author | Licence |
 | --- | --- | --- | --- | --- |
-| `hand-flare.jpg` | A red hand flare held up at night | [Signal flare during a rescue training mission.jpg](https://commons.wikimedia.org/wiki/File:Signal_flare_during_a_rescue_training_mission.jpg) | U.S. Air Force photo by Staff Sgt. Bennie J. Davis III | Public domain (US federal work) |
+| `hand-flare.jpg` | A red hand flare held up at night | [Signal flare during a rescue training mission.jpg](https://commons.wikimedia.org/wiki/File:Signal_flare_during_a_rescue_training_mission.jpg) | U.S. Air Force photo by Staff Sgt. Bennie J. Davis III | [Public domain (US federal work)](https://commons.wikimedia.org/wiki/Template:PD-USGov-Military-Air_Force) |
 | `orange-smoke.jpg` | A floating orange smoke signal | [Smoke buoy.jpg](https://commons.wikimedia.org/wiki/File:Smoke_buoy.jpg) | heb@Wikimedia Commons | [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/) |
-| `dye-marker.jpg` | A sea dye marker spreading in the water | [Sea dye marker.JPG](https://commons.wikimedia.org/wiki/File:Sea_dye_marker.JPG) | U.S. Air Force photo by Airman 1st Class Alexxis Pons Abascal | Public domain (US federal work) |
+| `dye-marker.jpg` | A sea dye marker spreading in the water | [Sea dye marker.JPG](https://commons.wikimedia.org/wiki/File:Sea_dye_marker.JPG) | U.S. Air Force photo by Airman 1st Class Alexxis Pons Abascal | [Public domain (US federal work)](https://commons.wikimedia.org/wiki/Template:PD-USGov-Military-Air_Force) |
 
 Six distress forms are **still drawn**, because no licensed photograph was
 found at all: the parachute flare in the air, the red star rocket, the
