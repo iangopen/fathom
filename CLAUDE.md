@@ -4,8 +4,25 @@ Vite + React + TypeScript app deployed to GitHub Pages at:
 https://iangopen.github.io/fathom/
 
 ## Stack
-- Tailwind CSS (CDN in index.html) — now only inside the drill *diagrams*
-  (CompassRose, LightDisplay and friends), which were never restyled.
+- Tailwind CSS **3.4.17, compiled at build time** through PostCSS
+  (`tailwind.config.js`, `postcss.config.js`, entry `src/index.css` imported
+  from main.tsx). It is used only inside the drill *diagrams* (CompassRose,
+  LightDisplay and friends), which were never restyled.
+  - It used to be the v3 Play CDN script in index.html, generating CSS in the
+    browser. The version is pinned exactly (no caret) to what that CDN served,
+    because a major bump changes defaults such as border colours and ring
+    widths. The CDN had no inline config, so the theme is stock v3 - nothing was
+    ported. `darkMode` is the v3 default (`media`); nothing uses `dark:`.
+  - **Class names must be complete literal strings.** The compile-time scanner
+    only sees whole tokens in `index.html` and `src/**/*.{ts,tsx}`; a class put
+    together from pieces (`bg-${c}-500`, `'text-' + size`) silently never
+    reaches the CSS. Choosing between whole literals is fine - CompassRose
+    keeps `sizeClass` / `colorClass` variables that each hold complete strings.
+    At the switch there were no pieced-together classes anywhere in src.
+  - Verified at the switch: all 18 baseline views (hub, photo question
+    unanswered and answered, lights diagram, compass rose, Settings, About, in
+    both themes, plus hub and question at 375px) matched the CDN build with
+    zero differing computed styles, element by element, on `npm run preview`.
 
 ## Architecture
 - App.tsx is the shell. It wraps everything in PrefsProvider and ChartFrame, so
@@ -83,9 +100,9 @@ The chart table: parchment and navy ink by day, brass on navy at the night helm.
 
 - `src/lib/theme.ts` holds both palettes as CSS custom properties (`--ct-bg`,
   `--ct-ink`, `--ct-brass`, `--ct-stbd`, `--ct-port`, `--ct-line`, …). They are
-  custom properties rather than Tailwind classes because the palette is not in
-  the Tailwind config, and index.html — where a CDN Tailwind config would have
-  to live — is finalized.
+  custom properties rather than Tailwind classes because they switch with the
+  theme at runtime, and the palette was never put in a Tailwind config (there
+  is one now, `tailwind.config.js`, but it holds no theme).
 - `ChartFrame` puts those properties on its root and ships the one stylesheet
   everything draws from: `.ct-solid` / `.ct-ghost` / `.ct-link` buttons,
   `.ct-card`, `.ct-option`, `.ct-rule` (the dashed rope divider), `.ct-quizbody`
@@ -221,12 +238,15 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
   document title). The old /nauticalmaster/ URL is dead by design.
 - vite.config.ts is finalized — do not modify it under any circumstances. The
   one authorized edit was the rename of the base path; it is now /fathom/ and
-  must not be removed or changed again.
+  must not be removed or changed again. The Tailwind build move was authorized
+  to touch it but did not need to: Vite loads `postcss.config.js` by itself.
 - Do not use @/ path aliases — they are not configured
-- index.html is finalized - do not modify it under any circumstances. Its
-  <title> still says NauticalMaster; that is deliberate and harmless — the real
-  title is set at runtime by installTitle() in src/lib/title.ts, called from
-  main.tsx, the same injection pattern used by installFavicon().
+- index.html is finalized - do not modify it under any circumstances. A
+  one-off authorization (the Tailwind build move, 2026-10-06) made exactly two
+  edits: the `cdn.tailwindcss.com` script tag was removed and `<title>` changed
+  from NauticalMaster to Fathom. It has no meta description or og tags. The
+  Space Grotesk font link was left as it was. installTitle() in
+  src/lib/title.ts still sets the title at runtime, as a backstop.
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub
