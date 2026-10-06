@@ -1,6 +1,6 @@
 # Fathom
 
-[![CI](https://github.com/iangopenbusinessai-lab/fathom/actions/workflows/ci.yml/badge.svg)](https://github.com/iangopenbusinessai-lab/fathom/actions/workflows/ci.yml)
+[![CI](https://github.com/iangopen/fathom/actions/workflows/ci.yml/badge.svg)](https://github.com/iangopen/fathom/actions/workflows/ci.yml)
 
 Fathom is a drilling tool for the parts of seamanship that are pure recall:
 the 32-point compass rose, relative bearings, and the COLREGs rules of the
@@ -8,7 +8,7 @@ road. It is aimed at anyone working toward a license or trying to get the
 lights and shapes back after a few years away from them. The material is
 drilled rather than taught.
 
-Live at https://iangopenbusinessai-lab.github.io/fathom/
+Live at https://iangopen.github.io/fathom/
 
 ## What's in it
 

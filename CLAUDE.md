@@ -1,7 +1,7 @@
 # Fathom
 
 Vite + React + TypeScript app deployed to GitHub Pages at:
-https://iangopenbusinessai-lab.github.io/fathom/
+https://iangopen.github.io/fathom/
 
 ## Stack
 - Tailwind CSS (CDN in index.html) — now only inside the drill *diagrams*
@@ -207,3 +207,10 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
   (`src/__tests__`) are collected by Vitest: 11 files / 1010 tests passing,
   build clean. Nothing was deleted, hydrated or quarantined, and no
   `.gitignore` entries were added since no such files exist.
+- Account renamed to `iangopen` (Sept 2026). Homepage field, git remote, README
+  badge/link and this file all use it now; live site is
+  https://iangopen.github.io/fathom/. Old-account strings still exist in git
+  history only (left alone on purpose).
+- `.claude/settings.local.json` is untracked and gitignored; it was removed from
+  tracking earlier (c588140). It is still in history but only held an npm/npx
+  permission allowlist, no secrets. History was not rewritten.
