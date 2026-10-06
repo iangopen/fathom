@@ -99,8 +99,17 @@ for a human, plus the leak-check notes and the rejection list.
 
 `src/__tests__/imageCredits.test.ts` walks the exported image maps and fails if
 an image ships with no credit, if a credit names an image that is not shipped,
-or if a BY licence is recorded with no author or deed URL. Extend the `KINDS`
-array when a category is added — that is the whole wiring.
+or if any credit lacks an author, licence, licence URL, source URL or Commons
+`pageId` (public domain included). Extend the `KINDS` array when a category is
+added — that is the whole wiring for the data.
+
+Every photo is credited on-site (see CLAUDE.md, "How credits render"), so a new
+photo also needs its `pageId` - from `action=query&titles=File:<t>` - because
+the credit under an unanswered question links by `?curid=`, never by the
+name-bearing `source` URL. A new display kind must also be added to
+`resolveVisual` in `VisualPanel` with its image map, or its photos render with
+no credit line; `photoCredit.test.tsx` fails if a credited photo is reached by
+no question.
 
 ## Finishing
 

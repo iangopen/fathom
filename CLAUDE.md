@@ -164,6 +164,34 @@ Two rules, and they are the reason this is here rather than in the skill:
   can be found for a form, leave that one on its drawing and SAY SO rather than
   reaching for an unlicensed one.
 
+### How credits render
+All 21 photos are credited on-site, in two places, from `src/lib/imageCredits.ts`:
+
+- **Under each photo**, inside the instrument panel: `PhotoCredit`, wired in
+  `VisualPanel` (which decides per question whether the visual is a photo -
+  buoys, distress and PFDs are photos for some names and drawings for others).
+  Styled by `.ct-credit` in ChartFrame with fixed colours, because the panel is
+  navy in both themes.
+- **About → Photo credits** (`#credits`): every photo with subject, file title
+  linked to its Commons page, author and licence linked to its deed.
+
+**The no-leak rule for credit text.** Before a question is answered, the
+credit line shows `Photo <author> · <licence>` and nothing else. Never the file
+title or subject - Commons titles name the answer ("Bruce anchor in
+Gdansk.jpg"). The author link goes to `?curid=<pageId>` rather than the
+`source` URL, because a browser shows the href on hover and the `source` URL
+spells out the filename. The title is added once the question is answered.
+`src/__tests__/photoCredit.test.tsx` renders every photo question unanswered
+and fails on the answer label, a word only the answer uses, the title, the
+subject, or a filename in an href. `imageCredits.test.ts` requires author,
+licence, licence URL, source URL and page id for every photo (no waiver for
+PD/CC0), and checks each CC licence name against its deed URL. Public-domain
+photos link to the Commons licence tag they carry (PD-self,
+PD-USGov-Military-Air_Force).
+
+Still open: the credit line is static text, not announced to screen readers
+in any special way, which belongs with the answer-accessibility session.
+
 How to source, vet, crop and wire one up - and the credits files those rules
 are enforced by - is in the `fathom-imagery` skill, not here.
 
