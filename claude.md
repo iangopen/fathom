@@ -200,3 +200,10 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - The local working directory is still named nauticalmaster; only the GitHub
   repo was renamed.
 - Always run `npm run build` after changes and fix all TS errors before finishing
+- The working copy is `C:\devwork\github projects\nauticalmaster`, **not** inside
+  OneDrive (`%OneDrive%` is `C:\Users\iango\OneDrive`). A cleanup audit
+  (2026-10-06) found no conflict copies, cloud-only placeholders, zero-byte
+  files or `~$`/`.tmp` leftovers, and all 11 test files on disk
+  (`src/__tests__`) are collected by Vitest: 11 files / 1010 tests passing,
+  build clean. Nothing was deleted, hydrated or quarantined, and no
+  `.gitignore` entries were added since no such files exist.
