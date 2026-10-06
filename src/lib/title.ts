@@ -1,9 +1,10 @@
-// Sets the document title at runtime, because index.html is finalized and its
-// <title> cannot be edited. Same approach as installFavicon() in ./favicon.
+// Sets the document title at runtime. Same approach as installFavicon() in
+// ./favicon.
 //
-// The HTML ships a stale title, so the browser paints that for an instant
-// before the bundle runs; calling this first thing in main.tsx keeps that
-// window as short as possible.
+// This was the only way to get "Fathom" into the tab while index.html was
+// finalized with a stale <title>. index.html now says Fathom itself (changed
+// under the one-off authorization for the Tailwind build move), so this is a
+// backstop that keeps the two from drifting rather than a fix.
 
 const TITLE = 'Fathom';
 
