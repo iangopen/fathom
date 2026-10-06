@@ -1,6 +1,7 @@
 import React from 'react';
 import { MONO } from '../lib/theme';
 import { sections } from '../lib/syllabus';
+import { IMAGE_CREDITS } from '../lib/imageCredits';
 
 // Where this came from, what Sea Scouting is, what is in it, and where the
 // content came from. The coverage list is read from the syllabus rather than
@@ -114,6 +115,31 @@ export const AboutScreen: React.FC = () => {
         hand, and mistakes are possible — if you find one, the feedback button
         in the top bar is the place for it.
       </p>
+
+      <h2 className="ct-display" style={heading} id="credits">
+        Photo credits
+      </h2>
+      <p className="ct-measure" style={prose}>
+        The photographs come from Wikimedia Commons and are used under the
+        licence each one names. They were cropped and resized; nothing else was
+        changed. Under a question the credit names only the photographer and the
+        licence, because a file title usually names what it shows.
+      </p>
+      <ul className="ct-measure ct-creditlist">
+        {Object.entries(IMAGE_CREDITS).map(([key, c]) => (
+          <li key={key}>
+            <span style={{ fontWeight: 600 }}>{c.subject}</span>
+            <br />
+            <a href={c.source} target="_blank" rel="noopener noreferrer">
+              {c.title}
+            </a>{' '}
+            by {c.author},{' '}
+            <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer">
+              {c.license}
+            </a>
+          </li>
+        ))}
+      </ul>
 
       <div className="ct-rule" style={{ margin: '34px 0 16px' }} />
 

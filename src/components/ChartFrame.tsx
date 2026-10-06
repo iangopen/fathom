@@ -145,6 +145,41 @@ a.ct-icon { text-decoration: none; }
   font-family: ${MONO}; font-size: 9px; letter-spacing: 0.22em;
   text-transform: uppercase; color: rgba(212,169,74,0.65);
 }
+/* The photo credit under a photograph. The panel is navy in BOTH themes, so
+   these are fixed colours for that ground rather than the theme's tokens: the
+   day theme's --ct-muted would sit at 3:1 on navy. Slate is the night theme's
+   muted (about 6.5:1 here), the links are the brass (about 8:1). Long authors -
+   "U.S. Air Force photo by ..." - wrap rather than widen the panel. */
+.ct-credit {
+  margin: 0; max-width: 260px; align-self: center;
+  font-family: ${MONO}; font-size: 10px; line-height: 1.5; letter-spacing: 0.02em;
+  text-align: center; color: #8a9bb0; overflow-wrap: anywhere;
+}
+.ct-credit a {
+  color: #d4a94a; text-decoration: underline;
+  text-decoration-color: rgba(212,169,74,0.4); text-underline-offset: 2px;
+}
+.ct-credit a:hover { text-decoration-color: currentColor; }
+.ct-credit a:focus-visible { outline: 1px solid #d4a94a; outline-offset: 2px; border-radius: 2px; }
+
+/* The full credits list on the About screen. This one is on the chart table,
+   not the instrument, so it does use the theme tokens. Commons titles can run
+   to a hundred characters with no spaces worth breaking at, so they wrap
+   anywhere rather than push the page sideways at phone width. */
+.ct-creditlist {
+  margin: 12px 0 0; padding: 0; list-style: none;
+  font-size: 13.5px; line-height: 1.55; color: var(--ct-ink);
+}
+.ct-creditlist li {
+  padding: 9px 0; border-bottom: 1px solid var(--ct-line); overflow-wrap: anywhere;
+}
+/* Ink, not brass: the day brass is about 3.6:1 on parchment, short of what
+   13.5px text needs. The brass underline is what marks them as links. */
+.ct-creditlist a {
+  color: var(--ct-ink); text-decoration: underline;
+  text-decoration-color: var(--ct-brass); text-underline-offset: 2px;
+}
+.ct-creditlist a:hover { text-decoration-color: currentColor; }
 
 /* Answer options ------------------------------------------------------ */
 .ct-option {

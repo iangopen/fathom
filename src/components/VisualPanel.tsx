@@ -19,13 +19,15 @@ import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 import { VesselProfile } from '../drills/colregs/components/VesselProfile';
 import { VesselScenario } from '../drills/colregs/components/VesselScenario';
 import { SoundSignalDisplay } from '../drills/colregs/components/SoundSignalDisplay';
-import { AnchorDisplay } from '../drills/colregs/components/AnchorDisplay';
-import { BuoyDisplay } from '../drills/colregs/components/BuoyDisplay';
-import { DistressDisplay } from '../drills/colregs/components/DistressDisplay';
-import { PfdDisplay } from '../drills/colregs/components/PfdDisplay';
+import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
+import { BuoyDisplay, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
+import { DistressDisplay, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
+import { PfdDisplay, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
-import { CloudDisplay } from '../drills/colregs/components/CloudDisplay';
+import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
 import { SignalFlagDisplay } from '../drills/colregs/components/SignalFlagDisplay';
+import { creditFor, ImageCredit, PhotoKind } from '../lib/imageCredits';
+import { PhotoCredit } from './PhotoCredit';
 
 // 75 of the 78 bank questions are answered from a picture rather than from the
 // prompt text - "identify this vessel from what she is showing". The canvas
@@ -54,16 +56,33 @@ interface VisualPanelProps {
 //
 // Precedence is the colregs drill's own, so a question carrying more than one
 // mapping renders the same visual in both places.
-function resolveVisual(questionId: string, revealed: boolean): React.ReactNode {
+//
+// It also says which photograph, if any, the visual is - a buoy, distress
+// signal or PFD is a photo for some names and a drawing for others, and only
+// the display's own image map knows which. Deciding it here, in the same
+// branch that picks the display, means the credit line cannot attach to a
+// question whose visual turned out to be someone else's precedence.
+interface ResolvedVisual {
+  node: React.ReactNode;
+  photo?: { kind: PhotoKind; name: string };
+}
+
+function photo(kind: PhotoKind, name: string, images: Record<string, string>) {
+  return name in images ? { kind, name } : undefined;
+}
+
+function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | null {
+  const node = (n: React.ReactNode, p?: ResolvedVisual['photo']): ResolvedVisual => ({ node: n, photo: p });
+
   const vesselType = QUESTION_VESSEL_TYPES[questionId];
-  if (vesselType) return <VesselProfile type={vesselType} label="Vessel" />;
+  if (vesselType) return node(<VesselProfile type={vesselType} label="Vessel" />);
 
   const lights = QUESTION_LIGHTS[questionId];
-  if (lights) return <LightDisplay active={lights} label="Vessel Lights" />;
+  if (lights) return node(<LightDisplay active={lights} label="Vessel Lights" />);
 
   const sounds = QUESTION_SOUNDS[questionId];
   if (sounds) {
-    return (
+    return node(
       <SoundSignalDisplay
         key={questionId}
         sequence={sounds}
@@ -75,7 +94,7 @@ function resolveVisual(questionId: string, revealed: boolean): React.ReactNode {
 
   const shapes = QUESTION_SHAPES[questionId];
   if (shapes) {
-    return (
+    return node(
       <DayShapeDisplay
         shapes={shapes.shapes}
         position={shapes.position}
@@ -86,28 +105,28 @@ function resolveVisual(questionId: string, revealed: boolean): React.ReactNode {
   }
 
   const scenario = QUESTION_SCENARIOS[questionId];
-  if (scenario) return <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />;
+  if (scenario) return node(<VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
 
   const anchor = QUESTION_ANCHORS[questionId];
-  if (anchor) return <AnchorDisplay type={anchor} label="Anchor" />;
+  if (anchor) return node(<AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
 
   const buoy = QUESTION_BUOYS[questionId];
-  if (buoy) return <BuoyDisplay type={buoy} label="Mark" />;
+  if (buoy) return node(<BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
 
   const distress = QUESTION_DISTRESS[questionId];
-  if (distress) return <DistressDisplay signal={distress} label="Signal" />;
+  if (distress) return node(<DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
 
   const pfd = QUESTION_PFDS[questionId];
-  if (pfd) return <PfdDisplay form={pfd} label="Device" />;
+  if (pfd) return node(<PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
-  if (boatPart) return <BoatPartDisplay part={boatPart} label="Highlighted" />;
+  if (boatPart) return node(<BoatPartDisplay part={boatPart} label="Highlighted" />);
 
   const cloud = QUESTION_CLOUDS[questionId];
-  if (cloud) return <CloudDisplay type={cloud} label="Sky" />;
+  if (cloud) return node(<CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
 
   const flag = QUESTION_FLAGS[questionId];
-  if (flag) return <SignalFlagDisplay flag={flag} label="Hoist" />;
+  if (flag) return node(<SignalFlagDisplay flag={flag} label="Hoist" />);
 
   return null;
 }
@@ -119,20 +138,29 @@ export function hasVisual(questionId: string): boolean {
   return resolveVisual(questionId, false) !== null;
 }
 
+// The credit for the photograph this question shows, or undefined when its
+// visual is a drawing or there is none. Exported for the credit tests.
+export function photoCreditFor(questionId: string): ImageCredit | undefined {
+  const p = resolveVisual(questionId, false)?.photo;
+  return p && creditFor(p.kind, p.name);
+}
+
 export const VisualPanel: React.FC<VisualPanelProps> = ({ questionId, revealed }) => {
-  const inner = resolveVisual(questionId, revealed);
+  const resolved = resolveVisual(questionId, revealed);
 
   // A question with no mapping draws nothing at all. That is necessary but it
   // was not sufficient: this panel and the ScenarioCard beside it are siblings,
   // and while they shared the key `current.id` React stopped unmounting this
   // one, so returning null here still left the previous diagram in the
   // document. The caller keys them apart now - see the note there.
-  if (!inner) return null;
+  if (!resolved) return null;
+  const credit = resolved.photo && creditFor(resolved.photo.kind, resolved.photo.name);
 
   return (
     <div className="ct-instrument">
       <div className="ct-instrument-label">Observed</div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>{inner}</div>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>{resolved.node}</div>
+      {credit && <PhotoCredit credit={credit} revealed={revealed} />}
     </div>
   );
 };
