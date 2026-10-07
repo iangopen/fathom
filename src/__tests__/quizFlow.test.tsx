@@ -52,7 +52,7 @@ function mount(mode: 'practice' | 'exam' = 'practice') {
 const $ = (sel: string) => [...container.querySelectorAll(sel)] as HTMLElement[];
 const prompt = () => container.querySelector('h2')?.textContent ?? '';
 const options = () =>
-  $('.ct-option').filter(b => !(b as HTMLButtonElement).disabled) as HTMLButtonElement[];
+  $('.ct-option').filter(b => b.getAttribute('aria-disabled') !== 'true') as HTMLButtonElement[];
 const nextButton = () =>
   $('button').find(b => /next question|see results/i.test(b.textContent ?? '')) as
     | HTMLButtonElement
@@ -126,7 +126,14 @@ describe('nothing advances on its own', () => {
   it('ignores every further click on an answered card', () => {
     mount();
     const first = prompt();
-    const before = $('.ct-option').map(b => b.textContent);
+    // The visible label only: an answered option also carries its state for
+    // assistive tech (", correct answer") in an sr-only span.
+    const label = (b: HTMLElement) => {
+      const c = b.cloneNode(true) as HTMLElement;
+      c.querySelectorAll('.sr-only').forEach(s => s.remove());
+      return c.textContent;
+    };
+    const before = $('.ct-option').map(label);
 
     click($('.ct-option')[0]);
     // Every option is locked now, including the ones never picked - clicking a
@@ -137,7 +144,7 @@ describe('nothing advances on its own', () => {
     click(container.querySelector('.ct-quizbody') as HTMLElement);
 
     expect(prompt()).toBe(first);
-    expect($('.ct-option').map(b => b.textContent)).toEqual(before);
+    expect($('.ct-option').map(label)).toEqual(before);
   });
 
   it('holds a timed-out exam question until Next, rather than skipping it', () => {
