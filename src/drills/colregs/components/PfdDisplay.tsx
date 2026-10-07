@@ -168,8 +168,10 @@ const PFD_IMAGES: Record<PhotoForm, string> = {
   'ring-buoy': ringBuoy,
 };
 
-// Alt text describes the FRAME, never the device.
-const ALT = 'Photograph of a flotation device, shown for identification';
+// Alt text describes the FRAME, never the device. Not "flotation device": the
+// answer to the flotation-aid question is "A Type III flotation aid", and the
+// alt was the only place a screen reader heard that word before answering.
+const ALT = 'Photograph of a piece of safety equipment, shown for identification';
 
 function isPhoto(form: PfdFormName): form is PhotoForm {
   return form in PFD_IMAGES;
