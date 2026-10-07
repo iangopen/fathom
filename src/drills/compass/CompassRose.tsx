@@ -1,5 +1,16 @@
 import React, { useMemo } from 'react';
+import { Check, X } from 'lucide-react';
 import { COMPASS_POINTS, RELATIVE_POINTS } from './constants';
+
+// Each point is a real button, reachable by Tab, in clockwise order from north
+// (or dead ahead) - DOM order is index order. Its accessible name is its
+// POSITION, never its name: "Point 3 of 32", not "NNE". The question is "find
+// NNE", so a button called NNE would answer it; counting round from north is
+// the same thing a sighted reader does from the N on the rose. The group label
+// says how the numbering runs. Once answered, the name gains the point's state.
+export function pointLabel(index: number, total: number): string {
+  return `Point ${index + 1} of ${total}`;
+}
 import { CompassPoint, GameState, GameMode, GameType } from '../../types';
 
 interface CompassRoseProps {
@@ -189,8 +200,17 @@ export const CompassRose: React.FC<CompassRoseProps> = ({
     });
   }, [targetPoint, clickedIndex, isHardVisuals, rotation, isCompass, activePoints]);
 
+  const answered = clickedIndex !== null;
+  const total = activePoints.length;
+
   return (
     <div
+      role="group"
+      aria-label={
+        isCompass
+          ? `Compass rose: ${total} points, numbered clockwise from north, which is point 1`
+          : `Own ship: ${total} points, numbered clockwise from dead ahead, which is point 1`
+      }
       className="relative w-full max-w-[600px] aspect-square mx-auto transition-transform duration-700 ease-out"
       style={{ transform: `rotate(${rotation}deg)` }}
     >
@@ -216,13 +236,13 @@ export const CompassRose: React.FC<CompassRoseProps> = ({
 
             {/* North Indicator (Practice/Easy Mode Only) */}
             {!isHardVisuals && (
-                <div className="absolute left-1/2 top-[1%] -translate-x-1/2 text-slate-500 font-bold text-sm select-none">N</div>
+                <div aria-hidden="true" className="absolute left-1/2 top-[1%] -translate-x-1/2 text-slate-500 font-bold text-sm select-none">N</div>
             )}
         </>
       ) : (
         <>
             {/* Ship Visuals - SVG Implementation */}
-             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+             <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center pointer-events-none">
                  <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl opacity-90">
                     <defs>
                       <linearGradient id="hullGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -255,30 +275,52 @@ export const CompassRose: React.FC<CompassRoseProps> = ({
                  </svg>
              </div>
              {/* Center Label */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center opacity-30 pointer-events-none z-0">
+             <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center opacity-30 pointer-events-none z-0">
                 <span className="text-[10px] font-bold tracking-widest text-slate-400 mb-1">SHIP</span>
              </div>
         </>
       )}
 
       {/* Render Points */}
-      {points.map((p) => (
-        <div
-          key={p.abbr}
-          onClick={() => gameState === 'playing' && clickedIndex === null && onPointClick(p.index)}
-          className={`absolute rounded-full transform -translate-x-1/2 -translate-y-1/2 ${p.sizeClass} ${p.colorClass} ${p.zIndex}`}
-          style={{ left: `${p.x}%`, top: `${p.y}%` }}
-        >
-          {isCompass && isHardVisuals && p.index === 0 && (
-            <span
-              className="select-none text-[10px] pointer-events-none"
-              style={{ transform: `rotate(${-rotation}deg)` }}
-            >
-              N
-            </span>
-          )}
-        </div>
-      ))}
+      {points.map((p) => {
+        const isTarget = answered && p.index === targetPoint?.index;
+        const isWrongPick = answered && p.index === clickedIndex && !isTarget;
+        const state = isTarget
+          ? p.index === clickedIndex ? ', your answer, correct' : ', correct answer'
+          : isWrongPick ? ', your answer, incorrect' : '';
+        // Upright whatever the rose's rotation, like the N.
+        const upright = { transform: `rotate(${-rotation}deg)` };
+        return (
+          <button
+            type="button"
+            key={p.abbr}
+            aria-label={pointLabel(p.index, total) + state}
+            aria-disabled={answered || gameState !== 'playing' || undefined}
+            onClick={() => gameState === 'playing' && clickedIndex === null && onPointClick(p.index)}
+            className={`absolute rounded-full transform -translate-x-1/2 -translate-y-1/2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${p.sizeClass} ${p.colorClass} ${p.zIndex}`}
+            style={{ left: `${p.x}%`, top: `${p.y}%` }}
+          >
+            {/* A tick and a cross, so the verdict is a shape as well as green
+                against orange. */}
+            {isTarget ? (
+              <span className="flex items-center justify-center w-full h-full text-white" style={upright}>
+                <Check size={16} strokeWidth={3} aria-hidden="true" />
+              </span>
+            ) : isWrongPick ? (
+              <span className="flex items-center justify-center w-full h-full text-white" style={upright}>
+                <X size={14} strokeWidth={3} aria-hidden="true" />
+              </span>
+            ) : isCompass && isHardVisuals && p.index === 0 ? (
+              <span
+                className="select-none text-[10px] pointer-events-none"
+                style={upright}
+              >
+                N
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 };

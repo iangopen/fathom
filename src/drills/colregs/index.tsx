@@ -11,6 +11,7 @@ import { bestScoreKey, readBestScore, writeBestScore } from '../../lib/storage';
 import { shuffle } from '../../lib/shuffle';
 import { ScenarioCard } from './components/ScenarioCard';
 import { VisualPanel, hasVisual } from '../../components/VisualPanel';
+import { AnswerLiveRegion, answerAnnouncement } from '../../lib/answerA11y';
 import { DISPLAY, MONO } from '../../lib/theme';
 import { usePrefs } from '../../lib/prefs';
 import { readProgress, recordAnswer } from '../../lib/progress';
@@ -754,6 +755,46 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
   const timerWarning = timerSeconds <= 5;
   const pool = getPool(categoryFilter);
 
+  // --- Announcing the result, and where focus goes (src/lib/answerA11y.tsx) ---
+
+  // Derived, so it is '' before an answer and goes back to '' the moment the
+  // next question loads, which is what lets an identical "Correct." be heard
+  // again on the question after.
+  const announcement =
+    awaitingNext && current
+      ? answerAnnouncement({
+          correct: selectedAnswer === current.correctAnswer,
+          timedOut: timeExpired && selectedAnswer === null,
+          answer: current.correctAnswer,
+          // The exam holds the verdict back on screen; it is not given away here.
+          withheld: drillMode === 'exam',
+        })
+      : '';
+
+  const promptRef = useRef<HTMLHeadingElement>(null);
+  const feedbackRef = useRef<HTMLHeadingElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  const resultRef = useRef<HTMLHeadingElement>(null);
+
+  // A finished question: practice puts focus on the feedback heading, so the
+  // explanation reads next and Next is the next Tab. The exam shows no
+  // feedback, so focus goes straight to Next. Either way it is no longer left
+  // on an option.
+  useEffect(() => {
+    if (!awaitingNext) return;
+    (drillMode === 'practice' ? feedbackRef.current : nextRef.current)?.focus();
+  }, [awaitingNext, drillMode]);
+
+  // Every new question - the first of a run, and each one Next brings up -
+  // puts focus on its prompt.
+  useEffect(() => {
+    if (drillState === 'playing' && current) promptRef.current?.focus();
+  }, [drillState, current?.id]);
+
+  useEffect(() => {
+    if (drillState === 'finished') resultRef.current?.focus();
+  }, [drillState]);
+
   // ── RENDER ──
 
   if (drillState === 'idle' && menuStep === 'category') {
@@ -918,6 +959,8 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
 
     return (
       <section style={{ padding: '24px 0 0' }}>
+        {/* Mounted, empty, with the question view; only its text changes. */}
+        <AnswerLiveRegion message={announcement} />
         <div
           style={{
             display: 'flex',
@@ -975,6 +1018,8 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
         </div>
 
         <h2
+          ref={promptRef}
+          tabIndex={-1}
           style={{
             margin: '12px 0 0',
             fontSize: 26,
@@ -1021,6 +1066,8 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
             awaitingNext={awaitingNext}
             nextLabel={isLastOfDeck ? 'See results' : 'Next question'}
             onNext={handleNext}
+            feedbackRef={feedbackRef}
+            nextRef={nextRef}
           />
         </div>
       </section>
@@ -1039,6 +1086,8 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
         </div>
 
         <h1
+          ref={resultRef}
+          tabIndex={-1}
           style={{
             margin: '14px 0 0',
             fontFamily: DISPLAY,

@@ -7,6 +7,8 @@ import { bestScoreKey, readBestScore, writeBestScore } from '../../lib/storage';
 import { readProgress, recordAnswer } from '../../lib/progress';
 import { itemIdForPoint } from '../../lib/syllabus';
 import { DEFAULT_PLAN, SessionPlan, planQueue } from '../../lib/session';
+import { AnswerLiveRegion, answerAnnouncement } from '../../lib/answerA11y';
+import { pointLabel } from './CompassRose';
 
 // Standalone Application - No External Services
 
@@ -62,6 +64,20 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
   // Refs
   const timerRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+
+  // A round is answered (or timed out, clickedIndex -1) and waits for Next.
+  // The rose used to move on by itself 0.5-1.5s later, which left no time to
+  // hear the result and nowhere for focus to go; it waits now, as colregs does.
+  const awaitingNext = clickedIndex !== null;
+  const awaitingRef = useRef(false);
+  awaitingRef.current = awaitingNext;
+
+  // Bumped on every new round, so "focus the prompt" fires even when a round
+  // happens to land on the same point object.
+  const [round, setRound] = useState(0);
+  const promptRef = useRef<HTMLHeadingElement>(null);
+  const feedbackRef = useRef<HTMLHeadingElement>(null);
+  const resultRef = useRef<HTMLHeadingElement>(null);
 
   // The point asked last round, held in a ref so generateRound can exclude it
   // without taking a dependency that would re-create it every round.
@@ -155,6 +171,7 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
 
   const generateRound = useCallback(() => {
     setClickedIndex(null);
+    setRound(r => r + 1);
     const activePoints = runPointsRef.current;
 
     // 1. Determine Target
@@ -195,6 +212,9 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
     setGameType(type);
     setPlan(runPlan);
     setStats(prev => ({ ...prev, score: 0, totalAttempts: 0 }));
+    setRound(r => r + 1);
+    handledTimeoutRef.current = false;
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     // We need to access points immediately, but state update for gameType might be async in next render.
     // So we use local var or the new type passed in.
@@ -257,6 +277,11 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
         lastTime = time;
 
         setTimeLeft(prev => {
+            // The exam's clock is per question: once the question is
+            // answered it has nothing left to time, and must not run out
+            // over an answer that was already given. The sixty-second runs
+            // keep their one clock going, as they always did.
+            if (gameMode === 'exam' && awaitingRef.current) return prev;
             const newTime = prev - delta;
 
             if (newTime <= 0) {
@@ -287,16 +312,18 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
   const handledTimeoutRef = useRef(false);
 
   useEffect(() => {
-    if (gameState === 'playing' && gameMode === 'exam' && timeLeft <= 0 && !handledTimeoutRef.current) {
+    if (gameState === 'playing' && gameMode === 'exam' && timeLeft <= 0 && clickedIndex === null && !handledTimeoutRef.current) {
         handledTimeoutRef.current = true;
-        setClickedIndex(-1); // Visual trigger for reveal/failure
-
-        timeoutRef.current = window.setTimeout(() => {
-             generateRound();
-             handledTimeoutRef.current = false;
-        }, 1500);
+        // Reveals the point, and the round waits for Next like an answer does.
+        setClickedIndex(-1);
     }
-  }, [timeLeft, gameState, gameMode, generateRound]);
+  }, [timeLeft, gameState, gameMode, clickedIndex]);
+
+  // --- The one way forward ---
+  const handleNext = () => {
+    handledTimeoutRef.current = false;
+    generateRound();
+  };
 
 
   // --- Interaction ---
@@ -320,14 +347,33 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
       isCorrect,
       targetPoint ? itemIdForPoint(gameType, targetPoint.abbr) : null
     );
-
-    const delay = gameMode === 'exam' ? 1000 : (isCorrect ? 500 : 1000);
-
-    timeoutRef.current = window.setTimeout(() => {
-        handledTimeoutRef.current = false;
-        generateRound();
-    }, delay);
+    // Nothing is scheduled: the round waits on the Next button.
   };
+
+  // --- Announcing the result, and where focus goes (src/lib/answerA11y.tsx) ---
+  // The rose always draws the whole set, even when a weak-spot run draws its
+  // targets from fewer.
+  const activeTotal = getActivePoints().length;
+  const announcement =
+    gameState === 'playing' && awaitingNext && targetPoint
+      ? answerAnnouncement({
+          correct: clickedIndex === targetPoint.index,
+          timedOut: clickedIndex === -1,
+          answer: pointLabel(targetPoint.index, activeTotal).toLowerCase(),
+        })
+      : '';
+
+  useEffect(() => {
+    if (gameState === 'playing' && awaitingNext) feedbackRef.current?.focus();
+  }, [gameState, awaitingNext]);
+
+  useEffect(() => {
+    if (gameState === 'playing') promptRef.current?.focus();
+  }, [gameState, round]);
+
+  useEffect(() => {
+    if (gameState === 'finished') resultRef.current?.focus();
+  }, [gameState]);
 
   // Cleanup
   useEffect(() => {
@@ -370,28 +416,21 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
         onStart={startGame}
         onQuit={resetToMenu}
         examTotal={questionsTotal}
+        resultRef={resultRef}
       />
     );
   }
 
   return (
     <section style={{ padding: '24px 0 0' }}>
+      {/* Mounted, empty, with the rose; only its text changes. */}
+      <AnswerLiveRegion message={announcement} />
+      {/* The panel comes FIRST in the document and the rose is drawn first
+          by CSS order (.ct-rosebody > .ct-instrument). Prompt, then the 32
+          points, is the order a keyboard and a screen reader need: the
+          question before the choices, and Tab from the prompt landing on the
+          rose instead of running off the end of the page. */}
       <div className="ct-rosebody">
-        <div className="ct-instrument">
-          <div className="ct-instrument-label">
-            {gameType === 'compass' ? 'Rose' : 'Own ship'}
-          </div>
-          <CompassRose
-            targetPoint={targetPoint}
-            gameState={gameState}
-            onPointClick={handlePointClick}
-            clickedIndex={clickedIndex}
-            rotation={rotation}
-            gameMode={gameMode}
-            gameType={gameType}
-          />
-        </div>
-
         <ControlPanel
           gameState={gameState}
           targetPoint={targetPoint}
@@ -406,7 +445,31 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
               ? { current: questionsTotal - examDeck.length, total: questionsTotal }
               : undefined
           }
+          answer={
+            awaitingNext && targetPoint
+              ? { correct: clickedIndex === targetPoint.index, timedOut: clickedIndex === -1 }
+              : null
+          }
+          nextLabel={gameMode === 'exam' && examDeck.length === 0 ? 'See results' : 'Next point'}
+          onNext={handleNext}
+          promptRef={promptRef}
+          feedbackRef={feedbackRef}
         />
+
+        <div className="ct-instrument">
+          <div className="ct-instrument-label">
+            {gameType === 'compass' ? 'Rose' : 'Own ship'}
+          </div>
+          <CompassRose
+            targetPoint={targetPoint}
+            gameState={gameState}
+            onPointClick={handlePointClick}
+            clickedIndex={clickedIndex}
+            rotation={rotation}
+            gameMode={gameMode}
+            gameType={gameType}
+          />
+        </div>
       </div>
     </section>
   );

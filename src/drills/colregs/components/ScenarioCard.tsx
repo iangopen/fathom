@@ -26,6 +26,11 @@ interface ScenarioCardProps {
   awaitingNext: boolean;
   nextLabel: string;
   onNext: () => void;
+  // Focus targets for the drill's answer contract (src/lib/answerA11y.tsx):
+  // the feedback heading after a practice answer, the Next button after an
+  // exam answer, where there is no feedback to read.
+  feedbackRef?: React.Ref<HTMLHeadingElement>;
+  nextRef?: React.Ref<HTMLButtonElement>;
 }
 
 export const ScenarioCard: React.FC<ScenarioCardProps> = ({
@@ -40,6 +45,8 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
   awaitingNext,
   nextLabel,
   onNext,
+  feedbackRef,
+  nextRef,
 }) => {
   const isAnswered = selectedAnswer !== null || locked;
   const isCorrect = selectedAnswer === question.correctAnswer;
@@ -81,15 +88,29 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
             </>
           );
         } else if (isPicked) {
+          // The exam holds the verdict back, so the only state to show is
+          // which one was picked - and a brass border alone is colour alone.
           border = 'var(--ct-brass)';
           background = 'var(--ct-panel)';
+          mark = <span>your answer</span>;
         }
 
+        // The tick and cross are shapes, but they are aria-hidden; this is the
+        // same state in words for assistive tech.
+        const state = reveal
+          ? isAnswer
+            ? isPicked ? 'your answer, correct' : 'correct answer'
+            : isPicked ? 'your answer, incorrect' : ''
+          : '';
+
         return (
+          // aria-disabled rather than disabled once answered: a disabled
+          // button drops focus to the page, which is where a keyboard user
+          // used to be left. The click is ignored either way.
           <button
             key={option}
             className="ct-option"
-            disabled={isAnswered}
+            aria-disabled={isAnswered || undefined}
             onClick={() => !isAnswered && onSelect(option)}
             style={{ background, border: `1px solid ${border}`, color }}
           >
@@ -104,7 +125,10 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
             >
               {'ABCD'[i] ?? ''}
             </span>
-            <span style={{ flex: 1 }}>{option}</span>
+            <span style={{ flex: 1 }}>
+              {option}
+              {state && <span className="sr-only">, {state}</span>}
+            </span>
             <span
               style={{
                 display: 'inline-flex',
@@ -130,7 +154,14 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
             padding: '2px 0 2px 16px',
           }}
         >
-          <div
+          {/* Focus lands here after an answer. The verdict is aria-hidden
+              because the live region already says it - with the answer - and
+              hearing it twice is noise; to assistive tech this is the heading
+              of the explanation under it. */}
+          <h3
+            ref={feedbackRef}
+            tabIndex={-1}
+            className="ct-feedback"
             style={{
               fontFamily: MONO,
               fontSize: 11,
@@ -139,7 +170,8 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
               color: isCorrect ? 'var(--ct-stbd)' : 'var(--ct-port)',
             }}
           >
-            {isCorrect ? 'Correct' : ranOut ? 'Time expired' : 'Incorrect'}
+            <span aria-hidden="true">{isCorrect ? 'Correct' : ranOut ? 'Time expired' : 'Incorrect'}</span>
+            <span className="sr-only">Explanation</span>
             {/* The citation keeps its own case. COLREGS subparagraph letters
                 are lowercase - "Rule 25(b)" - and the uppercase treatment of
                 this line would print "RULE 25(B)", a shape the citation format
@@ -147,7 +179,7 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
             {showCitations && cite ? (
               <span style={{ textTransform: 'none' }}> · {cite}</span>
             ) : null}
-          </div>
+          </h3>
           <p
             style={{
               margin: '8px 0 0',
@@ -164,6 +196,7 @@ export const ScenarioCard: React.FC<ScenarioCardProps> = ({
 
       {awaitingNext && (
         <button
+          ref={nextRef}
           className="ct-solid ct-fade"
           onClick={onNext}
           style={{ marginTop: 16, alignSelf: 'flex-start' }}

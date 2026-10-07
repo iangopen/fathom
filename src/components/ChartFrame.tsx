@@ -188,7 +188,24 @@ a.ct-icon { text-decoration: none; }
   border-radius: 12px; font-family: inherit; cursor: pointer;
   transition: border-color 140ms ease, background-color 140ms ease;
 }
-.ct-option[disabled] { cursor: default; }
+/* Answered options stay focusable (aria-disabled, not disabled) so focus is
+   never dropped to the page; they just stop looking clickable. */
+.ct-option[aria-disabled='true'] { cursor: default; }
+
+/* Focus ---------------------------------------------------------------- */
+/* One brass ring for everything a keyboard reaches in a run: the options, the
+   buttons, and the prompt / feedback / result headings that focus is moved to
+   (tabindex -1). :focus-visible, so a mouse click draws no ring - Chrome does
+   draw it when focus is moved by script after a key press, which is the case
+   it is for. Brass is about 3.6:1 on the parchment and 8:1 on navy, over the
+   3:1 a focus indicator needs. */
+.ct-option:focus-visible, .ct-solid:focus-visible, .ct-ghost:focus-visible,
+.ct-link:focus-visible, .ct-icon:focus-visible {
+  outline: 2px solid var(--ct-brass); outline-offset: 2px;
+}
+.ct-root [tabindex='-1']:focus-visible {
+  outline: 2px solid var(--ct-brass); outline-offset: 4px; border-radius: 2px;
+}
 
 /* Quiz body: the visual panel sits beside the options once there is room. */
 .ct-quizbody {
@@ -216,6 +233,9 @@ a.ct-icon { text-decoration: none; }
 @media (min-width: 720px) {
   .ct-rosebody { grid-template-columns: minmax(0, 1fr) minmax(0, 290px); }
 }
+/* The rose is drawn first; the panel holding the prompt is first in the
+   document, so the prompt is read and tabbed before the 32 points. */
+.ct-rosebody > .ct-instrument { order: -1; }
 
 /* The trail: where you are, and the labelled way back ----------------- */
 /* The wordmark still goes home, but "click the logo" is a convention, not a

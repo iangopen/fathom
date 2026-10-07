@@ -25,6 +25,15 @@ interface ControlPanelProps {
   // How many bearings the exam just asked. A planned run can be shorter than
   // the full rose, so the result cannot say "out of 32" and be right.
   examTotal?: number;
+  // The round on the rose is answered (or its clock ran out) and waits for
+  // Next. Null while the reader is still looking.
+  answer?: { correct: boolean; timedOut: boolean } | null;
+  nextLabel?: string;
+  onNext?: () => void;
+  // Focus targets for the answer contract in src/lib/answerA11y.tsx.
+  promptRef?: React.Ref<HTMLHeadingElement>;
+  feedbackRef?: React.Ref<HTMLHeadingElement>;
+  resultRef?: React.Ref<HTMLHeadingElement>;
 }
 
 const metaRow: React.CSSProperties = {
@@ -71,6 +80,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onQuit,
   examProgress,
   examTotal,
+  answer,
+  nextLabel = 'Next point',
+  onNext,
+  promptRef,
+  feedbackRef,
+  resultRef,
 }) => {
   const seconds = Math.ceil(timeLeft / 1000);
   const warning = seconds <= 5;
@@ -172,10 +187,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="ct-rule" />
 
         {targetPoint && (
-          <div>
-            <div style={metaRow}>{gameMode === 'exam' ? 'Target' : 'Find'}</div>
-            <div
+          // The prompt, and where focus goes when a round starts. Spans set
+          // to block rather than divs, which a heading may not contain; the
+          // preflight resets the heading's own size and weight to inherit.
+          <h2 ref={promptRef} tabIndex={-1} style={{ margin: 0 }}>
+            <span style={{ ...metaRow, display: 'block' }}>{gameMode === 'exam' ? 'Target' : 'Find'}</span>
+            <span
               style={{
+                display: 'block',
                 fontFamily: DISPLAY,
                 fontWeight: 600,
                 fontSize: 54,
@@ -187,9 +206,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               }}
             >
               {targetPoint.abbr}
-            </div>
-            <div
+            </span>
+            <span
               style={{
+                display: 'block',
                 marginTop: 8,
                 fontSize: 16,
                 lineHeight: 1.5,
@@ -198,7 +218,46 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               }}
             >
               {targetPoint.full}
-            </div>
+            </span>
+          </h2>
+        )}
+
+        {answer && (
+          <div
+            className="ct-fade"
+            style={{
+              borderLeft: `2px solid ${answer.correct ? 'var(--ct-stbd)' : 'var(--ct-port)'}`,
+              padding: '2px 0 2px 16px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 14,
+            }}
+          >
+            {/* Focus lands here after an answer. As in the colregs drill, the
+                verdict is aria-hidden because the live region says it, with
+                the point that was wanted; to assistive tech this is just the
+                feedback heading, and Next is the next Tab. */}
+            <h3
+              ref={feedbackRef}
+              tabIndex={-1}
+              className="ct-feedback"
+              style={{
+                fontFamily: MONO,
+                fontSize: 11,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: answer.correct ? 'var(--ct-stbd)' : 'var(--ct-port)',
+              }}
+            >
+              <span aria-hidden="true">
+                {answer.correct ? 'Correct' : answer.timedOut ? 'Time expired' : 'Incorrect'}
+              </span>
+              <span className="sr-only">Feedback</span>
+            </h3>
+            <button className="ct-solid" onClick={onNext}>
+              {nextLabel}
+            </button>
           </div>
         )}
       </div>
@@ -212,6 +271,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
 
       <h1
+        ref={resultRef}
+        tabIndex={-1}
         style={{
           ...heading,
           marginTop: 14,
