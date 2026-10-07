@@ -146,11 +146,90 @@ Every drill follows this structure:
 - Multiple-choice options are shuffled per draw, never rendered in bank order,
   and correctness is decided on option **text**, never on an index
 - Shared scoring and timer logic pattern from compass drill
-- **The colregs quiz never advances by itself.** Answering, or the clock
-  expiring, locks the options and shows a "Next question" button; that button
-  is the only thing that calls `advance()`. There is no auto-advance timeout -
-  the 1.2s/2s one that used to follow an answer was not long enough to read an
-  explanation and a rule citation. `src/__tests__/quizFlow.test.tsx` pins it.
+- **No drill advances by itself.** In colregs, answering or the clock expiring
+  locks the options and shows a "Next question" button; that button is the only
+  thing that calls `advance()`. The 1.2s/2s auto-advance that used to follow
+  an answer was not long enough to read an explanation and a rule citation.
+  `src/__tests__/quizFlow.test.tsx` pins it. The compass rose followed suit in
+  the accessibility session: it used to jump to the next point 0.5-1.5s after
+  a click, which left no time to hear the result and nowhere for focus to go,
+  and now shows a "Next point" button. Its exam clock is per question and
+  freezes once the question is answered; the sixty-second practice and timed
+  runs keep their one clock running across the Next press, as they always
+  ran across the auto-advance.
+
+## Answering, for keyboard and screen-reader users
+The portfolio audit's accessibility finding (no announcement of the result,
+focus left on a disabled button) is **closed** (2026-10-06). The contract,
+shared by both drills through `src/lib/answerA11y.tsx`:
+
+- **One live region per run**, `role="status"`, polite, `aria-atomic`. It is
+  rendered empty with the question view and only its text changes - never
+  mount it already filled. Text is derived from state: `''` before an answer,
+  `Correct.` / `Incorrect. The answer is <answer>.` / `Time expired. The
+  answer is <answer>.` after, and `''` again when the next question loads.
+  The colregs exam withholds the verdict on screen, so it says only
+  `Answer recorded.` (or `Time expired.`). On the compass the answer is a
+  position: `The answer is point 20 of 32.`
+- **Focus.** Answering moves focus to the feedback heading (`h3.ct-feedback`,
+  `tabIndex={-1}`), so the explanation reads next and Next is the next Tab.
+  The colregs exam has no feedback to read and focuses Next instead. Next
+  moves focus to the new prompt (`h2`, `tabIndex={-1}`); the results screen
+  moves it to the result heading. Focus is never left on an option.
+- **No double announcement.** The feedback heading's visible verdict
+  ("Correct") is `aria-hidden` and the heading is named "Explanation" /
+  "Feedback" for assistive tech, because the live region already said the
+  verdict with the answer.
+- **Options.** Real `<button>`s. Answered options get `aria-disabled`, NOT
+  `disabled` - a disabled button drops focus to the page - and the click
+  handler ignores them. Their state is in words: an sr-only ", correct
+  answer" / ", your answer, incorrect", and in the exam a visible "your
+  answer" (the brass border alone was colour alone).
+- **Compass points** are buttons in clockwise DOM order, named by POSITION -
+  `Point 3 of 32` - never by name, because the question is "find NNE" and a
+  button called NNE would answer it. The rose's group label says the numbering
+  runs clockwise from north (or dead ahead), which is point 1 - the same thing
+  the N on the rose tells a sighted reader. After an answer the right point
+  shows a tick and a wrong pick a cross, as well as green against orange.
+  The control panel (prompt, then feedback and Next) is first in the DOM and
+  the rose is drawn first by `.ct-rosebody > .ct-instrument { order: -1 }`, so
+  Tab goes prompt -> points.
+- **Focus ring**: one 2px brass outline on `:focus-visible` for options,
+  buttons and the focused headings (ChartFrame); compass points use literal
+  Tailwind `focus-visible:ring-2 focus-visible:ring-amber-300` classes, on
+  the navy instrument in both themes.
+
+**Accessible names must not leak answers.** Alt text, `aria-label` and
+`title` on anything shown before an answer describe the FRAME, never the
+subject ("Photograph of an anchor, shown for identification"). The
+`fathom-imagery` photo rules already said this for photographs; it now applies
+to every accessible name, including the compass points.
+
+`src/__tests__/answerA11y.test.tsx` pins all of it with Testing Library in
+jsdom: focus after answering and after Next in both drills; live region text
+before, after a right and a wrong answer, and in the exam; options focusable
+with their state in words; no alt / aria-label / title in any of the 131
+visuals carrying a word only its answer uses; no compass point named for
+itself; and axe-core (16 rules evaluated) finding zero violations on an
+unanswered and an answered colregs, photo and compass question. axe cannot
+judge colour contrast in jsdom; it reports it as incomplete, not passed.
+
+Still open:
+- **A real screen-reader pass by hand** (NVDA or VoiceOver) has not been
+  done. Everything above is verified in jsdom and with a keyboard in Chrome
+  against `npm run preview`, not by listening.
+- **Some drawings show their own answer, to every reader.** Day-shape
+  questions ask "which shape does X display?" and draw that shape
+  (ds-01-ds-11, ds-14, ds-15); sound-signal questions ask "which signal?" or
+  "how long is a short blast?" and draw the sequence with its "short 1s /
+  prolonged 4-6s" legend (ss-01-ss-07, ss-10-ss-16); and vh-01, vh-02 and
+  vh-09 label the very vessel the question asks about. That is a question-bank
+  problem, not an accessible-name one - the fix is the one an-06 onward got
+  (no picture, or a picture only after answering) - and wants its own session.
+- **Drawn visuals have no text equivalent.** Lights, flags, highlighted boat
+  parts and the like are SVGs with a stray caption at most; a screen-reader
+  user cannot answer those questions. Describing them is content work and
+  must not describe the answer (the lights, not the vessel).
 - **VisualPanel and ScenarioCard are siblings and their keys must differ.**
   Both were keyed on the bare question id; React's answer to duplicate sibling
   keys is that children "may be duplicated and/or omitted", and it stopped
@@ -185,8 +264,7 @@ Two rules, and they are the reason this is here rather than in the skill:
 All 21 photos are credited on-site, in two places, from `src/lib/imageCredits.ts`.
 17 of them are CC BY / BY-SA and legally need it (that is the portfolio
 audit's "17 uncredited"); the other 4 - three public domain, one CC0 - are
-credited anyway, so the rule is simply "every photo". Since this landed the
-suite is 12 files / 1017 tests.
+credited anyway, so the rule is simply "every photo".
 
 - **Under each photo**, inside the instrument panel: `PhotoCredit`, wired in
   `VisualPanel` (which decides per question whether the visual is a photo -
@@ -210,8 +288,10 @@ PD/CC0), and checks each CC licence name against its deed URL. Public-domain
 photos link to the Commons licence tag they carry (PD-self,
 PD-USGov-Military-Air_Force).
 
-Still open: the credit line is static text, not announced to screen readers
-in any special way, which belongs with the answer-accessibility session.
+The credit line needs nothing special for screen readers: it is plain text
+and two links in reading order after the photo, and the photo's alt names the
+frame, not the subject. The accessibility session checked it in the
+accessibility tree of an unanswered question.
 
 How to source, vet, crop and wire one up - and the credits files those rules
 are enforced by - is in the `fathom-imagery` skill, not here.
@@ -244,9 +324,16 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - index.html is finalized - do not modify it under any circumstances. A
   one-off authorization (the Tailwind build move, 2026-10-06) made exactly two
   edits: the `cdn.tailwindcss.com` script tag was removed and `<title>` changed
-  from NauticalMaster to Fathom. It has no meta description or og tags. The
-  Space Grotesk font link was left as it was. installTitle() in
-  src/lib/title.ts still sets the title at runtime, as a backstop.
+  from NauticalMaster to Fathom. It has no meta description or og tags.
+  installTitle() in src/lib/title.ts still sets the title at runtime, as a
+  backstop.
+  - **Open, for the next time index.html is authorized:** remove the Space
+    Grotesk `<link>`. Nothing in src uses that font (0 references), so it is
+    a wasted request on every load.
+- Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
+  (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
+  build toolchain - nothing a user's browser loads.
+- Tests: 13 files / 1036 tests (2026-10-06, after the accessibility session).
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub

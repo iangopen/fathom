@@ -3,6 +3,32 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-06 - Answering, for keyboard and screen-reader users
+
+- Closed the audit's last finding. Both drills now share one contract
+  (src/lib/answerA11y.tsx): an always-mounted polite live region, focus to the
+  feedback heading on answering and to the prompt on Next, aria-disabled
+  options that say their state. Details in CLAUDE.md.
+- The compass rose was mouse-only (`<div onClick>` points) and auto-advanced;
+  it now has real point buttons named by position, a Next button, and tick /
+  cross marks. Its control panel moved first in the DOM (CSS order keeps the
+  rose drawn first) so Tab runs prompt -> points.
+- Alt-text audit: one name-level leak, the PFD photo's "flotation device"
+  against the answer "A Type III flotation aid"; fixed. A throwaway audit
+  script first reported zero - the bash heredoc had turned its regex `\b`
+  into a literal backspace, so the word check never matched. The committed
+  test caught it.
+- Found but not fixed (own session): roughly 30 drawn visuals depict their
+  own answer to every reader - most day-shape and sound-signal questions, and
+  vh-01/02/09. Listed in CLAUDE.md.
+- Tests 1017 -> 1036 (13 files). Removing the focus move fails 3 of them.
+- Keyboard walkthrough in Chrome on `npm run preview`, light and dark, a photo
+  question and the compass. Quirk: the Chrome window reported
+  visibilityState "hidden", and the first key presses after a page setup
+  were sometimes dropped; single presses after a short pause arrived.
+- `npm audit --omit=dev` is clean; the Space Grotesk link in index.html is
+  unused and waits for the next index.html authorization.
+
 ## 2026-10-06 - Tailwind moved from the Play CDN to a compiled build
 
 - Closed out the photo-credit session first: putting "Claw anchor" into the
