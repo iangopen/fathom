@@ -13,6 +13,7 @@ import {
   QUESTION_BOAT_PARTS,
   QUESTION_CLOUDS,
   QUESTION_FLAGS,
+  QUESTION_VISUAL_AFTER_ANSWER,
 } from '../drills/colregs';
 import { LightDisplay } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
@@ -72,6 +73,10 @@ function photo(kind: PhotoKind, name: string, images: Record<string, string>) {
 }
 
 function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | null {
+  // A drawing that would answer its own question is held back until the
+  // question has been answered - see QUESTION_VISUAL_AFTER_ANSWER.
+  if (!revealed && QUESTION_VISUAL_AFTER_ANSWER.has(questionId)) return null;
+
   const node = (n: React.ReactNode, p?: ResolvedVisual['photo']): ResolvedVisual => ({ node: n, photo: p });
 
   const vesselType = QUESTION_VESSEL_TYPES[questionId];
@@ -131,11 +136,13 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   return null;
 }
 
-// Whether this question is answered from a picture. `revealed` cannot change
-// the answer - every branch above either has a mapping or does not - so the
-// grid can ask this before it knows whether the question has been answered.
-export function hasVisual(questionId: string): boolean {
-  return resolveVisual(questionId, false) !== null;
+// Whether a picture is drawn beside this question at this point. Before an
+// answer, that is whether the question is answered from a picture. The only
+// thing `revealed` changes is the handful of drawings held back until then
+// (QUESTION_VISUAL_AFTER_ANSWER), so the grid passes it to make room for one
+// when it appears.
+export function hasVisual(questionId: string, revealed = false): boolean {
+  return resolveVisual(questionId, revealed) !== null;
 }
 
 // The credit for the photograph this question shows, or undefined when its

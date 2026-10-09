@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
 
-export type BlastMark = 'short' | 'prolonged' | 'bell';
+// 'stroke' is one separate stroke on the bell - Rule 35(h)'s three strokes
+// before and after the rapid ringing of a vessel aground.
+export type BlastMark = 'short' | 'prolonged' | 'bell' | 'stroke';
 
 interface SoundSignalDisplayProps {
   sequence: BlastMark[];
@@ -17,6 +19,7 @@ const PROLONGED_S = 5;   // rule says 4-6 seconds
 const GAP_S = 1;         // silence between blasts
 const BELL_S = 5;        // Rule 35(g): rapid ringing for about 5 seconds
 const BELL_STRIKE_INTERVAL = 0.2;
+const STROKE_S = 0.6;     // one distinct stroke, left to ring before the next
 
 // --- Diagram geometry ---
 // Same near-black-on-slate language as LightDisplay / DayShapeDisplay;
@@ -29,6 +32,7 @@ const MARK_H = 16;
 const SHORT_W = 16;
 const PROLONGED_W = 62;
 const BELL_W = 62;
+const STROKE_W = 4;
 const GAP_PX = 14;
 const PAD_X = 14;
 const MIN_W = 212;
@@ -38,6 +42,7 @@ const VIEW_H = 74;
 function markWidth(mark: BlastMark): number {
   if (mark === 'short') return SHORT_W;
   if (mark === 'prolonged') return PROLONGED_W;
+  if (mark === 'stroke') return STROKE_W;
   return BELL_W;
 }
 
@@ -69,6 +74,7 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
   const hasShort = sequence.includes('short');
   const hasProlonged = sequence.includes('prolonged');
   const hasBell = sequence.includes('bell');
+  const hasStroke = sequence.includes('stroke');
 
   // --- Audio ---
 
@@ -120,22 +126,27 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
     sub.stop(start + duration + 0.02);
   };
 
+  // One bell strike - the same voice as the rapid ringing, so the strokes
+  // read as the same bell.
+  const scheduleStrike = (ctx: AudioContext, t: number, length: number) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = 2100;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.22, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + length * 0.85);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + length);
+  };
+
   // Rapid ringing of a bell for about 5 seconds.
   const scheduleBell = (ctx: AudioContext, start: number) => {
     const strikes = Math.round(BELL_S / BELL_STRIKE_INTERVAL);
     for (let i = 0; i < strikes; i++) {
-      const t = start + i * BELL_STRIKE_INTERVAL;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = 2100;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.22, t + 0.005);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + BELL_STRIKE_INTERVAL * 0.85);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + BELL_STRIKE_INTERVAL);
+      scheduleStrike(ctx, start + i * BELL_STRIKE_INTERVAL, BELL_STRIKE_INTERVAL);
     }
     return start + BELL_S;
   };
@@ -157,6 +168,9 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
     sequence.forEach((mark, i) => {
       if (mark === 'bell') {
         t = scheduleBell(ctx, t);
+      } else if (mark === 'stroke') {
+        scheduleStrike(ctx, t, STROKE_S);
+        t += STROKE_S;
       } else {
         const duration = mark === 'short' ? SHORT_S : PROLONGED_S;
         scheduleHorn(ctx, t, duration);
@@ -194,6 +208,23 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
 
           {/* Blast marks */}
           {placed.map(({ mark, x, w }, i) => {
+            if (mark === 'stroke') {
+              // One distinct stroke: a single tick, the same as one of the
+              // rapid ringing's, standing on its own.
+              return (
+                <rect
+                  key={`mark-${i}`}
+                  x={x + (w - 3.2) / 2}
+                  y={AXIS_Y - MARK_H / 2}
+                  width={3.2}
+                  height={MARK_H}
+                  rx={1.4}
+                  fill={MARK_FILL}
+                  stroke={MARK_STROKE}
+                  strokeWidth={0.7}
+                />
+              );
+            }
             if (mark === 'bell') {
               // Rapid ringing: a run of closely spaced ticks, not one blast.
               const ticks = 9;
@@ -246,6 +277,7 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
               </>
             )}
             {hasBell && <text x={PAD_X} y={18}>rapid bell 5s</text>}
+            {hasStroke && <text x={hasBell ? PAD_X + 84 : PAD_X} y={18}>| one stroke</text>}
           </g>
 
           <text

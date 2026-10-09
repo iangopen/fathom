@@ -157,7 +157,7 @@ export const QUESTION_SOUNDS: Partial<Record<string, BlastMark[]>> = {
   'ss-05': ['prolonged', 'prolonged'],
   // Rule 35(c): NUC / RAM / constrained by draft / sailing / fishing / towing.
   'ss-06': ['prolonged', 'short', 'short'],
-  // Rule 32(b): the definition of a short blast - one is shown for reference.
+  // Rule 32(b): a short blast - shown only after answering, see below.
   'ss-07': ['short'],
   // Rule 35(g): at anchor - rapid ringing of the bell for about 5 seconds.
   'ss-08': ['bell'],
@@ -173,11 +173,20 @@ export const QUESTION_SOUNDS: Partial<Record<string, BlastMark[]>> = {
   'ss-13': ['prolonged', 'short', 'prolonged', 'short'],
   // Rule 35(g): at anchor, warning an approaching vessel.
   'ss-14': ['short', 'prolonged', 'short'],
-  // Rule 35(h): aground - the bell signal, with three strokes either side.
-  'ss-15': ['bell'],
-  // Rule 32(c): one prolonged blast shown for reference.
+  // Rule 35(h): aground - three separate strokes, the rapid ringing, three
+  // more. Drawn as just the ringing it would have been a vessel at anchor.
+  'ss-15': ['stroke', 'stroke', 'stroke', 'bell', 'stroke', 'stroke', 'stroke'],
+  // Rule 32(c): a prolonged blast - shown only after answering, see below.
   'ss-16': ['prolonged'],
 };
+
+// Questions whose drawing is withheld until they are answered. These are the
+// ones that cannot be flipped: ss-07 and ss-16 ask how long a short and a
+// prolonged blast last, and the sound diagram's legend states exactly that
+// ("short 1s", "prolonged 4-6s"). Asked the other way they would be the same
+// question. So the drawing is the explanation's illustration, not the
+// stimulus: VisualPanel draws nothing for them until `revealed` is true.
+export const QUESTION_VISUAL_AFTER_ANSWER: ReadonlySet<string> = new Set(['ss-07', 'ss-16']);
 
 // Gap between blasts, in seconds, for signals whose rule states its own
 // interval. Anything absent here uses SoundSignalDisplay's default 1s gap.
@@ -736,8 +745,10 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
   // --- Visual aid ---
 
   // The diagram itself is drawn by the shared VisualPanel, off the same maps
-  // declared above; this only asks whether there is one.
-  const showPanel = current ? hasVisual(current.id) : false;
+  // declared above; this only asks whether there is one. It is asked with the
+  // same `revealed` the panel gets, so a drawing held back until the answer
+  // (QUESTION_VISUAL_AFTER_ANSWER) gets its column when it appears.
+  const showPanel = current ? hasVisual(current.id, selectedAnswer !== null) : false;
 
   // A question is finished - by an answer or by the clock - and is waiting for
   // the reader to move it on.

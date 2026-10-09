@@ -564,76 +564,105 @@ const navigationLightsQuestions: ColregsQuestion[] = [
 ];
 
 // --- SOUND SIGNALS (16 questions) ---
+//
+// Every question carrying a drawing is in the identify direction: the drawing
+// is the blast sequence, and the question asks what it means. The prompts say
+// "under the International Rules" because the Inland Rules give some of the
+// same blasts other meanings (one short is "I intend to leave you on my port
+// side" there), and a question with two right answers is worse than a leak.
+// ss-07 and ss-16 ask how long a blast lasts, which the drawing's legend states
+// outright, so their drawing is shown only once they are answered.
 
 const soundSignalsQuestions: ColregsQuestion[] = [
   {
     id: 'ss-01',
     category: 'sound-signals',
-    prompt: 'In sight of one another, what sound signal indicates a vessel is altering course to starboard?',
-    options: ['One short blast', 'Two short blasts', 'Three short blasts', 'One prolonged blast'],
-    correctAnswer: 'One short blast',
+    prompt:
+      'Under the International Rules, two power-driven vessels are in sight of one another. One of them sounds one short blast as she manoeuvres. What does it mean?',
+    options: [
+      'I am altering my course to port',
+      'I am altering my course to starboard',
+      'I am operating astern propulsion',
+      'I doubt whether you are taking sufficient action to avoid collision',
+    ],
+    correctAnswer: 'I am altering my course to starboard',
     explanation:
-      'Rule 34: One short blast means "I am altering my course to starboard."',
+      'Rule 34(a): In sight of one another, a power-driven vessel underway that manoeuvres as the Rules allow or require signals it on her whistle - one short blast for "I am altering my course to starboard". The International rule announces a turn already being made. The Inland Rules use the same blast for an intention - "I intend to leave you on my port side" - which is why the question says which rules apply.',
   },
   {
     id: 'ss-02',
     category: 'sound-signals',
-    prompt: 'What sound signal indicates a vessel is altering course to port?',
-    options: ['One short blast', 'Two short blasts', 'Three short blasts', 'One prolonged blast'],
-    correctAnswer: 'Two short blasts',
+    prompt:
+      'Under the International Rules, two power-driven vessels are in sight of one another. One of them sounds two short blasts as she manoeuvres. What does it mean?',
+    options: [
+      'I am altering my course to starboard',
+      'I am operating astern propulsion',
+      'I am altering my course to port',
+      'I doubt whether you are taking sufficient action to avoid collision',
+    ],
+    correctAnswer: 'I am altering my course to port',
     explanation:
-      'Rule 34: Two short blasts mean "I am altering my course to port."',
+      'Rule 34(a): Two short blasts mean "I am altering my course to port". One short is starboard, two short is port, three short is astern propulsion. Under the Inland Rules the same two blasts mean "I intend to leave you on my starboard side", so the answer depends on which rules you are under.',
   },
   {
     id: 'ss-03',
     category: 'sound-signals',
-    prompt: 'What sound signal indicates a vessel\'s engines are going astern?',
-    options: ['One short blast', 'Two short blasts', 'Three short blasts', 'One prolonged blast'],
-    correctAnswer: 'Three short blasts',
+    prompt:
+      'Under the International Rules, a power-driven vessel in sight of you sounds three short blasts. What does it mean?',
+    options: [
+      'I am altering my course to starboard',
+      'I am altering my course to port',
+      'I doubt whether you are taking sufficient action to avoid collision',
+      'I am operating astern propulsion',
+    ],
+    correctAnswer: 'I am operating astern propulsion',
     explanation:
-      'Rule 34: Three short blasts mean "I am operating astern propulsion." This does not necessarily mean the vessel is moving astern.',
+      'Rule 34(a): Three short blasts mean "I am operating astern propulsion". It says her engines are going astern, not that she is already moving astern - she may still be carrying headway. The doubt signal is at least five short and rapid blasts under Rule 34(d), not three.',
   },
   {
     id: 'ss-04',
     category: 'sound-signals',
-    prompt: 'A power-driven vessel underway in restricted visibility must sound which signal at intervals of not more than 2 minutes?',
+    prompt:
+      'Under the International Rules, in fog, a vessel you cannot see sounds one prolonged blast, repeated at intervals of not more than 2 minutes. What is she?',
     options: [
-      'One prolonged blast',
-      'Two prolonged blasts',
-      'One prolonged followed by two short blasts',
-      'Three short blasts',
+      'A power-driven vessel making way through the water',
+      'A power-driven vessel underway but stopped',
+      'A sailing vessel underway',
+      'A vessel at anchor',
     ],
-    correctAnswer: 'One prolonged blast',
+    correctAnswer: 'A power-driven vessel making way through the water',
     explanation:
-      'Rule 35: A power-driven vessel making way through the water in restricted visibility sounds one prolonged blast at intervals of not more than 2 minutes.',
+      'Rule 35(a): In or near restricted visibility, a power-driven vessel making way through the water sounds one prolonged blast at intervals of not more than 2 minutes. Stopped, she sounds two under Rule 35(b); a sailing vessel sounds one prolonged and two short under Rule 35(c); a vessel at anchor rings her bell under Rule 35(g).',
   },
   {
     id: 'ss-05',
     category: 'sound-signals',
-    prompt: 'A power-driven vessel underway but stopped (not making way) in restricted visibility sounds which signal?',
+    prompt:
+      'Under the International Rules, in fog, a vessel you cannot see sounds two prolonged blasts about 2 seconds apart, repeated at intervals of not more than 2 minutes. What is she?',
     options: [
-      'One prolonged blast',
-      'Two prolonged blasts',
-      'One prolonged followed by two short blasts',
-      'Three short blasts',
+      'A power-driven vessel making way through the water',
+      'A power-driven vessel underway but stopped and making no way',
+      'A vessel not under command',
+      'A vessel at anchor',
     ],
-    correctAnswer: 'Two prolonged blasts',
+    correctAnswer: 'A power-driven vessel underway but stopped and making no way',
     explanation:
-      'Rule 35: A power-driven vessel underway but stopped and making no way through the water sounds two prolonged blasts at intervals of not more than 2 minutes.',
+      'Rule 35(b): A power-driven vessel underway but stopped and making no way through the water sounds two prolonged blasts in succession, about 2 seconds apart, at intervals of not more than 2 minutes. The second blast is the difference from Rule 35(a): one prolonged means she is making way.',
   },
   {
     id: 'ss-06',
     category: 'sound-signals',
-    prompt: 'A vessel not under command, restricted in ability to maneuver, constrained by draft, sailing, fishing, or towing sounds which fog signal?',
+    prompt:
+      'Under the International Rules, in fog, you hear one prolonged blast followed by two short blasts, repeated at intervals of not more than 2 minutes. Which vessel could be sounding it?',
     options: [
-      'One prolonged blast every 2 minutes',
-      'Two prolonged blasts every 2 minutes',
-      'One prolonged followed by two short blasts every 2 minutes',
-      'Three short blasts every 2 minutes',
+      'A power-driven vessel making way through the water',
+      'A power-driven vessel underway but stopped',
+      'Any of: not under command, restricted in her ability to manoeuvre, constrained by her draft, sailing, fishing, or towing or pushing',
+      'A manned vessel being towed',
     ],
-    correctAnswer: 'One prolonged followed by two short blasts every 2 minutes',
+    correctAnswer: 'Any of: not under command, restricted in her ability to manoeuvre, constrained by her draft, sailing, fishing, or towing or pushing',
     explanation:
-      'Rule 35: These vessels sound one prolonged followed by two short blasts at intervals of not more than 2 minutes.',
+      'Rule 35(c): A vessel not under command, restricted in her ability to manoeuvre, constrained by her draft, a sailing vessel, a vessel engaged in fishing and a vessel towing or pushing all sound the same signal - one prolonged followed by two short blasts - at intervals of not more than 2 minutes. Rule 35(d) adds a vessel fishing at anchor and one restricted in her ability to manoeuvre at work at anchor. The signal tells you she cannot easily get out of your way, not which of them she is. A manned vessel being towed sounds one prolonged and THREE short, under Rule 35(e).',
   },
   {
     id: 'ss-07',
@@ -670,86 +699,92 @@ const soundSignalsQuestions: ColregsQuestion[] = [
   {
     id: 'ss-10',
     category: 'sound-signals',
-    prompt: 'A vessel nearing a bend where other vessels may be obscured sounds which signal?',
+    prompt:
+      'Under the International Rules, in clear weather, a vessel hidden from you behind a headland in a winding channel sounds one prolonged blast, once. What is she signalling?',
     options: [
-      'One prolonged blast',
-      'Two prolonged blasts',
-      'One short blast',
-      'Five short blasts',
+      'She is altering her course to starboard',
+      'She is nearing a bend where vessels beyond it may be hidden from her',
+      'She doubts whether you are taking sufficient action to avoid collision',
+      'She is a power-driven vessel stopped in the water',
     ],
-    correctAnswer: 'One prolonged blast',
+    correctAnswer: 'She is nearing a bend where vessels beyond it may be hidden from her',
     explanation:
-      'Rule 34(e): A vessel nearing a bend or an area of a channel where other vessels may be obscured sounds one prolonged blast, to be answered with a prolonged blast by any approaching vessel within hearing.',
+      'Rule 34(e): A vessel nearing a bend or an area of a channel or fairway where other vessels may be obscured by an intervening obstruction sounds one prolonged blast, and any approaching vessel within hearing around the bend answers with a prolonged blast. The same blast repeated every 2 minutes in fog would be a power-driven vessel making way under Rule 35(a) - clear weather and a single blast are what make it the bend signal.',
   },
   {
     id: 'ss-11',
     category: 'sound-signals',
-    prompt: 'In a narrow channel, which signal means "I intend to overtake you on your starboard side"?',
+    prompt:
+      'Under the International Rules, in a narrow channel, the vessel coming up astern of you sounds two prolonged blasts followed by one short blast. What does it mean?',
     options: [
-      'Two prolonged blasts followed by one short blast',
-      'Two prolonged blasts followed by two short blasts',
-      'One prolonged blast followed by one short blast',
-      'Three short blasts',
+      'I intend to overtake you on your port side',
+      'I agree to be overtaken',
+      'I intend to overtake you on your starboard side',
+      'I am altering my course to starboard',
     ],
-    correctAnswer: 'Two prolonged blasts followed by one short blast',
+    correctAnswer: 'I intend to overtake you on your starboard side',
     explanation:
-      'Rule 34(c)(i): In a narrow channel or fairway, a vessel intending to overtake sounds two prolonged blasts followed by one short blast to mean "I intend to overtake you on your starboard side".',
+      'Rule 34(c)(i): In a narrow channel or fairway, two prolonged blasts followed by one short blast mean "I intend to overtake you on your starboard side". Followed by two short, it is your port side. The Inland Rules use one short blast for the same intention, without the prolonged blasts.',
   },
   {
     id: 'ss-12',
     category: 'sound-signals',
-    prompt: 'In a narrow channel, which signal means "I intend to overtake you on your port side"?',
+    prompt:
+      'Under the International Rules, in a narrow channel, the vessel coming up astern of you sounds two prolonged blasts followed by two short blasts. What does it mean?',
     options: [
-      'Two prolonged blasts followed by two short blasts',
-      'Two prolonged blasts followed by one short blast',
-      'Two short blasts',
-      'One prolonged and two short blasts',
+      'I intend to overtake you on your starboard side',
+      'I intend to overtake you on your port side',
+      'I agree to be overtaken',
+      'I am altering my course to port',
     ],
-    correctAnswer: 'Two prolonged blasts followed by two short blasts',
+    correctAnswer: 'I intend to overtake you on your port side',
     explanation:
-      'Rule 34(c)(i): Two prolonged blasts followed by two short blasts means "I intend to overtake you on your port side". One short for starboard, two short for port - the same convention as the Rule 34(a) manoeuvring signals.',
+      'Rule 34(c)(i): Two prolonged blasts followed by two short blasts mean "I intend to overtake you on your port side". One short for starboard, two short for port - the same convention as the Rule 34(a) manoeuvring signals.',
   },
   {
     id: 'ss-13',
     category: 'sound-signals',
-    prompt: 'How does the vessel about to be overtaken signal her agreement to the overtaking?',
+    prompt:
+      'Under the International Rules, in a narrow channel, you have signalled that you intend to overtake. The vessel ahead answers with one prolonged, one short, one prolonged and one short blast. What does she mean?',
     options: [
-      'One prolonged, one short, one prolonged and one short blast, in that order',
-      'Two prolonged blasts',
-      'Three short blasts',
-      'Five short and rapid blasts',
+      'I doubt whether it is safe for you to overtake',
+      'I intend to overtake you on your port side',
+      'I am operating astern propulsion',
+      'I agree to be overtaken',
     ],
-    correctAnswer: 'One prolonged, one short, one prolonged and one short blast, in that order',
+    correctAnswer: 'I agree to be overtaken',
     explanation:
-      'Rule 34(c)(ii): The vessel about to be overtaken, if in agreement, sounds one prolonged, one short, one prolonged and one short blast in that order. Anything else - in particular five short blasts - is not agreement.',
+      'Rule 34(c)(ii): The vessel about to be overtaken, if in agreement, sounds one prolonged, one short, one prolonged and one short blast, in that order. If she is in doubt she sounds at least five short and rapid blasts instead, under Rule 34(d) - anything other than this signal is not agreement.',
   },
   {
     id: 'ss-14',
     category: 'sound-signals',
-    prompt: 'A vessel at anchor may sound which signal to warn an approaching vessel of her position?',
+    prompt:
+      'Under the International Rules, in fog, as you close a vessel you cannot see, she sounds one short, one prolonged and one short blast. What is she?',
     options: [
-      'One short, one prolonged and one short blast',
-      'One prolonged blast',
-      'Two prolonged blasts',
-      'Three short blasts',
+      'A vessel agreeing to be overtaken',
+      'A vessel at anchor, warning you of her position',
+      'A vessel not under command',
+      'A power-driven vessel underway but stopped',
     ],
-    correctAnswer: 'One short, one prolonged and one short blast',
+    correctAnswer: 'A vessel at anchor, warning you of her position',
     explanation:
-      'Rule 35(g): A vessel at anchor may in addition sound three blasts in succession - short, prolonged, short - to give warning of her position and of the possibility of collision to an approaching vessel.',
+      'Rule 35(g): A vessel at anchor rings her bell, and may in addition sound three blasts in succession - one short, one prolonged and one short - to give warning of her position and of the possibility of collision to an approaching vessel. It is the one whistle signal a vessel at anchor has.',
   },
   {
     id: 'ss-15',
     category: 'sound-signals',
-    prompt: 'A vessel aground signals her bell how, in restricted visibility?',
+    prompt:
+      'Under the International Rules, in fog, you hear three separate strokes on a bell, rapid ringing for about 5 seconds, then three more separate strokes, repeated about once a minute. What is she?',
     options: [
-      'Three separate strokes before and after the rapid ringing of the bell',
-      'Rapid ringing of the bell alone, as if at anchor',
-      'Two separate strokes after the rapid ringing only',
-      'Continuous ringing for one minute',
+      'A vessel at anchor',
+      'A vessel not under command',
+      'A vessel engaged in fishing, at anchor',
+      'A vessel aground',
     ],
-    correctAnswer: 'Three separate strokes before and after the rapid ringing of the bell',
+    correctAnswer: 'A vessel aground',
     explanation:
-      'Rule 35(h): A vessel aground gives the bell signal of a vessel at anchor and in addition three separate and distinct strokes on the bell immediately before and after the rapid ringing.',
+      'Rule 35(h): A vessel aground gives the bell signal of a vessel at anchor and, in addition, three separate and distinct strokes on the bell immediately before and after the rapid ringing. The rapid ringing alone, every minute, is a vessel at anchor under Rule 35(g), and a vessel fishing at anchor sounds one prolonged and two short on her whistle instead, under Rule 35(d).',
   },
   {
     id: 'ss-16',

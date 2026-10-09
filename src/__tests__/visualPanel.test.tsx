@@ -14,6 +14,7 @@ import {
   QUESTION_BOAT_PARTS,
   QUESTION_CLOUDS,
   QUESTION_FLAGS,
+  QUESTION_VISUAL_AFTER_ANSWER,
 } from '../drills/colregs';
 
 // Several categories carry questions that must render with NO picture, and it
@@ -33,14 +34,29 @@ function markup(questionId: string, revealed = false): string {
 
 describe('the visual panel and the diagram maps agree', () => {
   it('never claims a visual it does not draw, or draws one it did not claim', () => {
-    const disagreed = COLREGS_QUESTIONS.filter(
-      q => hasVisual(q.id) !== (markup(q.id).length > 0)
-    ).map(q => q.id);
-    expect(disagreed).toEqual([]);
+    for (const revealed of [false, true]) {
+      const disagreed = COLREGS_QUESTIONS.filter(
+        q => hasVisual(q.id, revealed) !== (markup(q.id, revealed).length > 0)
+      ).map(q => q.id);
+      expect(disagreed).toEqual([]);
+    }
+  });
+
+  // The drawings held back until the answer. Written out by hand, so adding
+  // to the set is a decision this test has to be told about.
+  it('holds back exactly the drawings that would answer their own question', () => {
+    expect([...QUESTION_VISUAL_AFTER_ANSWER].sort()).toEqual(['ss-07', 'ss-16']);
+    for (const id of QUESTION_VISUAL_AFTER_ANSWER) {
+      expect(hasVisual(id)).toBe(false);
+      expect(markup(id)).toBe('');
+      expect(markup(id, true)).not.toBe('');
+    }
   });
 
   it('draws literally nothing for a question with no diagram entry', () => {
-    const undiagrammed = COLREGS_QUESTIONS.filter(q => !hasVisual(q.id));
+    const undiagrammed = COLREGS_QUESTIONS.filter(
+      q => !hasVisual(q.id) && !QUESTION_VISUAL_AFTER_ANSWER.has(q.id)
+    );
     // Guard against the whole bank quietly becoming diagrammed, which would
     // make the assertion below vacuous.
     expect(undiagrammed.length).toBeGreaterThan(50);
