@@ -9,8 +9,14 @@
 //   1. the role suffix on a vessel's label ("Fishing (Stand-On)"),
 //   2. the caption, which states the rule and its outcome outright, and
 //   3. the give-way/stand-on hull colours and the legend decoding them.
-// The vessel TYPE half of a label ("Fishing", "RAM") stays visible throughout:
-// it frames the question, and without knowing Rule 18 it does not answer it.
+// The vessel TYPE half of a label ("Fishing", "RAM") usually stays visible: it
+// frames the question, and without knowing Rule 18 it does not answer it.
+// The exception is a type that IS the answer. vh-01 asks which vessel has the
+// highest priority, vh-09 which vessel a fishing vessel has priority over, and
+// vh-02 and vh-17 which vessels a sailing or power-driven vessel keeps clear of
+// - and the drawing labelled that very vessel. Those vessels are marked
+// `typeAfterAnswer` and are drawn unlabelled until the reveal, with nothing
+// else about the drawing changed.
 //
 // buildScenarioView deliberately does NOT return the true role. The view holds
 // only what is drawn, so an unrevealed view carries no role information at all
@@ -41,6 +47,8 @@ export interface VesselDef {
   showArrow?: boolean;
   arrowDx?: number;
   arrowDy?: number;
+  /** The type is the answer to a question drawn on this scenario: no label until the reveal. */
+  typeAfterAnswer?: boolean;
 }
 
 const ROLE_SUFFIX: Record<VesselDef['role'], string> = {
@@ -95,14 +103,14 @@ const SCENARIOS: Record<ScenarioType, { vessels: VesselDef[]; caption: string }>
   'priority-nuc': {
     caption: 'Rule 18 — every other vessel keeps clear of a vessel Not Under Command.',
     vessels: [
-      { x: 200, y: 105, rotation: 25, role: 'stand-on', label: 'NUC',    showArrow: false },
+      { x: 200, y: 105, rotation: 25, role: 'stand-on', label: 'NUC',    showArrow: false, typeAfterAnswer: true },
       { x: 95,  y: 195, rotation: 0,  role: 'give-way', label: 'Power',  showArrow: true, arrowDx: 0, arrowDy: -28 },
     ],
   },
   'sail-keeps-clear-ram': {
     caption: 'Rule 18 — a sailing vessel keeps clear of a RAM vessel, and must not impede one constrained by her draft.',
     vessels: [
-      { x: 205, y: 110, rotation: -90, role: 'stand-on', label: 'RAM',     showArrow: true, arrowDx: -28, arrowDy: 0 },
+      { x: 205, y: 110, rotation: -90, role: 'stand-on', label: 'RAM',     showArrow: true, arrowDx: -28, arrowDy: 0, typeAfterAnswer: true },
       { x: 90,  y: 190, rotation: 0,   role: 'give-way', label: 'Sailing', showArrow: true, arrowDx: 0,   arrowDy: -28 },
     ],
   },
@@ -110,7 +118,7 @@ const SCENARIOS: Record<ScenarioType, { vessels: VesselDef[]; caption: string }>
     caption: 'Rule 18 — a sailing vessel keeps clear of a vessel engaged in fishing.',
     vessels: [
       { x: 95,  y: 110, rotation: 90, role: 'stand-on', label: 'Fishing', showArrow: true, arrowDx: 28, arrowDy: 0 },
-      { x: 205, y: 190, rotation: 0,  role: 'give-way', label: 'Sailing', showArrow: true, arrowDx: 0,  arrowDy: -28 },
+      { x: 205, y: 190, rotation: 0,  role: 'give-way', label: 'Sailing', showArrow: true, arrowDx: 0,  arrowDy: -28, typeAfterAnswer: true },
     ],
   },
   'sail-vs-sail': {
@@ -149,7 +157,7 @@ export interface ScenarioVesselView {
   showArrow: boolean;
   arrowDx: number;
   arrowDy: number;
-  /** Type-only before the reveal; gains the role suffix after. */
+  /** Type-only before the reveal (empty for a `typeAfterAnswer` vessel); gains the role suffix after. */
   label: string;
   /** Always 'neutral' before the reveal - never the true role. */
   colorRole: VesselRole;
@@ -174,7 +182,7 @@ export function buildScenarioView(scenario: ScenarioType, revealed: boolean): Sc
       showArrow: v.showArrow ?? false,
       arrowDx: v.arrowDx ?? 0,
       arrowDy: v.arrowDy ?? 0,
-      label: revealed ? `${v.label}${ROLE_SUFFIX[v.role]}` : v.label,
+      label: revealed ? `${v.label}${ROLE_SUFFIX[v.role]}` : v.typeAfterAnswer ? '' : v.label,
       colorRole: revealed ? v.role : 'neutral',
     })),
     caption: revealed ? caption : null,
