@@ -1042,157 +1042,108 @@ const vesselHierarchyQuestions: ColregsQuestion[] = [
   },
 ];
 
-// --- DAY SHAPES (16 questions) ---
+// --- DAY SHAPES (9 questions) ---
+//
+// Written in the identify direction wherever a shape is drawn: the drawing is
+// the shape, and the question asks what it means. The bank used to ask it the
+// other way round - "which shape does a vessel at anchor display?" beside a
+// drawing of one ball - which handed every reader the answer. See the note on
+// QUESTION_SHAPES in index.tsx.
+//
+// Seven of the old sixteen are gone rather than flipped. ds-02 (two balls),
+// ds-05 (ball-diamond-ball), ds-06 (cylinder), ds-09 (two cones) and ds-15
+// (no shape under sail alone) would each have become a copy of vt-01, vt-02,
+// vt-03, vt-04 and vt-05, which already ask exactly that from the same shapes.
+// ds-11 (the towed vessel's diamond) would have been a copy of ds-04, whose
+// answer now covers both ends of the tow, and ds-14 (where the anchor ball
+// goes) of ds-01, whose explanation now carries the fore part.
 
 const dayShapesQuestions: ColregsQuestion[] = [
   {
     id: 'ds-01',
     category: 'day-shapes',
-    prompt: 'What day shape does a vessel at anchor display?',
+    prompt: 'By day, a vessel is showing one black ball in her fore part and no other shape. What is she?',
     options: [
-      'One black ball',
-      'Two black balls in a vertical line',
-      'One black diamond',
-      'One black cone',
+      'A vessel not under command',
+      'A vessel at anchor',
+      'A vessel aground',
+      'A sailing vessel also propelled by machinery',
     ],
-    correctAnswer: 'One black ball',
+    correctAnswer: 'A vessel at anchor',
     explanation:
-      'Rule 30: A vessel at anchor displays one black ball in the forepart of the vessel where best seen.',
-  },
-  {
-    id: 'ds-02',
-    category: 'day-shapes',
-    prompt: 'What day shape does a vessel not under command display?',
-    options: [
-      'One black ball',
-      'Two black balls in a vertical line',
-      'One black diamond',
-      'Three black balls in a vertical line',
-    ],
-    correctAnswer: 'Two black balls in a vertical line',
-    explanation:
-      'Rule 27: A vessel not under command displays two black balls in a vertical line where best seen.',
+      'Rule 30(a)(i): A vessel at anchor exhibits one ball in the fore part, where it can best be seen - the end she is riding to her anchor from. Two balls in a vertical line would be not under command under Rule 27(a)(ii), and three would be aground under Rule 30(d)(ii).',
   },
   {
     id: 'ds-03',
     category: 'day-shapes',
-    prompt: 'A sailing vessel proceeding under sail AND being propelled by machinery must display which day shape?',
+    prompt: 'A vessel with her sails set is showing, forward, a single black cone with its apex downwards. What is she?',
     options: [
-      'One black ball',
-      'One black cone, apex downwards',
-      'One black diamond',
-      'Two black balls',
+      'A sailing vessel under sail alone',
+      'A vessel not under command',
+      'A vessel at anchor',
+      'A sailing vessel under sail and also propelled by machinery',
     ],
-    correctAnswer: 'One black cone, apex downwards',
+    correctAnswer: 'A sailing vessel under sail and also propelled by machinery',
     explanation:
-      'Rule 25: A vessel proceeding under sail when also being propelled by machinery shall exhibit forward a black conical shape, apex downwards. (If only sailing, no day shape is required.)',
+      'Rule 25(e): A vessel proceeding under sail when also being propelled by machinery exhibits forward a conical shape, apex downwards. The cone says her engine is running, so she is a power-driven vessel for the purposes of the Rules. Under sail alone she shows no shape at all.',
   },
   {
     id: 'ds-04',
     category: 'day-shapes',
-    prompt: 'What day shape does a vessel engaged in towing display when the tow exceeds 200 metres?',
+    prompt: 'A single black diamond is the only shape a vessel is showing. What does it tell you?',
     options: [
-      'One black diamond',
-      'Two black diamonds in a vertical line',
-      'One black ball',
-      'A diamond shape where the tow length is marked',
+      'She is part of a tow - the towing vessel, or a vessel or object being towed',
+      'She is restricted in her ability to manoeuvre',
+      'She is constrained by her draft',
+      'She is at anchor',
     ],
-    correctAnswer: 'One black diamond',
+    correctAnswer: 'She is part of a tow - the towing vessel, or a vessel or object being towed',
     explanation:
-      'Rule 24: When the length of the tow exceeds 200 metres, both the towing vessel and the towed vessel each display a black diamond shape where best seen.',
-  },
-  {
-    id: 'ds-05',
-    category: 'day-shapes',
-    prompt: 'A vessel restricted in ability to maneuver (RAM) displays which day shape?',
-    options: [
-      'Ball-diamond-ball in a vertical line',
-      'Diamond-ball-diamond in a vertical line',
-      'Three black balls in a vertical line',
-      'One black cylinder',
-    ],
-    correctAnswer: 'Ball-diamond-ball in a vertical line',
-    explanation:
-      'Rule 27: A RAM vessel displays a ball, diamond, and ball in a vertical line where best seen (black shapes).',
-  },
-  {
-    id: 'ds-06',
-    category: 'day-shapes',
-    prompt: 'A vessel constrained by her draft may display which day shape?',
-    options: [
-      'One black ball',
-      'One black cylinder',
-      'Three black balls in a vertical line',
-      'Ball-diamond-ball in a vertical line',
-    ],
-    correctAnswer: 'One black cylinder',
-    explanation:
-      'Rule 28: A vessel constrained by her draft may exhibit a cylinder (black) where best seen.',
+      'Rule 24(a)(v) and 24(e)(iii): When the length of the tow exceeds 200 metres, the towing vessel and the vessel being towed each display a diamond where it can best be seen, so the shape alone cannot tell you which end you are looking at - only that she is in a long tow. Rule 24(g) also puts a diamond on the last of a partly submerged tow. The ball-diamond-ball of a vessel restricted in her ability to manoeuvre has a diamond in it, but never on its own.',
   },
   {
     id: 'ds-07',
     category: 'day-shapes',
-    prompt: 'A vessel aground displays which day shape?',
+    prompt: 'A vessel is showing three black balls in a vertical line. What is she?',
     options: [
-      'One black ball',
-      'Two black balls in a vertical line',
-      'Three black balls in a vertical line',
-      'One black cylinder',
+      'A vessel not under command',
+      'A vessel engaged in mineclearance operations',
+      'A vessel aground',
+      'A vessel at anchor',
     ],
-    correctAnswer: 'Three black balls in a vertical line',
+    correctAnswer: 'A vessel aground',
     explanation:
-      'Rule 30: A vessel aground displays three black balls in a vertical line where best seen.',
+      'Rule 30(d)(ii): A vessel aground exhibits three balls in a vertical line, in addition to the anchor ball of Rule 30(a). The line is what matters: a vessel engaged in mineclearance also shows three balls, but one at the foremast head and one at each end of the fore yard under Rule 27(f), never stacked.',
   },
   {
     id: 'ds-08',
     category: 'day-shapes',
-    prompt: 'A vessel engaged in minesweeping displays, in addition to her steaming lights or shapes, how many black balls?',
-    options: ['One', 'Two', 'Three', 'Four'],
-    correctAnswer: 'Three',
-    explanation:
-      'Rule 27: A vessel engaged in minesweeping displays three black balls — one at or near the foremast head and one at each end of the fore yardarm — to indicate that it is dangerous to approach within 1000 metres.',
-  },
-  {
-    id: 'ds-09',
-    category: 'day-shapes',
-    prompt: 'What day shape does a vessel engaged in fishing display?',
+    prompt:
+      'A vessel is showing three black balls: one near the foremast head and one at each end of the fore yard. What is she?',
     options: [
-      'Two cones with their apexes together, in a vertical line',
-      'Two black balls in a vertical line',
-      'One black cone, apex downwards',
-      'A ball, a diamond and a ball in a vertical line',
+      'A vessel engaged in mineclearance operations',
+      'A vessel aground',
+      'A vessel not under command',
+      'A vessel restricted in her ability to manoeuvre',
     ],
-    correctAnswer: 'Two cones with their apexes together, in a vertical line',
+    correctAnswer: 'A vessel engaged in mineclearance operations',
     explanation:
-      'Rule 26(b)(i): A vessel engaged in fishing displays two cones with their apexes together in a vertical line - the daytime equivalent of her green-over-white or red-over-white lights.',
+      'Rule 27(f): A vessel engaged in mineclearance operations exhibits three balls, one near the foremast head and one at each end of the fore yard, in addition to her power-driven or anchor shapes. They mean it is dangerous for another vessel to approach within 1000 metres. Three balls in a vertical line would be a vessel aground.',
   },
   {
     id: 'ds-10',
     category: 'day-shapes',
-    prompt: 'A fishing vessel with outlying gear extending more than 150 metres horizontally displays what additional shape?',
+    prompt:
+      'A vessel engaged in fishing, other than trawling, is showing her two cones and, in addition, the single cone above with its apex upwards. What does that extra cone tell you?',
     options: [
-      'A cone, apex upwards, in the direction of the gear',
-      'A second pair of cones, apexes together',
-      'A black diamond on the side of the gear',
-      'Two black balls on the side of the gear',
+      'She is making way through the water',
+      'She is shooting or hauling her nets',
+      'Her outlying gear extends more than 150 metres horizontally, in that direction',
+      'She is at anchor',
     ],
-    correctAnswer: 'A cone, apex upwards, in the direction of the gear',
+    correctAnswer: 'Her outlying gear extends more than 150 metres horizontally, in that direction',
     explanation:
-      'Rule 26(c)(ii): A vessel engaged in fishing with outlying gear extending more than 150 metres horizontally displays a cone, apex upwards, in the direction of the gear, so others know which side to avoid.',
-  },
-  {
-    id: 'ds-11',
-    category: 'day-shapes',
-    prompt: 'What day shape is displayed by the vessel BEING TOWED, when the tow exceeds 200 metres?',
-    options: [
-      'One black diamond',
-      'One black ball',
-      'Two black balls in a vertical line',
-      'None - only the towing vessel displays a shape',
-    ],
-    correctAnswer: 'One black diamond',
-    explanation:
-      'Rule 24(e)(iii): A vessel being towed displays a diamond shape when the length of the tow exceeds 200 metres. Both ends of the tow carry the diamond - the towing vessel under Rule 24(a)(v) and the towed vessel under 24(e)(iii).',
+      'Rule 26(c)(ii): A vessel engaged in fishing other than trawling, with outlying gear extending more than 150 metres horizontally, exhibits a cone apex upwards in the direction of the gear - by night, an all-round white light. It tells you which side of her to keep off.',
   },
   {
     id: 'ds-12',
@@ -1221,34 +1172,6 @@ const dayShapesQuestions: ColregsQuestion[] = [
     correctAnswer: 'A vessel of less than 12 metres in length',
     explanation:
       'Rule 30(f): A vessel of less than 12 metres in length, when aground, is not required to exhibit the three balls in a vertical line required by Rule 30(d).',
-  },
-  {
-    id: 'ds-14',
-    category: 'day-shapes',
-    prompt: 'Where on the vessel is the anchor ball displayed?',
-    options: [
-      'In the fore part',
-      'At or near the stern',
-      'At the masthead, amidships',
-      'On the side facing the channel',
-    ],
-    correctAnswer: 'In the fore part',
-    explanation:
-      'Rule 30(a)(i): A vessel at anchor exhibits, where it can best be seen, one ball in the fore part - marking the end she is riding to her anchor from.',
-  },
-  {
-    id: 'ds-15',
-    category: 'day-shapes',
-    prompt: 'What day shape does a sailing vessel proceeding under sail alone display?',
-    options: [
-      'None',
-      'One black cone, apex downwards',
-      'One black ball',
-      'Two cones with their apexes together',
-    ],
-    correctAnswer: 'None',
-    explanation:
-      'Rule 25: A sailing vessel proceeding under sail alone carries no day shape. The cone apex downwards of Rule 25(e) is required only when she is under sail AND being propelled by machinery, when she counts as a power-driven vessel.',
   },
   {
     id: 'ds-16',

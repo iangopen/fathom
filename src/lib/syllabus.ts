@@ -118,13 +118,13 @@ export const CATEGORIES: ChartCategory[] = [
     status: 'live',
     source: 'day-shapes',
     blurb:
-      'Balls, cones, cylinders and diamonds - the daytime equivalent of the light combinations, and the ones candidates most often reverse.',
+      'Balls, cones and diamonds read the way you meet them - the shape is shown and you say what she is. The NUC, RAM, CBD and fishing shapes are drilled on Vessel types.',
     topics: [
       'Anchor ball and aground',
-      'Ball-diamond-ball',
-      'Cones and hourglass',
-      'Cylinder for CBD',
       'Sail under power',
+      'The tow diamond',
+      'Mineclearance',
+      'Outlying gear',
     ],
   },
   {

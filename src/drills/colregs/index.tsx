@@ -112,39 +112,34 @@ export interface DayShapeSpec {
 }
 
 // Shapes listed top-down (first entry is the uppermost shape).
+//
+// The same direction rule as QUESTION_LIGHTS above: the drawing is the
+// stimulus and the question asks what it means. ds-01 to ds-15 used to ask
+// the other way - "which shape does a vessel at anchor display?" beside a
+// drawing of the ball - so the drawing was the answer. They were flipped, or
+// dropped where the flip was already a vessel-types question; see the note at
+// the head of the day shapes bank in constants.ts.
 export const QUESTION_SHAPES: Partial<Record<string, DayShapeSpec>> = {
-  // Rule 30(a): at anchor — one ball in the forepart.
+  // Rule 30(a)(i): one ball in the fore part - at anchor.
   'ds-01': { shapes: ['ball'], position: 'forward' },
-  // Rule 27(a): not under command — two balls in a vertical line.
-  'ds-02': { shapes: ['ball', 'ball'], position: 'main' },
-  // Rule 25(e): sail + machinery — one cone, apex downwards, forward.
+  // Rule 25(e): one cone, apex downwards, forward - under sail and machinery.
   'ds-03': { shapes: ['cone-down'], position: 'forward' },
-  // Rule 24(a)(v): tow exceeding 200 m — one diamond.
+  // Rule 24(a)(v) / 24(e)(iii): one diamond - either end of a long tow.
   'ds-04': { shapes: ['diamond'], position: 'main' },
-  // Rule 27(b): restricted in ability to manoeuvre — ball, diamond, ball.
-  'ds-05': { shapes: ['ball', 'diamond', 'ball'], position: 'main' },
-  // Rule 28: constrained by draft — one cylinder.
-  'ds-06': { shapes: ['cylinder'], position: 'main' },
-  // Rule 30(d): aground — three balls in a vertical line.
+  // Rule 30(d)(ii): three balls in a vertical line - aground.
   'ds-07': { shapes: ['ball', 'ball', 'ball'], position: 'forward' },
-  // Rule 27(f): minesweeping — one ball at the foremast head and one at each
-  // end of the fore yardarm.
+  // Rule 27(f): mineclearance - one ball near the foremast head and one at
+  // each end of the fore yard.
   'ds-08': { shapes: ['ball', 'ball', 'ball'], position: 'forward', arrangement: 'yardarm' },
-  // Rule 26(b)(i): fishing - two cones, apexes together.
-  'ds-09': { shapes: ['cone-down', 'cone-up'], position: 'main' },
-  // Rule 26(c)(ii): gear extending over 150 m - a cone apex up toward the gear.
+  // Rule 26(c)(ii): the extra cone, apex up, toward outlying gear over 150 m.
   'ds-10': { shapes: ['cone-up'], position: 'forward' },
-  // Rule 24(e)(iii): the vessel being towed, tow over 200 m - one diamond.
-  'ds-11': { shapes: ['diamond'], position: 'main' },
-  // Rule 30(g): the anchor ball a small vessel need not exhibit.
+  // Rule 30(e): the anchor ball a small vessel need not exhibit. The answer is
+  // a length, which the drawing does not show.
   'ds-12': { shapes: ['ball'], position: 'forward' },
   // Rule 30(f): the three balls a vessel under 12 m aground need not exhibit.
   'ds-13': { shapes: ['ball', 'ball', 'ball'], position: 'forward' },
-  // Rule 30(a)(i): the anchor ball, shown in the fore part.
-  'ds-14': { shapes: ['ball'], position: 'forward' },
-  // Rule 25: under sail alone - a bare mast, no shape at all.
-  'ds-15': { shapes: [], position: 'main' },
-  // Annex I s6: the ball whose minimum dimensions are in question.
+  // Annex I s6: the ball whose minimum dimensions are in question. Not drawn
+  // to scale, so it does not answer it.
   'ds-16': { shapes: ['ball'], position: 'main' },
 };
 
