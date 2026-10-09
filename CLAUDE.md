@@ -208,8 +208,8 @@ to every accessible name, including the compass points.
 `src/__tests__/answerA11y.test.tsx` pins all of it with Testing Library in
 jsdom: focus after answering and after Next in both drills; live region text
 before, after a right and a wrong answer, and in the exam; options focusable
-with their state in words; no alt / aria-label / title in any of the 131
-visuals carrying a word only its answer uses; no compass point named for
+with their state in words; no alt / aria-label / title in any of the 123
+visuals drawn before an answer (2026-10-09) carrying a word only its answer uses; no compass point named for
 itself; and axe-core (16 rules evaluated) finding zero violations on an
 unanswered and an answered colregs, photo and compass question. axe cannot
 judge colour contrast in jsdom; it reports it as incomplete, not passed.
@@ -218,18 +218,52 @@ Still open:
 - **A real screen-reader pass by hand** (NVDA or VoiceOver) has not been
   done. Everything above is verified in jsdom and with a keyboard in Chrome
   against `npm run preview`, not by listening.
-- **Some drawings show their own answer, to every reader.** Day-shape
-  questions ask "which shape does X display?" and draw that shape
-  (ds-01-ds-11, ds-14, ds-15); sound-signal questions ask "which signal?" or
-  "how long is a short blast?" and draw the sequence with its "short 1s /
-  prolonged 4-6s" legend (ss-01-ss-07, ss-10-ss-16); and vh-01, vh-02 and
-  vh-09 label the very vessel the question asks about. That is a question-bank
-  problem, not an accessible-name one - the fix is the one an-06 onward got
-  (no picture, or a picture only after answering) - and wants its own session.
 - **Drawn visuals have no text equivalent.** Lights, flags, highlighted boat
-  parts and the like are SVGs with a stray caption at most; a screen-reader
-  user cannot answer those questions. Describing them is content work and
-  must not describe the answer (the lights, not the vessel).
+  parts and the like are SVGs with a stray caption at most. The flipped
+  day-shape and sound questions describe the signal in their prompt, so
+  they can be answered without the picture, but most drawn questions cannot.
+  Describing them is content work and must not describe the answer (the
+  lights, not the vessel).
+- **ds-12 cites Rule 30(g)** for the under-7-metre anchor exemption. It is
+  Rule 30(e) in both the International and the Inland text. Found while
+  checking the drawing fix and left alone, because ds-12 was not part of it.
+
+Resolved (2026-10-09): **no drawing shows its own answer.** 31 questions used
+to: day shapes that asked "which shape?" and drew it, sound signals that asked
+"which signal?" and drew it, and four give-way scenarios (vh-01, vh-02, vh-09,
+vh-17) that labelled the vessel the answer names. The fixes:
+- Flipped to the identify direction, as the navigation lights were: ds-01,
+  03, 04, 07, 08, 10 and ss-01 to 06, 10 to 15. The drawing is the signal,
+  and the question asks what it means.
+- Dropped where the flip was a copy of an existing question: ds-02, 05, 06,
+  09 and 15 (vt-01 to vt-05), ds-11 (ds-04) and ds-14 (ds-01).
+- Drawing shown only after answering, for the two that cannot be flipped:
+  ss-07 and ss-16 ask how long a blast lasts, which the legend states.
+  That list is `QUESTION_VISUAL_AFTER_ANSWER`, and a test pins it by hand.
+- Labels: a scenario vessel marked `typeAfterAnswer` is drawn unlabelled
+  until the answer.
+
+**The rule: a visual shown before the answer is the stimulus, never the
+answer.** A question that asks for a configuration ("which shape", "which
+signal", "which lights", "how many balls", "where is it shown") gets no
+drawing of that configuration before it is answered. Either flip it, or show
+the drawing only after the answer. Two more rules came with it:
+- **One drawing, one right answer.** Several signals mean more than one thing
+  (Rule 35(c) is six vessel types; a lone diamond is either end of a long
+  tow), so the right option is the grouped answer, and no distractor may be
+  another correct reading.
+- **Say "under the International Rules"** in a sound prompt whenever the
+  Inland Rules give those blasts a different meaning: one and two short
+  blasts, the overtaking signals, and one prolonged blast when leaving a
+  berth (33 CFR 83.34).
+
+The guard is the "no drawing shows its own answer" block in
+`answerA11y.test.tsx`, and it has no allowlist. For lights, shapes and sound
+drawings it rejects an answer worded in the drawing's own terms, a bare-count
+answer and a configure-direction prompt. It rejects a pre-answer drawing that
+labels a vessel class the answer names, and, where two questions draw exactly
+the same thing, it rejects either one offering the other's answer as a
+distractor.
 - **VisualPanel and ScenarioCard are siblings and their keys must differ.**
   Both were keyed on the bare question id; React's answer to duplicate sibling
   keys is that children "may be duplicated and/or omitted", and it stopped
@@ -333,7 +367,12 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
   (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
   build toolchain - nothing a user's browser loads.
-- Tests: 13 files / 1036 tests (2026-10-06, after the accessibility session).
+- Tests: 13 files / 1026 tests (2026-10-09, after the drawing-leak session:
+  7 questions dropped took 14 per-question citation cases, and 4 tests were
+  added). On Node 25 run them as `NODE_OPTIONS=--no-experimental-webstorage
+  npx vitest run`: Node 25 has a global `localStorage` of its own that
+  shadows jsdom's, and 24 jsdom tests fail without the flag. CI is on Node 22
+  and needs nothing.
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub
