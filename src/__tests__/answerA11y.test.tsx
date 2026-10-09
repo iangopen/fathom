@@ -10,7 +10,7 @@ import CompassDrill from '../drills/compass';
 import { CompassRose } from '../drills/compass/CompassRose';
 import { COMPASS_POINTS, RELATIVE_POINTS } from '../drills/compass/constants';
 import { COLREGS_QUESTIONS } from '../drills/colregs/constants';
-import { VisualPanel, hasVisual } from '../components/VisualPanel';
+import { VisualPanel, hasVisual, visualKind, VisualKind } from '../components/VisualPanel';
 import { PrefsProvider } from '../lib/prefs';
 import { DEFAULT_PLAN } from '../lib/session';
 import { answerAnnouncement } from '../lib/answerA11y';
@@ -253,9 +253,8 @@ describe('accessible names before an answer', () => {
   // Visible text in a drawing is the same for every reader, so it gets the
   // coarser check: it must never carry the answer label whole. Word-level
   // matching here is all noise - "Blast Sequence" is every sound diagram's
-  // caption - and the drawings that DO show their own answer (a day-shape
-  // question that draws the shape it asks for) leak by picture, not by
-  // name; that is a question-bank problem, recorded in CLAUDE.md.
+  // caption. A drawing can leak by picture as well as by text; the block
+  // below is the guard for that.
   it('no drawing spells out its own answer label', () => {
     const leaks = withVisual.filter(q => {
       const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
@@ -285,6 +284,101 @@ describe('accessible names before an answer', () => {
         cleanup();
       }
     }
+  });
+});
+
+// ── No drawing shows its own answer ─────────────────────────────────────
+
+// A drawing of lights, day shapes or a blast sequence can only be the
+// stimulus: "here is the signal, what does it mean?". Asked the other way -
+// "which signal does she sound?" - the drawing IS the answer, to every reader,
+// and it carries no word a name check could catch. These tests hold the
+// question bank to the identify direction. There is no allowlist: a question
+// that needs to ask for a configuration either has no drawing, or shows it only
+// once it has been answered (revealed = true), which this never inspects.
+
+// The words a drawing of each kind is made of. A right answer phrased in them,
+// beside that drawing, is a description of the picture.
+const DRAWN_VOCABULARY: Partial<Record<VisualKind, RegExp>> = {
+  lights: /\b(lights?|masthead|sidelights?|sternlight|all-round|red|green|white|yellow)\b/,
+  shapes: /\b(balls?|cones?|diamonds?|cylinders?|apex(es)?|shapes?|yardarm|fore part|masthead)\b/,
+  sounds: /\b(blasts?|short|prolonged|bell|gong|strokes?|ringing|whistle|seconds?)\b/,
+};
+
+// A bare count or "none" beside a drawing is answered by counting it.
+const BARE_COUNT = /^(none|nothing|zero|one|two|three|four|five|six|seven|eight|nine|ten|\d+)$/;
+
+// Prompts written in the configure direction - asking for the signal, the
+// shape, the lights, or where one is shown.
+const CONFIGURE_PROMPT =
+  /\b(which|what) (day |sound |fog )?(shapes?|signal)\b|\bwhich lights\b|\bhow many (black )?(balls|shapes|blasts|lights)\b|\bwhere on the vessel\b|\bduration of\b/;
+
+// The vessel classes a scenario or profile may print, each with the short
+// forms the diagrams use.
+const VESSEL_CLASSES: Record<string, RegExp> = {
+  'not under command': /\bnuc\b|not under command/,
+  'restricted in ability to manoeuvre': /\bram\b|restricted in (her )?ability/,
+  'constrained by draft': /\bcbd\b|constrained by (her )?drau?g?ht/,
+  'engaged in fishing': /\bfishing\b/,
+  sailing: /\bsailing\b/,
+  'power-driven': /\bpower(-driven)?\b/,
+  'at anchor': /\bat anchor\b|\banchored\b/,
+  aground: /\baground\b/,
+  towing: /\btow(ing|ed)?\b/,
+};
+const classesIn = (s: string) =>
+  Object.entries(VESSEL_CLASSES).filter(([, re]) => re.test(s.toLowerCase())).map(([name]) => name);
+
+describe('no drawing shows its own answer', () => {
+  const drawn = COLREGS_QUESTIONS.filter(q => visualKind(q.id, false) !== null);
+
+  it('a lights, shapes or sound drawing is never asked for in its own terms', () => {
+    const leaks: string[] = [];
+    for (const q of drawn) {
+      const kind = visualKind(q.id, false)!;
+      const vocab = DRAWN_VOCABULARY[kind];
+      if (!vocab) continue;
+      const answer = q.correctAnswer.toLowerCase();
+      if (vocab.test(answer)) leaks.push(`${q.id}: answer "${q.correctAnswer}" describes the ${kind} drawing`);
+      if (BARE_COUNT.test(answer)) leaks.push(`${q.id}: answer "${q.correctAnswer}" is counted off the ${kind} drawing`);
+      if (CONFIGURE_PROMPT.test(q.prompt.toLowerCase())) leaks.push(`${q.id}: prompt asks for the ${kind} it draws`);
+    }
+    expect(leaks).toEqual([]);
+  });
+
+  it('no drawing labels a vessel the right answer names', () => {
+    const leaks: string[] = [];
+    for (const q of drawn) {
+      const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
+      const shown = classesIn(heard(container).text);
+      cleanup();
+      for (const c of classesIn(q.correctAnswer)) {
+        if (shown.includes(c)) leaks.push(`${q.id}: drawing labels "${c}"`);
+      }
+    }
+    expect(leaks).toEqual([]);
+  });
+
+  // The other way a flipped question goes wrong: one drawing, two right
+  // answers. Where two questions draw exactly the same thing, neither may
+  // offer the other's answer as a wrong one.
+  it('no distractor is the right answer to another question with the same drawing', () => {
+    const markupOf = new Map<string, string>();
+    for (const q of drawn) {
+      const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
+      markupOf.set(q.id, container.innerHTML);
+      cleanup();
+    }
+    const clashes: string[] = [];
+    for (const q of drawn) {
+      for (const other of drawn) {
+        if (other.id === q.id || markupOf.get(other.id) !== markupOf.get(q.id)) continue;
+        if (q.options.includes(other.correctAnswer) && other.correctAnswer !== q.correctAnswer) {
+          clashes.push(`${q.id} offers ${other.id}'s answer "${other.correctAnswer}" as wrong`);
+        }
+      }
+    }
+    expect(clashes).toEqual([]);
   });
 });
 

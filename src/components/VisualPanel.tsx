@@ -63,7 +63,15 @@ interface VisualPanelProps {
 // the display's own image map knows which. Deciding it here, in the same
 // branch that picks the display, means the credit line cannot attach to a
 // question whose visual turned out to be someone else's precedence.
+// `kind` says what sort of thing the picture depicts, so the leak test can ask
+// whether a question's answer is phrased in that picture's own terms - a sound
+// question whose answer is a blast, beside a drawing of the blasts.
+export type VisualKind =
+  | 'vessel' | 'lights' | 'sounds' | 'shapes' | 'scenario' | 'anchor' | 'buoy'
+  | 'distress' | 'pfd' | 'boat-part' | 'cloud' | 'flag';
+
 interface ResolvedVisual {
+  kind: VisualKind;
   node: React.ReactNode;
   photo?: { kind: PhotoKind; name: string };
 }
@@ -77,17 +85,19 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   // question has been answered - see QUESTION_VISUAL_AFTER_ANSWER.
   if (!revealed && QUESTION_VISUAL_AFTER_ANSWER.has(questionId)) return null;
 
-  const node = (n: React.ReactNode, p?: ResolvedVisual['photo']): ResolvedVisual => ({ node: n, photo: p });
+  const node = (kind: VisualKind, n: React.ReactNode, p?: ResolvedVisual['photo']): ResolvedVisual =>
+    ({ kind, node: n, photo: p });
 
   const vesselType = QUESTION_VESSEL_TYPES[questionId];
-  if (vesselType) return node(<VesselProfile type={vesselType} label="Vessel" />);
+  if (vesselType) return node('vessel', <VesselProfile type={vesselType} label="Vessel" />);
 
   const lights = QUESTION_LIGHTS[questionId];
-  if (lights) return node(<LightDisplay active={lights} label="Vessel Lights" />);
+  if (lights) return node('lights', <LightDisplay active={lights} label="Vessel Lights" />);
 
   const sounds = QUESTION_SOUNDS[questionId];
   if (sounds) {
     return node(
+      'sounds',
       <SoundSignalDisplay
         key={questionId}
         sequence={sounds}
@@ -100,6 +110,7 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   const shapes = QUESTION_SHAPES[questionId];
   if (shapes) {
     return node(
+      'shapes',
       <DayShapeDisplay
         shapes={shapes.shapes}
         position={shapes.position}
@@ -110,28 +121,28 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const scenario = QUESTION_SCENARIOS[questionId];
-  if (scenario) return node(<VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
+  if (scenario) return node('scenario', <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
 
   const anchor = QUESTION_ANCHORS[questionId];
-  if (anchor) return node(<AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
+  if (anchor) return node('anchor', <AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
 
   const buoy = QUESTION_BUOYS[questionId];
-  if (buoy) return node(<BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
+  if (buoy) return node('buoy', <BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
 
   const distress = QUESTION_DISTRESS[questionId];
-  if (distress) return node(<DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
+  if (distress) return node('distress', <DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
 
   const pfd = QUESTION_PFDS[questionId];
-  if (pfd) return node(<PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
+  if (pfd) return node('pfd', <PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
-  if (boatPart) return node(<BoatPartDisplay part={boatPart} label="Highlighted" />);
+  if (boatPart) return node('boat-part', <BoatPartDisplay part={boatPart} label="Highlighted" />);
 
   const cloud = QUESTION_CLOUDS[questionId];
-  if (cloud) return node(<CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
+  if (cloud) return node('cloud', <CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
 
   const flag = QUESTION_FLAGS[questionId];
-  if (flag) return node(<SignalFlagDisplay flag={flag} label="Hoist" />);
+  if (flag) return node('flag', <SignalFlagDisplay flag={flag} label="Hoist" />);
 
   return null;
 }
@@ -143,6 +154,12 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
 // when it appears.
 export function hasVisual(questionId: string, revealed = false): boolean {
   return resolveVisual(questionId, revealed) !== null;
+}
+
+// What the picture beside this question depicts, before or after it is
+// answered, or null when there is none. Exported for the leak test.
+export function visualKind(questionId: string, revealed: boolean): VisualKind | null {
+  return resolveVisual(questionId, revealed)?.kind ?? null;
 }
 
 // The credit for the photograph this question shows, or undefined when its
