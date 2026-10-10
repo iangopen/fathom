@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import {
   QUESTION_LIGHTS,
   QUESTION_SCENARIOS,
@@ -15,7 +15,7 @@ import {
   QUESTION_FLAGS,
   QUESTION_VISUAL_AFTER_ANSWER,
 } from '../drills/colregs';
-import { LightDisplay } from '../drills/colregs/components/LightDisplay';
+import { LightDisplay, describeLights } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 import { VesselProfile } from '../drills/colregs/components/VesselProfile';
 import { VesselScenario } from '../drills/colregs/components/VesselScenario';
@@ -29,6 +29,7 @@ import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDi
 import { SignalFlagDisplay } from '../drills/colregs/components/SignalFlagDisplay';
 import { creditFor, ImageCredit, PhotoKind } from '../lib/imageCredits';
 import { PhotoCredit } from './PhotoCredit';
+import { SvgA11y } from '../lib/visualA11y';
 
 // 75 of the 78 bank questions are answered from a picture rather than from the
 // prompt text - "identify this vessel from what she is showing". The canvas
@@ -72,9 +73,30 @@ export type VisualKind =
 
 interface ResolvedVisual {
   kind: VisualKind;
-  node: React.ReactNode;
+  // Drawn with the accessibility props the panel hands it - see VISUAL_NAMES.
+  node: (a11y?: SvgA11y) => React.ReactNode;
   photo?: { kind: PhotoKind; name: string };
+  // The text equivalent of a drawing, generated from the data that draws it.
+  // Photographs carry their own frame-describing alt instead, and have none.
+  description?: string;
 }
+
+// The accessible name of each kind of drawing. It names the KIND of picture,
+// never what is in it; the description says what is in it.
+export const VISUAL_NAMES: Record<VisualKind, string> = {
+  vessel: 'Vessel diagram, side view',
+  lights: 'Lights diagram, seen from above',
+  sounds: 'Sound signal diagram',
+  shapes: 'Day shapes diagram, seen from above',
+  scenario: 'Vessel encounter diagram, seen from above',
+  anchor: 'Anchor',
+  buoy: 'Navigation mark diagram',
+  distress: 'Signal diagram',
+  pfd: 'Safety equipment diagram',
+  'boat-part': 'Boat diagram with one part highlighted',
+  cloud: 'Sky',
+  flag: 'Signal flag diagram',
+};
 
 function photo(kind: PhotoKind, name: string, images: Record<string, string>) {
   return name in images ? { kind, name } : undefined;
@@ -85,20 +107,31 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   // question has been answered - see QUESTION_VISUAL_AFTER_ANSWER.
   if (!revealed && QUESTION_VISUAL_AFTER_ANSWER.has(questionId)) return null;
 
-  const node = (kind: VisualKind, n: React.ReactNode, p?: ResolvedVisual['photo']): ResolvedVisual =>
-    ({ kind, node: n, photo: p });
+  const node = (
+    kind: VisualKind,
+    n: (a11y?: SvgA11y) => React.ReactNode,
+    p?: ResolvedVisual['photo'],
+    description?: string
+  ): ResolvedVisual => ({ kind, node: n, photo: p, description });
 
   const vesselType = QUESTION_VESSEL_TYPES[questionId];
-  if (vesselType) return node('vessel', <VesselProfile type={vesselType} label="Vessel" />);
+  if (vesselType) return node('vessel', () => <VesselProfile type={vesselType} label="Vessel" />);
 
   const lights = QUESTION_LIGHTS[questionId];
-  if (lights) return node('lights', <LightDisplay active={lights} label="Vessel Lights" />);
+  if (lights) {
+    return node(
+      'lights',
+      (a11y) => <LightDisplay active={lights} label="Vessel Lights" a11y={a11y} />,
+      undefined,
+      describeLights(lights)
+    );
+  }
 
   const sounds = QUESTION_SOUNDS[questionId];
   if (sounds) {
     return node(
       'sounds',
-      <SoundSignalDisplay
+      () => <SoundSignalDisplay
         key={questionId}
         sequence={sounds}
         gapS={QUESTION_SOUND_GAPS[questionId]}
@@ -111,7 +144,7 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   if (shapes) {
     return node(
       'shapes',
-      <DayShapeDisplay
+      () => <DayShapeDisplay
         shapes={shapes.shapes}
         position={shapes.position}
         arrangement={shapes.arrangement}
@@ -121,28 +154,28 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const scenario = QUESTION_SCENARIOS[questionId];
-  if (scenario) return node('scenario', <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
+  if (scenario) return node('scenario', () => <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
 
   const anchor = QUESTION_ANCHORS[questionId];
-  if (anchor) return node('anchor', <AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
+  if (anchor) return node('anchor', () => <AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
 
   const buoy = QUESTION_BUOYS[questionId];
-  if (buoy) return node('buoy', <BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
+  if (buoy) return node('buoy', () => <BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
 
   const distress = QUESTION_DISTRESS[questionId];
-  if (distress) return node('distress', <DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
+  if (distress) return node('distress', () => <DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
 
   const pfd = QUESTION_PFDS[questionId];
-  if (pfd) return node('pfd', <PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
+  if (pfd) return node('pfd', () => <PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
-  if (boatPart) return node('boat-part', <BoatPartDisplay part={boatPart} label="Highlighted" />);
+  if (boatPart) return node('boat-part', () => <BoatPartDisplay part={boatPart} label="Highlighted" />);
 
   const cloud = QUESTION_CLOUDS[questionId];
-  if (cloud) return node('cloud', <CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
+  if (cloud) return node('cloud', () => <CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
 
   const flag = QUESTION_FLAGS[questionId];
-  if (flag) return node('flag', <SignalFlagDisplay flag={flag} label="Hoist" />);
+  if (flag) return node('flag', () => <SignalFlagDisplay flag={flag} label="Hoist" />);
 
   return null;
 }
@@ -162,6 +195,15 @@ export function visualKind(questionId: string, revealed: boolean): VisualKind | 
   return resolveVisual(questionId, revealed)?.kind ?? null;
 }
 
+// The text equivalent of the drawing beside this question at this point, or
+// null when there is no drawing or it has none yet. A drawing held back until
+// the answer (QUESTION_VISUAL_AFTER_ANSWER) has no description before it
+// either, because there is nothing resolved to describe. Exported for the leak
+// guard and the description tests.
+export function visualDescription(questionId: string, revealed: boolean): string | null {
+  return resolveVisual(questionId, revealed)?.description ?? null;
+}
+
 // The credit for the photograph this question shows, or undefined when its
 // visual is a drawing or there is none. Exported for the credit tests.
 export function photoCreditFor(questionId: string): ImageCredit | undefined {
@@ -170,6 +212,9 @@ export function photoCreditFor(questionId: string): ImageCredit | undefined {
 }
 
 export const VisualPanel: React.FC<VisualPanelProps> = ({ questionId, revealed }) => {
+  // Not derived from the question id: two questions with the same drawing must
+  // render the same markup, and the id would be the one difference.
+  const descriptionId = useId();
   const resolved = resolveVisual(questionId, revealed);
 
   // A question with no mapping draws nothing at all. That is necessary but it
@@ -179,11 +224,22 @@ export const VisualPanel: React.FC<VisualPanelProps> = ({ questionId, revealed }
   // document. The caller keys them apart now - see the note there.
   if (!resolved) return null;
   const credit = resolved.photo && creditFor(resolved.photo.kind, resolved.photo.name);
+  const a11y = resolved.description
+    ? { name: VISUAL_NAMES[resolved.kind], describedBy: descriptionId }
+    : undefined;
 
   return (
     <div className="ct-instrument">
       <div className="ct-instrument-label">Observed</div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>{resolved.node}</div>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>{resolved.node(a11y)}</div>
+      {/* Read after the drawing's name, through aria-describedby. Hidden from
+          sight for now: whether sighted players get a "Describe" toggle is a
+          product decision still to make. */}
+      {resolved.description && (
+        <p id={descriptionId} className="sr-only">
+          {resolved.description}
+        </p>
+      )}
       {credit && <PhotoCredit credit={credit} revealed={revealed} />}
     </div>
   );

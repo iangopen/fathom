@@ -1,4 +1,5 @@
 import React from 'react';
+import { SvgA11y, imgProps, colourName, countWord, capitalise } from '../../../lib/visualA11y';
 
 export type LightName =
   | 'masthead'
@@ -23,6 +24,7 @@ export type LightName =
 interface LightDisplayProps {
   active: LightName[];
   label?: string;
+  a11y?: SvgA11y;
 }
 
 // This was the first visual component in the app and it predated the rule the
@@ -138,7 +140,71 @@ const LIGHT_POSITIONS: Record<LightName, { cx: number; cy: number; arc?: ArcDef 
   cylinder:     { cx: 100, cy: 40,  },
 };
 
-export const LightDisplay: React.FC<LightDisplayProps> = ({ active, label }) => {
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from LIGHT_POSITIONS and LIGHT_COLORS, the two tables the drawing
+// is painted from, so it cannot describe a light the picture does not show.
+// It says what a sighted reader sees - each lit light's colour, where it sits
+// on the hull and which way its arc shines - and never what the light is
+// called. "Masthead light" or "anchor light" would be half the answer.
+
+// Arc ends, in degrees clockwise from the bow, as a reader looking at the
+// plan would say them. Every arc in LIGHT_POSITIONS ends on one of these; a
+// new one has to be added here or describeLights throws.
+const BEARING_WORDS: Record<number, string> = {
+  0: 'dead ahead',
+  90: 'abeam to starboard',
+  112.5: 'just abaft the starboard beam',
+  180: 'dead astern',
+  247.5: 'just abaft the port beam',
+  270: 'abeam to port',
+  360: 'dead ahead',
+};
+
+function bearingWords(deg: number): string {
+  const words = BEARING_WORDS[deg];
+  if (!words) throw new Error(`describeLights: no words for an arc ending at ${deg} degrees`);
+  return words;
+}
+
+function arcWords(arc: ArcDef): string {
+  const span = (arc.endDeg - arc.startDeg + 360) % 360;
+  if (span === 0) return 'shining all round';
+  // The sweep runs clockwise from start to end; say which of dead ahead or
+  // dead astern it passes through, as the drawn wedge plainly does.
+  const crosses = (deg: number) => {
+    const into = (deg - arc.startDeg + 360) % 360;
+    return into > 0 && into < span;
+  };
+  const via = crosses(0) ? ', past dead ahead,' : crosses(180) ? ', past dead astern,' : '';
+  return `shining from ${bearingWords(arc.startDeg)}${via} round to ${bearingWords(arc.endDeg)}`;
+}
+
+// The hull runs from y 28 (stem) to y 195 (transom); x 100 is the centreline.
+function placeWords(cx: number, cy: number): string {
+  const side = cx < 90 ? 'on the port side' : cx > 110 ? 'on the starboard side' : 'on the centreline';
+  const along = (cy - 28) / (195 - 28);
+  const where = along > 1 ? 'at the stern' : along < 0.3 ? 'forward' : along < 0.62 ? 'near the middle' : 'aft';
+  return `${side}, ${where}`;
+}
+
+export function describeLights(active: LightName[]): string {
+  const lit = (Object.keys(LIGHT_POSITIONS) as LightName[])
+    .filter((name) => active.includes(name) && name !== 'cylinder')
+    .sort((a, b) => LIGHT_POSITIONS[a].cy - LIGHT_POSITIONS[b].cy || LIGHT_POSITIONS[a].cx - LIGHT_POSITIONS[b].cx);
+
+  const items = lit.map((name) => {
+    const { cx, cy, arc } = LIGHT_POSITIONS[name];
+    const colour = colourName(LIGHT_COLORS[name]);
+    return `${colour === 'orange' ? 'an' : 'a'} ${colour} light ${placeWords(cx, cy)}, ${arc ? arcWords(arc) : 'with no arc'}`;
+  });
+
+  const count = lit.length === 1 ? 'One light is lit' : `${capitalise(countWord(lit.length))} lights are lit, from bow to stern`;
+  const shape = active.includes('cylinder') ? ' A dark cylinder shape stands above the bow.' : '';
+  return `Seen from above, bow at the top. ${count}: ${items.join('; ')}. The remaining light positions are drawn dark.${shape}`;
+}
+
+export const LightDisplay: React.FC<LightDisplayProps> = ({ active, label, a11y }) => {
   const activeSet = new Set(active);
 
   const isLit = (name: LightName) => activeSet.has(name);
@@ -154,6 +220,7 @@ export const LightDisplay: React.FC<LightDisplayProps> = ({ active, label }) => 
           viewBox="0 0 200 260"
           className="w-full drop-shadow-2xl"
           xmlns="http://www.w3.org/2000/svg"
+          {...imgProps(a11y)}
         >
           <defs>
             {(Object.keys(LIGHT_GLOWS) as LightName[]).map((name) => (

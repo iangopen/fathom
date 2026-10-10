@@ -10,7 +10,15 @@ import CompassDrill from '../drills/compass';
 import { CompassRose } from '../drills/compass/CompassRose';
 import { COMPASS_POINTS, RELATIVE_POINTS } from '../drills/compass/constants';
 import { COLREGS_QUESTIONS } from '../drills/colregs/constants';
-import { VisualPanel, hasVisual, visualKind, VisualKind } from '../components/VisualPanel';
+import {
+  VisualPanel,
+  hasVisual,
+  visualKind,
+  visualDescription,
+  VisualKind,
+  VISUAL_NAMES,
+} from '../components/VisualPanel';
+import { QUESTION_VISUAL_AFTER_ANSWER } from '../drills/colregs';
 import { PrefsProvider } from '../lib/prefs';
 import { DEFAULT_PLAN } from '../lib/session';
 import { answerAnnouncement } from '../lib/answerA11y';
@@ -202,9 +210,10 @@ describe('compass: answering', () => {
 // ── No accessible name answers the question ─────────────────────────────
 
 // What a screen reader can reach, in two parts. `names` are the ones only
-// assistive tech gets - alt, aria-label, title - which this layer is
-// responsible for. `text` is visible text in the drawing, which a sighted
-// reader sees too.
+// assistive tech gets - alt, aria-label, title, and the text an
+// aria-describedby points at - which this layer is responsible for. `text` is
+// the text in the drawing, which a sighted reader sees too (a description is
+// visually hidden, so it is in `names` and is held to that stricter check).
 function heard(root: Element): { names: string; text: string } {
   const names: string[] = [];
   const text: string[] = [];
@@ -214,6 +223,9 @@ function heard(root: Element): { names: string; text: string } {
       for (const a of ['alt', 'aria-label', 'title']) {
         const v = n.getAttribute(a);
         if (v) names.push(v);
+      }
+      for (const id of (n.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)) {
+        names.push(document.getElementById(id)?.textContent ?? '');
       }
     } else if (n.nodeType === Node.TEXT_NODE) {
       text.push(n.textContent ?? '');
@@ -366,7 +378,9 @@ describe('no drawing shows its own answer', () => {
     const markupOf = new Map<string, string>();
     for (const q of drawn) {
       const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
-      markupOf.set(q.id, container.innerHTML);
+      // The description's id is generated per render. Two identical drawings
+      // differ only in it, so it is taken out before comparing.
+      markupOf.set(q.id, container.innerHTML.replace(/\b(id|aria-describedby)="[^"]*"/g, '$1=""'));
       cleanup();
     }
     const clashes: string[] = [];
@@ -379,6 +393,130 @@ describe('no drawing shows its own answer', () => {
       }
     }
     expect(clashes).toEqual([]);
+  });
+});
+
+// ── No description gives away its own answer ────────────────────────────
+
+// Every drawn visual carries a text equivalent (src/lib/visualA11y.ts). It is
+// held to the names check above and to more, because a description is the one
+// place a screen-reader user is told what the picture shows, and a sentence
+// can name an answer far more easily than a drawing can.
+//
+// For every question, the description shown BEFORE answering may not contain:
+//   1. the right answer's label;
+//   2. a word only the right answer uses (not shared with a wrong option),
+//      unless the prompt already says it or the drawing prints it for every
+//      reader to see - repeating those tells nobody anything new;
+//   3. a vessel class the right answer names, however it is abbreviated;
+//   4. the name of any flag of the phonetic alphabet;
+//   5. the vocabulary that names or means the subject of its kind of drawing:
+//      a boat part, a type of mark, a type of PFD, a type of light, what a
+//      signal means. These are absolute - no prompt or label excuses them.
+// There is no allowlist. A drawing that cannot be described without one of
+// these is a drawing that shows its own answer, and is held back until the
+// question is answered (QUESTION_VISUAL_AFTER_ANSWER), description and all.
+
+const PHONETIC =
+  /\b(alfa|alpha|bravo|charlie|delta|echo|foxtrot|golf|hotel|india|juliett?|kilo|lima|mike|november|oscar|papa|quebec|romeo|sierra|tango|uniform|victor|whiske?y|x-?ray|yankee|zulu)\b/;
+
+// What each kind of drawing must never be described as. The subject is what
+// the question asks for, so naming it is answering it.
+const SUBJECT_VOCABULARY: Partial<Record<VisualKind, RegExp>> = {
+  lights:
+    /\b(masthead|sidelights?|sternlight|anchor\w*|tow\w*|trawl\w*|fishing|pilot\w*|aground|restricted|constrained|under ?way|making way|power\w*|sailing|hovercraft|air-cushion|not under command)\b/,
+  shapes:
+    /\b(anchor\w*|aground|fishing|trawl\w*|tow\w*|mine\w*|restricted|constrained|drau?g?ht|sailing|machinery|power\w*|not under command|gear)\b/,
+  vessel:
+    /\b(anchor\w*|aground|fishing|trawl\w*|tow\w*|restricted|constrained|drau?g?ht|sailing|power\w*|not under command|nuc|ram|cbd|net)\b/,
+  sounds:
+    /\b(alter\w*|course|starboard|port|astern|overtak\w*|doubt\w*|anchor\w*|aground|bend|agree\w*|warn\w*|propulsion|visibility|fog|under ?way|making way|power\w*|restricted)\b/,
+  scenario: /\b(give[- ]way|stand[- ]on|keeps? clear|keep out|priority|right of way|rule \d+)\b/,
+  buoy:
+    /\b(lateral|cardinal|starboard|port|north|south|east|west|junction|preferred|isolated|danger|safe water|special|nun|can|pillar|spar|icw|intracoastal)\b/,
+  distress:
+    /\b(distress|emergency|mayday|assistance|help|sos|rocket\w*|flares?|parachute|november|charlie|code)\b/,
+  pfd: /\b(type|offshore|throwable|special-use|inflatable|flotation|life ?jacket|vest|buoyancy|cushion|ring)\b/,
+  'boat-part':
+    /\b(bows?|stern|transom|keel|gunwales?|freeboard|drau?g?ht|rudder|waterline|beam|thwarts?|amidships|athwartships|port|starboard|forward|fore|aft|after|abaft|abeam|stem|sheer)\b/,
+  flag: /\b(letter|code|meaning|signal)\b/,
+};
+
+const wordsOf = (s: string) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
+
+function descriptionLeaks(
+  q: (typeof COLREGS_QUESTIONS)[number],
+  kind: VisualKind,
+  description: string,
+  printed: string
+): string[] {
+  const d = description.toLowerCase();
+  const leaks: string[] = [];
+  if (d.includes(q.correctAnswer.toLowerCase())) leaks.push('the answer label');
+
+  const alreadySaid = new Set([...wordsOf(q.prompt), ...wordsOf(printed)]);
+  for (const w of distinctiveWords(q.correctAnswer, q.options)) {
+    if (!alreadySaid.has(w) && new RegExp(`\\b${w}`).test(d)) leaks.push(`"${w}"`);
+  }
+
+  const described = classesIn(d);
+  for (const c of classesIn(q.correctAnswer)) {
+    if (described.includes(c)) leaks.push(`vessel class "${c}"`);
+  }
+
+  const letter = PHONETIC.exec(d);
+  if (letter) leaks.push(`flag name "${letter[0]}"`);
+
+  const subject = SUBJECT_VOCABULARY[kind]?.exec(d);
+  if (subject) leaks.push(`${kind} vocabulary "${subject[0]}"`);
+  return leaks;
+}
+
+describe('no description gives away its own answer', () => {
+  const drawn = COLREGS_QUESTIONS.filter(q => visualKind(q.id, false) !== null);
+
+  it('says nothing a sighted reader is not shown, and never the answer', () => {
+    const leaks: string[] = [];
+    let described = 0;
+    for (const q of drawn) {
+      const description = visualDescription(q.id, false);
+      if (description === null) continue;
+      described += 1;
+      const kind = visualKind(q.id, false)!;
+      // What the drawing prints for everyone: its text with the description
+      // taken out, so a description cannot excuse itself.
+      const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
+      container.querySelectorAll('.sr-only').forEach(n => n.remove());
+      const printed = container.textContent ?? '';
+      cleanup();
+      for (const l of descriptionLeaks(q, kind, description, printed)) leaks.push(`${q.id}: ${l}`);
+    }
+    expect(described).toBeGreaterThan(0);
+    expect(leaks).toEqual([]);
+  });
+
+  it('keeps the description of a drawing held back until the answer back too', () => {
+    for (const id of QUESTION_VISUAL_AFTER_ANSWER) {
+      expect(visualDescription(id, false), id).toBeNull();
+      const { container } = render(<VisualPanel questionId={id} revealed={false} />);
+      expect(container.querySelector('[aria-describedby]'), id).toBeNull();
+      cleanup();
+    }
+  });
+
+  it('reads each description as the drawing\'s own, after a name that says only what kind it is', () => {
+    for (const q of drawn) {
+      const description = visualDescription(q.id, false);
+      if (description === null) continue;
+      const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
+      const img = container.querySelectorAll('[role="img"]');
+      expect(img, q.id).toHaveLength(1);
+      expect(img[0].getAttribute('aria-label'), q.id).toBe(VISUAL_NAMES[visualKind(q.id, false)!]);
+      const target = document.getElementById(img[0].getAttribute('aria-describedby') ?? '');
+      expect(target?.textContent, q.id).toBe(description);
+      expect(target?.className, q.id).toContain('sr-only');
+      cleanup();
+    }
   });
 });
 
