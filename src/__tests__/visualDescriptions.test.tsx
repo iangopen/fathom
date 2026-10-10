@@ -18,6 +18,8 @@ import { SoundSignalDisplay, BlastMark } from '../drills/colregs/components/Soun
 import { VesselProfile, VesselTypeName } from '../drills/colregs/components/VesselProfile';
 import { QUESTION_VESSEL_TYPES, QUESTION_SCENARIOS } from '../drills/colregs';
 import { VesselScenario, ScenarioType } from '../drills/colregs/components/VesselScenario';
+import { BuoyDisplay, BuoyName, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
+import { QUESTION_BUOYS } from '../drills/colregs';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -334,6 +336,90 @@ describe('scenarios', () => {
       'Seen from above. Two vessels, both drawn in the same grey, from top to bottom: ' +
         'a vessel labelled Other at the middle right, with an arrow pointing to the left; ' +
         'a vessel labelled Own at the bottom left, with an arrow pointing up the page.'
+    );
+  });
+});
+
+// A drawn mark read off the SVG: the outline path's shape, the band fills top
+// to bottom, the topmark cones and which way each points, and the badge.
+function pointsOf(d: string): number[][] {
+  const nums = (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+  const pts: number[][] = [];
+  for (let i = 0; i + 1 < nums.length; i += 2) pts.push([nums[i], nums[i + 1]]);
+  return pts;
+}
+function paintedMark(root: Element) {
+  const outline = pointsOf(root.querySelector('path[fill="none"]')?.getAttribute('d') ?? '');
+  let body: string;
+  if (outline.length === 8) body = 'a broad, squat base with a tall narrow column';
+  else {
+    const top = Math.min(...outline.map(p => p[1]));
+    const base = Math.max(...outline.map(p => p[1]));
+    const width = (y: number) => {
+      const xs = outline.filter(p => p[1] === y).map(p => p[0]);
+      return Math.max(...xs) - Math.min(...xs);
+    };
+    body = width(top) < width(base) ? 'a tapered body' : 'a straight-sided, flat-topped round body';
+  }
+  const bands = [...root.querySelectorAll('g[clip-path] rect')]
+    .sort((a, b) => num(a, 'y') - num(b, 'y'))
+    .map(r => colourName(fillOf(r)));
+  const cones = [...root.querySelectorAll('polygon')]
+    .filter(p => colourName(fillOf(p)) === 'black')
+    .map(p => {
+      const pts = pointsOf(p.getAttribute('points') ?? '');
+      const ys = pts.map(q => q[1]);
+      const apex = pts.find(q => ys.filter(y => y === q[1]).length === 1)!;
+      return { y: Math.min(...ys), up: apex[1] === Math.min(...ys) };
+    })
+    .sort((a, b) => a.y - b.y);
+  // The badge is stuck on the face, outside the clipped paintwork, so a
+  // yellow band is not mistaken for one.
+  const yellow = [...root.querySelectorAll('rect, polygon')].find(
+    e => !e.closest('g[clip-path]') && colourName(fillOf(e)) === 'yellow'
+  );
+  const badge = yellow ? (yellow.tagName === 'rect' ? 'square' : 'triangle') : null;
+  return { body, bands, cones, badge };
+}
+
+describe('buoys (the drawn marks)', () => {
+  const drawn = entries<BuoyName>(QUESTION_BUOYS).filter(([, b]) => !(b in BUOY_IMAGES));
+
+  it('describes every drawn mark, and leaves the photographs to their alt text', () => {
+    expect(drawn.length).toBeGreaterThan(0);
+    for (const [id, buoy] of entries<BuoyName>(QUESTION_BUOYS)) {
+      expect(visualDescription(id, false) === null, id).toBe(buoy in BUOY_IMAGES);
+    }
+  });
+
+  it('gives the body, the bands top to bottom, the topmark and the badge the drawing paints', () => {
+    for (const [id, buoy] of drawn) {
+      const { container } = render(<BuoyDisplay type={buoy} />);
+      const mark = paintedMark(container);
+      cleanup();
+      const d = visualDescription(id, false)!;
+      expect(d, id).toContain(mark.body);
+      expect(d, id).toContain(
+        mark.bands.length === 1 ? `painted all ${mark.bands[0]}` : `from top to bottom: ${mark.bands.slice(0, -1).join(', ')} and ${mark.bands[mark.bands.length - 1]}`
+      );
+      if (mark.cones.length === 0) expect(d, id).toContain('Nothing is mounted on top');
+      else {
+        expect(mark.cones, id).toHaveLength(2);
+        const [upper, lower] = mark.cones;
+        expect(d, id).toContain(
+          upper.up && lower.up ? 'both pointing up' : !upper.up && lower.up ? 'the upper pointing down and the lower pointing up' : 'UNDESCRIBED'
+        );
+      }
+      expect(d.includes('yellow triangle'), id).toBe(mark.badge === 'triangle');
+      expect(d.includes('yellow square'), id).toBe(mark.badge === 'square');
+    }
+  });
+
+  it('reads by-07 as written', () => {
+    expect(visualDescription('by-07', false)).toBe(
+      'Side view of a buoy: a broad, squat base with a tall narrow column standing on it, painted in three ' +
+        'horizontal bands, from top to bottom: yellow, black and yellow. On a short staff on top, two black cones, ' +
+        'one above the other, the upper pointing down and the lower pointing up, so their points meet.'
     );
   });
 });

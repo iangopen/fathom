@@ -1,4 +1,5 @@
 import React from 'react';
+import { SvgA11y, imgProps, colourName, countWord, joinList } from '../../../lib/visualA11y';
 
 import cardinalEast from '../../../assets/buoys/cardinal-east.jpg';
 import cardinalSouth from '../../../assets/buoys/cardinal-south.jpg';
@@ -39,6 +40,8 @@ type DrawnBuoy =
 interface BuoyDisplayProps {
   type: BuoyName;
   label?: string;
+  // Applied to a drawn mark only; a photograph has its own alt text.
+  a11y?: SvgA11y;
 }
 
 // PHOTOGRAPHS of the marks, where a clean licensed one exists - the same change
@@ -267,7 +270,7 @@ function badgeGroup(badge: Badge, shape: BuoyShape): React.ReactNode {
   );
 }
 
-function drawnBuoy(type: DrawnBuoy): React.ReactNode {
+function drawnBuoy(type: DrawnBuoy, a11y?: SvgA11y): React.ReactNode {
   const spec = DRAWN[type];
   const d = bodyPath(spec.shape);
   const clipId = `buoy-clip-${type}`;
@@ -281,7 +284,7 @@ function drawnBuoy(type: DrawnBuoy): React.ReactNode {
   ));
 
   return (
-    <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg" {...imgProps(a11y)}>
       <defs>
         <clipPath id={clipId}>
           <path d={d} />
@@ -299,7 +302,49 @@ function isDrawn(type: BuoyName): type is DrawnBuoy {
   return type in DRAWN;
 }
 
-export const BuoyDisplay: React.FC<BuoyDisplayProps> = ({ type, label }) => {
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// For the drawn marks only, generated from DRAWN - the body, the bands top to
+// bottom, the topmark and the badge, the four things the drawing is built
+// from and a mark is identified by. Shapes are said as they look ("a tapered
+// body"), never by their names: "nun", "can" and "pillar" are the vocabulary
+// a buoyage question tests. A photographed mark returns null; its alt text
+// describes the frame.
+const BODY_WORDS: Record<BuoyShape, string> = {
+  nun: 'a tapered body, wide at the base and narrowing to a flat top',
+  can: 'a straight-sided, flat-topped round body',
+  pillar: 'a broad, squat base with a tall narrow column standing on it',
+};
+
+const TOPMARK_WORDS: Record<Topmark, string> = {
+  'cones-up': 'both pointing up',
+  'cones-point': 'the upper pointing down and the lower pointing up, so their points meet',
+};
+
+export function describeBuoy(type: BuoyName): string | null {
+  if (!isDrawn(type)) return null;
+  const { shape, bands, topmark, badge } = DRAWN[type];
+  const colours = bands.map(colourName);
+  const paint =
+    colours.length === 1
+      ? `painted all ${colours[0]}`
+      : `painted in ${countWord(colours.length)} horizontal bands, from top to bottom: ${joinList(colours)}`;
+  const parts = [`Side view of a buoy: ${BODY_WORDS[shape]}, ${paint}.`];
+  if (topmark) {
+    parts.push(
+      `On a short staff on top, two ${colourName(BLACK)} cones, one above the other, ${TOPMARK_WORDS[topmark]}.`
+    );
+  } else {
+    parts.push('Nothing is mounted on top.');
+  }
+  if (badge) {
+    const what = badge === 'triangle' ? 'triangle with its point up' : 'square';
+    parts.push(`A ${colourName(YELLOW)} ${what} is fixed to the face of the body.`);
+  }
+  return parts.join(' ');
+}
+
+export const BuoyDisplay: React.FC<BuoyDisplayProps> = ({ type, label, a11y }) => {
   return (
     <div className="flex flex-col items-center gap-3 select-none w-full">
       {label && (
@@ -308,7 +353,7 @@ export const BuoyDisplay: React.FC<BuoyDisplayProps> = ({ type, label }) => {
 
       <div className="w-full max-w-[240px] rounded-xl border border-slate-800 bg-slate-900/60 p-3 backdrop-blur-sm">
         {isDrawn(type) ? (
-          drawnBuoy(type)
+          drawnBuoy(type, a11y)
         ) : (
           <img
             src={BUOY_IMAGES[type]}

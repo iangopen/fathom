@@ -21,7 +21,7 @@ import { VesselProfile, describeVesselProfile } from '../drills/colregs/componen
 import { VesselScenario, describeScenario } from '../drills/colregs/components/VesselScenario';
 import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/components/SoundSignalDisplay';
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
-import { BuoyDisplay, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
+import { BuoyDisplay, BUOY_IMAGES, describeBuoy } from '../drills/colregs/components/BuoyDisplay';
 import { DistressDisplay, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
 import { PfdDisplay, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
@@ -184,7 +184,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   if (anchor) return node('anchor', () => <AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));
 
   const buoy = QUESTION_BUOYS[questionId];
-  if (buoy) return node('buoy', () => <BuoyDisplay type={buoy} label="Mark" />, photo('buoy', buoy, BUOY_IMAGES));
+  if (buoy) {
+    return node(
+      'buoy',
+      (a11y) => <BuoyDisplay type={buoy} label="Mark" a11y={a11y} />,
+      photo('buoy', buoy, BUOY_IMAGES),
+      describeBuoy(buoy) ?? undefined
+    );
+  }
 
   const distress = QUESTION_DISTRESS[questionId];
   if (distress) return node('distress', () => <DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
