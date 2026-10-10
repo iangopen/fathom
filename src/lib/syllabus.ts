@@ -118,13 +118,14 @@ export const CATEGORIES: ChartCategory[] = [
     status: 'live',
     source: 'day-shapes',
     blurb:
-      'Balls, cones and diamonds read the way you meet them - the shape is shown and you say what she is. The NUC, RAM, CBD and fishing shapes are drilled on Vessel types.',
+      'Balls, cones and diamonds read the way you meet them - the shape is shown and you say what she is. The NUC, RAM, CBD and fishing shapes are the Vessel types questions, drilled here as well.',
     topics: [
       'Anchor ball and aground',
       'Sail under power',
       'The tow diamond',
       'Mineclearance',
       'Outlying gear',
+      'NUC, RAM, CBD and fishing',
     ],
   },
   {
