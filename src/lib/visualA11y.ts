@@ -34,10 +34,13 @@ export function imgProps(a11y?: SvgA11y): {
 // than looked up in a table of the palettes' hex values: a table would be a
 // second copy of every palette, free to drift from the first. Only the plain
 // words a viewer would use - the drawings use nothing subtler.
-export function colourName(hex: string): string {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex.trim());
-  if (!m) throw new Error(`colourName: not a #rrggbb colour: ${hex}`);
-  const [r, g, b] = [m[1], m[2], m[3]].map((h) => parseInt(h, 16) / 255);
+export function colourName(colour: string): string {
+  const hex = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(colour.trim());
+  const rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(colour.trim());
+  if (!hex && !rgb) throw new Error(`colourName: not a #rrggbb or rgb() colour: ${colour}`);
+  const [r, g, b] = hex
+    ? [hex[1], hex[2], hex[3]].map((h) => parseInt(h, 16) / 255)
+    : [rgb![1], rgb![2], rgb![3]].map((v) => Number(v) / 255);
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const l = (max + min) / 2;

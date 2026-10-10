@@ -16,7 +16,7 @@ import {
   QUESTION_VISUAL_AFTER_ANSWER,
 } from '../drills/colregs';
 import { LightDisplay, describeLights } from '../drills/colregs/components/LightDisplay';
-import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
+import { DayShapeDisplay, describeDayShapes } from '../drills/colregs/components/DayShapeDisplay';
 import { VesselProfile } from '../drills/colregs/components/VesselProfile';
 import { VesselScenario } from '../drills/colregs/components/VesselScenario';
 import { SoundSignalDisplay } from '../drills/colregs/components/SoundSignalDisplay';
@@ -144,12 +144,17 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   if (shapes) {
     return node(
       'shapes',
-      () => <DayShapeDisplay
-        shapes={shapes.shapes}
-        position={shapes.position}
-        arrangement={shapes.arrangement}
-        label="Day Shapes"
-      />
+      (a11y) => (
+        <DayShapeDisplay
+          shapes={shapes.shapes}
+          position={shapes.position}
+          arrangement={shapes.arrangement}
+          label="Day Shapes"
+          a11y={a11y}
+        />
+      ),
+      undefined,
+      describeDayShapes(shapes.shapes, shapes.position, shapes.arrangement)
     );
   }
 

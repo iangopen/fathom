@@ -1,4 +1,5 @@
 import React from 'react';
+import { SvgA11y, imgProps, colourName, counted, capitalise, joinList } from '../../../lib/visualA11y';
 
 export type DayShapeName = 'ball' | 'cone-down' | 'cone-up' | 'diamond' | 'cylinder';
 export type MastPosition = 'forward' | 'main' | 'aft';
@@ -9,6 +10,7 @@ interface DayShapeDisplayProps {
   position?: MastPosition;
   arrangement?: ShapeArrangement;
   label?: string;
+  a11y?: SvgA11y;
 }
 
 // Shapes are black by COLREGS; on the dark hull they are drawn near-black with a
@@ -83,11 +85,50 @@ const SHAPE_LABELS: Record<DayShapeName, string> = {
   'cylinder':  'Cylinder',
 };
 
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from the same spec the drawing is placed from: which mast, which
+// shapes top to bottom, and whether they hang in a column or from a crossbar.
+// The shape words are SHAPE_LABELS and the mast is its own label - both are
+// printed on the drawing itself, so the description adds order and
+// arrangement but no word a sighted reader is not already shown.
+export function describeDayShapes(
+  shapes: DayShapeName[],
+  position: MastPosition = 'main',
+  arrangement: ShapeArrangement = 'vertical'
+): string {
+  const mast = `Seen from above, bow at the top, with one mast labelled ${MAST_POSITIONS[position].label}`;
+  const colour = colourName(SHAPE_FILL);
+  // "Cone, apex down" reads as two list items when spoken in a list, so the
+  // label's comma becomes "with its".
+  const word = (s: DayShapeName) => SHAPE_LABELS[s].toLowerCase().replace(', ', ' with its ');
+
+  if (shapes.length === 0) return `${mast}. No shapes are shown on it.`;
+
+  if (arrangement === 'yardarm') {
+    const [top, ...ends] = shapes;
+    return (
+      `${mast} and a crossbar across it. ${capitalise(counted(shapes.length, 'shape'))}, all ${colour}: ` +
+      `${joinList([
+        `a ${word(top)} at the top of the mast`,
+        ...ends.map((s, i) => `a ${word(s)} at the ${i === 0 ? 'left' : 'right'} end of the crossbar`),
+      ])}.`
+    );
+  }
+
+  if (shapes.length === 1) return `${mast}. One ${colour} shape is shown on it: ${word(shapes[0])}.`;
+  return (
+    `${mast}. ${capitalise(counted(shapes.length, 'shape'))}, all ${colour}, are shown on it in a vertical line, ` +
+    `from top to bottom: ${joinList(shapes.map(word))}.`
+  );
+}
+
 export const DayShapeDisplay: React.FC<DayShapeDisplayProps> = ({
   shapes,
   position = 'main',
   arrangement = 'vertical',
   label,
+  a11y,
 }) => {
   const mast = MAST_POSITIONS[position];
 
@@ -127,6 +168,7 @@ export const DayShapeDisplay: React.FC<DayShapeDisplayProps> = ({
           viewBox="0 0 200 260"
           className="w-full drop-shadow-2xl"
           xmlns="http://www.w3.org/2000/svg"
+          {...imgProps(a11y)}
         >
           <defs>
             <linearGradient id="dsHullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
