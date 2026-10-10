@@ -233,22 +233,80 @@ to every accessible name, including the compass points.
 `src/__tests__/answerA11y.test.tsx` pins all of it with Testing Library in
 jsdom: focus after answering and after Next in both drills; live region text
 before, after a right and a wrong answer, and in the exam; options focusable
-with their state in words; no alt / aria-label / title in any of the 123
-visuals drawn before an answer (2026-10-09) carrying a word only its answer uses; no compass point named for
+with their state in words; no alt / aria-label / title in any of the 122
+visuals drawn before an answer (2026-10-09, dk-13 now held back) carrying a word only its answer uses; no compass point named for
 itself; and axe-core (16 rules evaluated) finding zero violations on an
 unanswered and an answered colregs, photo and compass question. axe cannot
 judge colour contrast in jsdom; it reports it as incomplete, not passed.
 
 Still open:
 - **A real screen-reader pass by hand** (NVDA or VoiceOver) has not been
-  done. Everything above is verified in jsdom and with a keyboard in Chrome
-  against `npm run preview`, not by listening.
-- **Drawn visuals have no text equivalent.** Lights, flags, highlighted boat
-  parts and the like are SVGs with a stray caption at most. The flipped
-  day-shape and sound questions describe the signal in their prompt, so
-  they can be answered without the picture, but most drawn questions cannot.
-  Describing them is content work and must not describe the answer (the
-  lights, not the vessel).
+  done. Everything above, and the drawing descriptions below, is verified in
+  jsdom and in Chrome's computed accessibility tree on `npm run preview`,
+  not by listening.
+- **Whether sighted players get a "Describe" toggle** for the drawing
+  descriptions is a product decision; they are visually hidden for now.
+- **Scenario labels sit on their own arrowheads** in some diagrams (the
+  label is offset 22-26px along the arrow, which is about the arrow's
+  length; plainly visible in sail-vs-sail). Cosmetic, noticed and left.
+
+### Text equivalents for the drawings (2026-10-09)
+Every drawn visual - 101 before an answer, plus the three held back until
+one - has a description a screen reader reads after the drawing's name. The
+21 photographs keep their frame-only alt and have none.
+
+**The describe-from-data rule.** A description is generated, never written
+by hand, by one function per drawing type that reads the same data the
+drawing is painted from: `describeLights`, `describeDayShapes`,
+`describeSoundSignal`, `describeVesselProfile`, `describeScenario`,
+`describeBuoy`, `describeDistress`, `describePfd`, `describeBoatPart`,
+`describeFlag`, each beside its component. It says what a sighted reader
+sees - positions, colours, shapes, counts, order - and never what it means.
+A drawing whose parts were hand geometry (distress, PFDs, boat parts) was
+first moved onto a table it paints from, with the markup checked
+byte-identical before and after. Colour words come from the colour itself
+(`colourName` in `src/lib/visualA11y.ts`), not from a second copy of the
+palettes.
+- Exposure: the `<svg>` is `role="img"`, its `aria-label` names only the KIND
+  (`VISUAL_NAMES` in VisualPanel - "Flag diagram", "Scene diagram"), and
+  `aria-describedby` points at an `sr-only` `<p>` VisualPanel renders with a
+  `useId` id. role="img" goes on the SVG itself, not a wrapper, so the sound
+  diagram's Play button stays a button. The kind names had to be neutral:
+  "Vessel encounter diagram" and "Signal diagram" both failed the names
+  check against answers that use those words.
+- Names are not answers: lights are described by colour, place and arc,
+  never as "masthead" or "anchor" lights; buoy bodies as "tapered" or
+  "straight-sided", never nun or can; boat parts by where the highlight sits
+  ("the right-hand end", "from the top edge of the side down to the surface
+  of the water"), never by any part name.
+- `visualDescriptions.test.tsx` renders each drawing and checks the
+  description against what the SVG actually paints (counts, colours, order,
+  arrangement), pins one question per type word for word, and fails any
+  drawn visual without a description or any photo with one.
+
+**The extended leak guard** is the description block in
+`answerA11y.test.tsx`, with no allowlist. Before the answer, a description
+may not contain the answer label; a word only the right answer uses, unless
+the prompt already says it or the drawing prints it; a vessel class the
+answer names; any phonetic flag name; or the subject vocabulary of its kind
+(part names, mark types, PFD types, light types, "distress"). A short list
+of function words ("with", "both", "vessel") is ignored. Descriptions are
+also in the panel text the older checks read, so "no drawing labels a vessel
+the right answer names" covers them too. The guard found real leaks on its
+first runs - "through", "other", "course" - and each was fixed by rewording
+the generator, not by loosening the guard.
+
+**dk-13 is now held back until answered.** It asks which side is the port
+side and answers "the left-hand side", and its drawing picked out the left
+half of the hull: the picture was the answer, to sighted players too, and no
+description could avoid "left". It joins ss-07 and ss-16 in
+`QUESTION_VISUAL_AFTER_ANSWER`.
+
+Two drawing bugs found on the way and fixed, each checked in a screenshot:
+the sidelight arcs fanned forward and across the hull (Rule 21(b) puts each
+from right ahead to 22.5 degrees abaft its own beam), and the wind-to-port
+vessel in the sail-vs-sail scenario pointed her bow against her own course
+arrow.
 
 Resolved (2026-10-09): **ds-12 cites Rule 30(e)**, not 30(g). It asks for the
 under-7-metre anchor exemption, which is 30(e) in both the International
@@ -270,6 +328,7 @@ vh-17) that labelled the vessel the answer names. The fixes:
 - Drawing shown only after answering, for the two that cannot be flipped:
   ss-07 and ss-16 ask how long a blast lasts, which the legend states.
   That list is `QUESTION_VISUAL_AFTER_ANSWER`, and a test pins it by hand.
+  dk-13 joined it later; see the drawing descriptions above.
 - Labels: a scenario vessel marked `typeAfterAnswer` is drawn unlabelled
   until the answer.
 
@@ -401,7 +460,7 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
   (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
   build toolchain - nothing a user's browser loads.
-- Tests: 14 files / 1048 tests (2026-10-09). Plain `npm test`, no flags, on
+- Tests: 15 files / 1082 tests (2026-10-09, after the drawing descriptions). Plain `npm test`, no flags, on
   any Node from 22 up.
 - **Node versions.** CI runs Node 22; `.nvmrc` says 22 and `engines` says
   `>=22`. `npm test` passes unflagged on 22, 24, 25 and 26 (verified on

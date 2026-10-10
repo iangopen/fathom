@@ -3,6 +3,30 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-09 - Text equivalents for the drawings
+
+- Inventory first: 104 drawn visuals across ten types (lights 13, day shapes
+  9, sounds 16, vessel profiles 6, scenarios 17, drawn buoys 6, drawn distress
+  6, drawn PFDs 3, boat parts 13, flags 15), plus 21 photographs out of
+  scope. Before, a screen reader heard the panel captions and the SVG's
+  loose text - "Vessel Lights BOW STERN PORT STBD", "Mark", "Highlighted".
+- One commit per type; infrastructure went in with lights. The guard's
+  first runs caught filler words that happened to be distinctive in an
+  answer ("through", "other", "course") and two kind names ("Vessel
+  encounter diagram", "Signal diagram"); all reworded at the source.
+- Writing the generators surfaced two drawing bugs (sidelight arcs, the
+  sail-vs-sail hull) and one drawing that was its own answer (dk-13). All
+  three fixed in their own commits, each with a before/after screenshot.
+- Gotchas, for next time: a Python heredoc turned a regex `\b` into a
+  backspace character (again - see the 2026-10-06 entry); several component
+  files are CRLF, so scripted string replacements need line endings
+  normalised; `textContent` runs neighbouring SVG labels together, so read
+  text node by node; and stopping a background `npm run preview` task left
+  its node child holding port 4173 - stop the process itself.
+- The accessibility tree was read with CDP `Accessibility.getPartialAXTree`
+  in headless Chrome, because the Claude in Chrome extension was not
+  connected.
+
 ## 2026-10-09 - Follow-ups to the drawing-leak session
 
 - Test environment: Node 25 failed 27 tests (CLAUDE.md said 24; later tests
