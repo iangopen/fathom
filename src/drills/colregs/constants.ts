@@ -23,6 +23,11 @@ export interface ColregsQuestion {
   options: string[];
   correctAnswer: string;
   explanation: string;
+  // Other cards that also drill this question, under the same id. `category`
+  // is still its one home: the bucket it is written in, the card its answers
+  // are credited to, and the label shown beside it. See
+  // COLREGS_DECK_BY_CATEGORY below.
+  alsoOn?: ColregsCategory[];
 }
 
 // Not everything in this bank is governed by the COLREGS. Anchor types are
@@ -1225,11 +1230,17 @@ const dayShapesQuestions: ColregsQuestion[] = [
 // type. Each cue is a real COLREGS signal - see VesselProfile.tsx. A
 // power-driven vessel is deliberately not asked: underway she carries no day
 // shape, so there is nothing to draw that would distinguish her.
+//
+// Every one of them is also a day-shape question, so all six are drilled on the
+// Day shapes card as well (`alsoOn`). Day shapes once had its own copies of
+// five of them; those were dropped as duplicates, and this is how the card
+// keeps the shapes without a second copy of any question.
 
 const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-01',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel is showing two black balls in a vertical line. What is she?',
     options: [
       'A vessel not under command',
@@ -1244,6 +1255,7 @@ const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-02',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel displays a ball, a diamond and a ball in a vertical line. What is she?',
     options: [
       'A vessel restricted in her ability to manoeuvre',
@@ -1258,6 +1270,7 @@ const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-03',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel displays a single black cylinder. What is she?',
     options: [
       'A vessel constrained by her draft',
@@ -1272,6 +1285,7 @@ const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-04',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel displays two cones with their apexes together, and has gear streaming astern. What is she?',
     options: [
       'A vessel engaged in fishing',
@@ -1286,6 +1300,7 @@ const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-05',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel is under sail and carries no day shape at all. What is she?',
     options: [
       'A sailing vessel under sail alone',
@@ -1300,6 +1315,7 @@ const vesselTypesQuestions: ColregsQuestion[] = [
   {
     id: 'vt-06',
     category: 'vessel-types',
+    alsoOn: ['day-shapes'],
     prompt: 'This vessel displays a single black diamond and has another vessel on a towline astern. What is she?',
     options: [
       'A vessel towing, where the length of the tow exceeds 200 metres',
@@ -4830,6 +4846,22 @@ export const COLREGS_QUESTIONS_BY_CATEGORY: Record<ColregsCategory, ColregsQuest
   'tides': tidesQuestions,
   'signal-flags': signalFlagQuestions,
 };
+
+// What each card drills: its own bucket, then any question from another bucket
+// that names it in `alsoOn`. The cross-listed ones are the same objects, not
+// copies, so a question has one id and one ledger record wherever it is asked.
+// The buckets above stay an exact partition of the bank; this is built from
+// them, so a question cannot be on a card without having a home.
+export const COLREGS_DECK_BY_CATEGORY: Record<ColregsCategory, ColregsQuestion[]> =
+  Object.fromEntries(
+    (Object.keys(COLREGS_QUESTIONS_BY_CATEGORY) as ColregsCategory[]).map((cat) => [
+      cat,
+      [
+        ...COLREGS_QUESTIONS_BY_CATEGORY[cat],
+        ...COLREGS_QUESTIONS.filter((q) => q.category !== cat && q.alsoOn?.includes(cat)),
+      ],
+    ])
+  ) as Record<ColregsCategory, ColregsQuestion[]>;
 
 export const CATEGORY_LABELS: Record<ColregsCategory, string> = {
   'navigation-lights': 'Navigation Lights',

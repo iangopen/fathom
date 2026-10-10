@@ -50,14 +50,22 @@ describe('every category draws through the shared picker', () => {
   });
 
   it('routes the whole bank through the category pools, with nothing orphaned', () => {
+    // A question can be on more than one card (`alsoOn`), so count each pool
+    // entry once per card it is declared on: its home, plus every cross-listing.
+    // Anything else in a pool - a stray, or a second copy - breaks the equality.
     const pooled = CATEGORIES.flatMap(cat => getPool(cat).map(q => q.id)).sort();
+    const declared = COLREGS_QUESTIONS.flatMap(q => [q.id, ...(q.alsoOn ?? []).map(() => q.id)]).sort();
+    expect(pooled).toEqual(declared);
     const all = getPool('all').map(q => q.id).sort();
-    expect(pooled).toEqual(all);
     expect(all).toEqual(COLREGS_QUESTIONS.map(q => q.id).sort());
     // Each question sits in the pool its own `category` field names, so no
-    // category can be drawing from a bank that is not its own.
+    // category can be drawing from a bank that is not its own, and anything
+    // else in a pool is there because it names that pool in `alsoOn`.
+    for (const q of COLREGS_QUESTIONS) expect(getPool(q.category)).toContain(q);
     for (const cat of CATEGORIES) {
-      for (const q of getPool(cat)) expect(q.category).toBe(cat);
+      for (const q of getPool(cat)) {
+        if (q.category !== cat) expect(q.alsoOn ?? []).toContain(cat);
+      }
     }
   });
 });

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useLayoutEffect, useRef } from
 import { ArrowLeft } from 'lucide-react';
 import {
   COLREGS_QUESTIONS,
-  COLREGS_QUESTIONS_BY_CATEGORY,
+  COLREGS_DECK_BY_CATEGORY,
   CATEGORY_LABELS,
   ColregsCategory,
   ColregsQuestion,
@@ -399,7 +399,7 @@ export function presentationOrder(question: ColregsQuestion): string[] {
 }
 
 export function getPool(filter: CategoryFilter): ColregsQuestion[] {
-  return filter === 'all' ? COLREGS_QUESTIONS : COLREGS_QUESTIONS_BY_CATEGORY[filter];
+  return filter === 'all' ? COLREGS_QUESTIONS : COLREGS_DECK_BY_CATEGORY[filter];
 }
 
 // The one place a run's questions are chosen. With the default plan this is

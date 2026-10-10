@@ -1,4 +1,4 @@
-import { ColregsCategory, COLREGS_QUESTIONS_BY_CATEGORY } from '../drills/colregs/constants';
+import { ColregsCategory, COLREGS_DECK_BY_CATEGORY } from '../drills/colregs/constants';
 import { COMPASS_POINTS, RELATIVE_POINTS } from '../drills/compass/constants';
 
 // The chart table indexes the syllabus, not just the question bank, so a
@@ -407,7 +407,7 @@ export function sectionByName(name: string): SyllabusSection | undefined {
 // a question to ../colregs/constants updates the chart table for free.
 export function questionCount(cat: ChartCategory): number {
   if (cat.status !== 'live' || !cat.source) return 0;
-  return COLREGS_QUESTIONS_BY_CATEGORY[cat.source].length;
+  return COLREGS_DECK_BY_CATEGORY[cat.source].length;
 }
 
 export const LIVE_CATEGORIES: ChartCategory[] = CATEGORIES.filter(
@@ -465,7 +465,7 @@ export function itemIdForPoint(gameType: string, abbr: string): string {
 
 export function itemsForCategory(cat: ChartCategory): SyllabusItem[] {
   if (cat.status === 'live' && cat.source) {
-    return COLREGS_QUESTIONS_BY_CATEGORY[cat.source].map((q) => ({
+    return COLREGS_DECK_BY_CATEGORY[cat.source].map((q) => ({
       id: q.id,
       label: q.prompt,
     }));
