@@ -21,6 +21,8 @@ import { VesselScenario, ScenarioType } from '../drills/colregs/components/Vesse
 import { BuoyDisplay, BuoyName, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
 import { QUESTION_BUOYS, QUESTION_FLAGS } from '../drills/colregs';
 import { SignalFlagDisplay, FlagName } from '../drills/colregs/components/SignalFlagDisplay';
+import { DistressDisplay, DistressSignalName, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
+import { QUESTION_DISTRESS } from '../drills/colregs';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -490,6 +492,82 @@ describe('signal flags', () => {
     expect(visualDescription('sf-01', false)).toBe(
       'One flag flying from a halyard on the left, so the hoist is on the left: a swallow-tailed flag, cut into ' +
         'two points at the fly, divided into vertical halves: white at the hoist, blue at the fly.'
+    );
+  });
+});
+
+// The countable parts of each drawn signal, read off its SVG.
+const RED_CORE = '#d8382c';
+function paintedSignal(signal: DistressSignalName, root: Element): string[] {
+  const svg = root.querySelector('svg')!;
+  const reds = [...svg.querySelectorAll('circle')].filter(c => fillOf(c) === RED_CORE);
+  switch (signal) {
+    case 'parachute-flare':
+      return [`${countWord(svg.querySelectorAll('line').length)} lines`, `one bright red light`].filter(() => reds.length === 1);
+    case 'star-rocket': {
+      const streaks = svg.querySelectorAll(`g[stroke="${RED_CORE}"] line`).length;
+      return [`${countWord(reds.length)} separate bright red lights`, `${countWord(streaks)} short red streaks`];
+    }
+    case 'flag-nc': {
+      // Painted rects only (each flag's border is fill="none"): the checks are
+      // narrower than the flag, the stripes run its full 76 width.
+      const painted = [...svg.querySelectorAll('rect')].filter(r => fillOf(r) !== 'none');
+      const checks = painted.filter(r => num(r, 'width') < 76);
+      const stripes = painted.filter(r => num(r, 'width') === 76).sort((a, b) => num(a, 'y') - num(b, 'y'));
+      const side = Math.round(Math.sqrt(checks.length));
+      const colours = [...new Set(checks.map(r => colourName(fillOf(r))))];
+      return [
+        `${countWord(side)} by ${countWord(side)} squares, alternating ${colours[0]} and ${colours[1]}`,
+        `${countWord(stripes.length)} horizontal stripes, from top to bottom: ` +
+          `${stripes.slice(0, -1).map(r => colourName(fillOf(r))).join(', ')} and ${colourName(fillOf(stripes[stripes.length - 1]))}`,
+      ];
+    }
+    case 'flag-and-ball': {
+      const ball = svg.querySelector('circle')!;
+      const flag = svg.querySelector('rect')!;
+      return [`The round shape is ${num(ball, 'cy') < num(flag, 'y') ? 'above' : 'beneath'} the flag`];
+    }
+    case 'arms': {
+      const lowered = svg.querySelectorAll('g[opacity="0.45"] line').length;
+      const curves = svg.querySelectorAll('path[stroke-dasharray="4 4"]').length;
+      return [lowered === 2 ? 'second pair of arms is drawn lowered' : 'UNMATCHED', `${countWord(curves)} dashed curves`];
+    }
+    case 'flames': {
+      const inner = svg.querySelectorAll(`g[fill="${RED_CORE}"] path`).length;
+      return [`${capitalise(countWord(inner))} flames, red inside orange`];
+    }
+    default:
+      return [];
+  }
+}
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+describe('distress signals (the drawn ones)', () => {
+  const drawn = entries<DistressSignalName>(QUESTION_DISTRESS).filter(([, s]) => !(s in DISTRESS_IMAGES));
+
+  it('describes every drawn signal, and leaves the photographs to their alt text', () => {
+    expect(drawn.length).toBeGreaterThan(0);
+    for (const [id, s] of entries<DistressSignalName>(QUESTION_DISTRESS)) {
+      expect(visualDescription(id, false) === null, id).toBe(s in DISTRESS_IMAGES);
+    }
+  });
+
+  it('counts and colours what the drawing paints', () => {
+    for (const [id, signal] of drawn) {
+      const { container } = render(<DistressDisplay signal={signal} />);
+      const expected = paintedSignal(signal, container);
+      cleanup();
+      expect(expected.length, id).toBeGreaterThan(0);
+      const d = visualDescription(id, false)!;
+      for (const part of expected) expect(d, id).toContain(part);
+    }
+  });
+
+  it('reads di-05 as written', () => {
+    expect(visualDescription('di-05', false)).toBe(
+      'Two flags on one halyard, one above the other. The upper flag is a chequerboard of four by four squares, ' +
+        'alternating blue and white. The lower flag has five horizontal stripes, from top to bottom: blue, white, ' +
+        'red, white and blue.'
     );
   });
 });

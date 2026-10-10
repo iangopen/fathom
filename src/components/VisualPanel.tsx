@@ -22,7 +22,7 @@ import { VesselScenario, describeScenario } from '../drills/colregs/components/V
 import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/components/SoundSignalDisplay';
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
 import { BuoyDisplay, BUOY_IMAGES, describeBuoy } from '../drills/colregs/components/BuoyDisplay';
-import { DistressDisplay, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
+import { DistressDisplay, DISTRESS_IMAGES, describeDistress } from '../drills/colregs/components/DistressDisplay';
 import { PfdDisplay, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
 import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
@@ -91,11 +91,11 @@ export const VISUAL_NAMES: Record<VisualKind, string> = {
   scenario: 'Encounter diagram, seen from above',
   anchor: 'Anchor',
   buoy: 'Navigation mark diagram',
-  distress: 'Signal diagram',
+  distress: 'Scene diagram',
   pfd: 'Safety equipment diagram',
   'boat-part': 'Boat diagram with one part highlighted',
   cloud: 'Sky',
-  flag: 'Signal flag diagram',
+  flag: 'Flag diagram',
 };
 
 function photo(kind: PhotoKind, name: string, images: Record<string, string>) {
@@ -194,7 +194,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const distress = QUESTION_DISTRESS[questionId];
-  if (distress) return node('distress', () => <DistressDisplay signal={distress} label="Signal" />, photo('distress', distress, DISTRESS_IMAGES));
+  if (distress) {
+    return node(
+      'distress',
+      (a11y) => <DistressDisplay signal={distress} label="Signal" a11y={a11y} />,
+      photo('distress', distress, DISTRESS_IMAGES),
+      describeDistress(distress) ?? undefined
+    );
+  }
 
   const pfd = QUESTION_PFDS[questionId];
   if (pfd) return node('pfd', () => <PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
