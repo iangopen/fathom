@@ -112,8 +112,11 @@ const LIGHT_POSITIONS: Record<LightName, { cx: number; cy: number; arc?: ArcDef 
   masthead:     { cx: 100, cy: 65,  arc: { cx: 100, cy: 65,  r: 40, startDeg: 247.5, endDeg: 112.5, color: 'rgba(255,255,255,0.07)' } },
   masthead2:    { cx: 100, cy: 105, arc: { cx: 100, cy: 105, r: 40, startDeg: 247.5, endDeg: 112.5, color: 'rgba(255,255,255,0.05)' } },
   masthead3:    { cx: 100, cy: 85,  arc: { cx: 100, cy: 85,  r: 40, startDeg: 247.5, endDeg: 112.5, color: 'rgba(255,255,255,0.04)' } },
-  port:         { cx: 62,  cy: 130, arc: { cx: 62,  cy: 130, r: 42, startDeg: 337.5, endDeg: 90,    color: 'rgba(239,68,68,0.08)'    } },
-  starboard:    { cx: 138, cy: 130, arc: { cx: 138, cy: 130, r: 42, startDeg: 270,   endDeg: 22.5,  color: 'rgba(34,197,94,0.08)'    } },
+  // Rule 21(b): each sidelight shows from right ahead to 22.5 degrees abaft
+  // its own beam. These two used to fan forward and across the hull instead,
+  // the red one towards starboard and the green towards port.
+  port:         { cx: 62,  cy: 130, arc: { cx: 62,  cy: 130, r: 42, startDeg: 247.5, endDeg: 360,   color: 'rgba(239,68,68,0.08)'    } },
+  starboard:    { cx: 138, cy: 130, arc: { cx: 138, cy: 130, r: 42, startDeg: 0,     endDeg: 112.5, color: 'rgba(34,197,94,0.08)'    } },
   stern:        { cx: 100, cy: 205, arc: { cx: 100, cy: 205, r: 40, startDeg: 112.5, endDeg: 247.5, color: 'rgba(255,255,255,0.06)' } },
   anchor:       { cx: 100, cy: 90,  arc: { cx: 100, cy: 90,  r: 44, startDeg: 0,     endDeg: 360,   color: 'rgba(255,255,255,0.05)' } },
   allRoundRed1: { cx: 100, cy: 80,  arc: { cx: 100, cy: 80,  r: 40, startDeg: 0,     endDeg: 360,   color: 'rgba(239,68,68,0.07)'    } },
