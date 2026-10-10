@@ -5,10 +5,12 @@ import { defineConfig } from 'vitest/config';
 // entirely alone.
 export default defineConfig({
   test: {
-    // Still no DOM: the one component test renders through
-    // react-dom/server rather than mounting, so the node environment is
-    // enough. See src/__tests__.
+    // Most files need no DOM and run on node. The ones that mount components
+    // opt into jsdom with a @vitest-environment docblock.
     environment: 'node',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    // Node 25+ has a global localStorage that hides jsdom's; this puts jsdom's
+    // back so `npm test` needs no flags on any Node. See the file.
+    setupFiles: ['src/__tests__/setup/jsdomStorage.ts'],
   },
 });
