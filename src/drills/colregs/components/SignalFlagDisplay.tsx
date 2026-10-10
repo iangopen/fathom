@@ -1,4 +1,5 @@
 import React from 'react';
+import { SvgA11y, imgProps, colourName, countWord, joinList } from '../../../lib/visualA11y';
 
 export type FlagName =
   | 'alpha'
@@ -20,6 +21,7 @@ export type FlagName =
 interface SignalFlagDisplayProps {
   flag: FlagName;
   label?: string;
+  a11y?: SvgA11y;
 }
 
 // One flag flying from a halyard, 220x170, drawn to the same contract as
@@ -283,14 +285,63 @@ function flagBody(flag: FlagName): React.ReactNode {
   );
 }
 
-export const SignalFlagDisplay: React.FC<SignalFlagDisplayProps> = ({ flag, label }) => (
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from FLAGS, the table the flag is painted from: its outline and
+// its field, in the order a reader sees them - hoist to fly, top to bottom.
+// It never names the letter: the colours and the pattern are the question.
+const CHARGE_WORDS: Record<Charge, string> = {
+  rect: 'square',
+  disc: 'circle',
+  diamond: 'diamond',
+};
+
+function fieldWords(field: Field): string {
+  const c = colourName;
+  switch (field.kind) {
+    case 'solid':
+      return `plain ${c(field.color)}`;
+    case 'horizontal':
+      return field.bands.length === 2
+        ? `divided into horizontal halves: ${c(field.bands[0])} over ${c(field.bands[1])}`
+        : `${countWord(field.bands.length)} horizontal stripes, from top to bottom: ${joinList(field.bands.map(c))}`;
+    case 'vertical':
+      return field.stripes.length === 2
+        ? `divided into vertical halves: ${c(field.stripes[0])} at the hoist, ${c(field.stripes[1])} at the fly`
+        : `${countWord(field.stripes.length)} vertical stripes, from hoist to fly: ${joinList(field.stripes.map(c))}`;
+    case 'diagonal':
+      return (
+        `divided diagonally from the top corner at the hoist to the bottom corner at the fly: ` +
+        `${c(field.upper)} above the line, ${c(field.lower)} below it`
+      );
+    case 'checker':
+      return (
+        `a chequerboard of ${countWord(field.cols)} by ${countWord(field.rows)} squares, alternating ` +
+        `${c(field.a)} and ${c(field.b)}, with ${c(field.a)} in the top corner at the hoist`
+      );
+    case 'charged':
+      return `${c(field.ground)}, with a ${c(field.color)} ${CHARGE_WORDS[field.charge]} in the centre`;
+    case 'saltire':
+      return `${c(field.ground)}, with a ${c(field.color)} diagonal cross running corner to corner`;
+  }
+}
+
+export function describeFlag(flag: FlagName): string {
+  const spec = FLAGS[flag];
+  const outline = spec.swallowtail
+    ? 'a swallow-tailed flag, cut into two points at the fly'
+    : 'a rectangular flag';
+  return `One flag flying from a halyard on the left, so the hoist is on the left: ${outline}, ${fieldWords(spec.field)}.`;
+}
+
+export const SignalFlagDisplay: React.FC<SignalFlagDisplayProps> = ({ flag, label, a11y }) => (
   <div className="flex flex-col items-center gap-3 select-none w-full">
     {label && (
       <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-mono">{label}</div>
     )}
 
     <div className="w-full max-w-[240px] rounded-xl border border-slate-800 bg-slate-900/60 p-3 backdrop-blur-sm">
-      <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg" {...imgProps(a11y)}>
         {flagBody(flag)}
       </svg>
     </div>

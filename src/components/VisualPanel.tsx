@@ -26,7 +26,7 @@ import { DistressDisplay, DISTRESS_IMAGES } from '../drills/colregs/components/D
 import { PfdDisplay, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
 import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
-import { SignalFlagDisplay } from '../drills/colregs/components/SignalFlagDisplay';
+import { SignalFlagDisplay, describeFlag } from '../drills/colregs/components/SignalFlagDisplay';
 import { creditFor, ImageCredit, PhotoKind } from '../lib/imageCredits';
 import { PhotoCredit } from './PhotoCredit';
 import { SvgA11y } from '../lib/visualA11y';
@@ -206,7 +206,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   if (cloud) return node('cloud', () => <CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));
 
   const flag = QUESTION_FLAGS[questionId];
-  if (flag) return node('flag', () => <SignalFlagDisplay flag={flag} label="Hoist" />);
+  if (flag) {
+    return node(
+      'flag',
+      (a11y) => <SignalFlagDisplay flag={flag} label="Hoist" a11y={a11y} />,
+      undefined,
+      describeFlag(flag)
+    );
+  }
 
   return null;
 }

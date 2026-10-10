@@ -19,7 +19,8 @@ import { VesselProfile, VesselTypeName } from '../drills/colregs/components/Vess
 import { QUESTION_VESSEL_TYPES, QUESTION_SCENARIOS } from '../drills/colregs';
 import { VesselScenario, ScenarioType } from '../drills/colregs/components/VesselScenario';
 import { BuoyDisplay, BuoyName, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
-import { QUESTION_BUOYS } from '../drills/colregs';
+import { QUESTION_BUOYS, QUESTION_FLAGS } from '../drills/colregs';
+import { SignalFlagDisplay, FlagName } from '../drills/colregs/components/SignalFlagDisplay';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -420,6 +421,75 @@ describe('buoys (the drawn marks)', () => {
       'Side view of a buoy: a broad, squat base with a tall narrow column standing on it, painted in three ' +
         'horizontal bands, from top to bottom: yellow, black and yellow. On a short staff on top, two black cones, ' +
         'one above the other, the upper pointing down and the lower pointing up, so their points meet.'
+    );
+  });
+});
+
+// A flag read back off its SVG: the outline (a swallowtail has five corners),
+// what kind of field is painted through the clip, and its colours in the order
+// a reader takes them - top to bottom, hoist to fly, ground before charge.
+const COLOUR_WORD = /\b(red|blue|yellow|black|white|green|orange)\b/g;
+function paintedFlag(root: Element): { swallowtail: boolean; kind: string; colours: string[] } {
+  const outline = pointsOf(root.querySelector('path[fill="none"]')?.getAttribute('d') ?? '');
+  const field = root.querySelector('g[clip-path]')!;
+  const rects = [...field.querySelectorAll('rect')];
+  const polys = [...field.querySelectorAll('polygon')];
+  const circle = field.querySelector('circle');
+  const cross = field.querySelector('g[stroke]');
+  const c = (el: Element) => colourName(fillOf(el));
+  const swallowtail = outline.length === 5;
+
+  if (cross) return { swallowtail, kind: 'diagonal cross', colours: [c(rects[0]), colourName(cross.getAttribute('stroke')!)] };
+  if (circle) return { swallowtail, kind: 'circle', colours: [c(rects[0]), c(circle)] };
+  if (polys.length === 1) return { swallowtail, kind: 'diamond', colours: [c(rects[0]), c(polys[0])] };
+  if (polys.length === 2) {
+    // The upper triangle is the one with two corners on the top edge.
+    const topY = Math.min(...polys.flatMap(p => pointsOf(p.getAttribute('points')!).map(q => q[1])));
+    const onTop = (p: Element) => pointsOf(p.getAttribute('points')!).filter(q => q[1] === topY).length;
+    const [upper, lower] = [...polys].sort((a, b) => onTop(b) - onTop(a));
+    return { swallowtail, kind: 'diagonally', colours: [c(upper), c(lower)] };
+  }
+  if (rects.length === 1) return { swallowtail, kind: 'plain', colours: [c(rects[0])] };
+  if (rects.length === 2 && num(rects[1], 'width') < num(rects[0], 'width') && num(rects[1], 'height') < num(rects[0], 'height')) {
+    return { swallowtail, kind: 'square', colours: [c(rects[0]), c(rects[1])] };
+  }
+  // Stripes run the full length of the flag (128 wide) or its full depth (88
+  // high); a chequerboard's squares do neither.
+  if (rects.every(r => num(r, 'width') >= 128)) {
+    return { swallowtail, kind: 'horizontal', colours: rects.sort((a, b) => num(a, 'y') - num(b, 'y')).map(c) };
+  }
+  if (rects.every(r => num(r, 'height') >= 88)) {
+    return { swallowtail, kind: 'vertical', colours: rects.sort((a, b) => num(a, 'x') - num(b, 'x')).map(c) };
+  }
+  // A chequerboard: its two colours, then the one in the top hoist corner.
+  const first = rects.reduce((a, b) => (num(b, 'x') + num(b, 'y') < num(a, 'x') + num(a, 'y') ? b : a));
+  const other = rects.find(r => c(r) !== c(first))!;
+  return { swallowtail, kind: 'chequerboard', colours: [c(first), c(other), c(first)] };
+}
+
+describe('signal flags', () => {
+  it('has a description for every flag question', () => {
+    for (const [id] of entries(QUESTION_FLAGS)) expect(visualDescription(id, false), id).toBeTruthy();
+  });
+
+  it('gives the outline, the kind of field and its colours in the order the flag paints them', () => {
+    for (const [id, flag] of entries<FlagName>(QUESTION_FLAGS)) {
+      const { container } = render(<SignalFlagDisplay flag={flag} />);
+      const painted = paintedFlag(container);
+      cleanup();
+      const d = visualDescription(id, false)!;
+      expect(d.includes('swallow-tailed'), id).toBe(painted.swallowtail);
+      expect(d, id).toContain(painted.kind);
+      // The colour words after the outline, in order.
+      const field = d.slice(d.indexOf(painted.swallowtail ? 'at the fly,' : 'rectangular flag,'));
+      expect(field.match(COLOUR_WORD), id).toEqual(painted.colours);
+    }
+  });
+
+  it('reads sf-01 as written', () => {
+    expect(visualDescription('sf-01', false)).toBe(
+      'One flag flying from a halyard on the left, so the hoist is on the left: a swallow-tailed flag, cut into ' +
+        'two points at the fly, divided into vertical halves: white at the hoist, blue at the fly.'
     );
   });
 });
