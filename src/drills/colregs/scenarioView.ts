@@ -124,7 +124,9 @@ const SCENARIOS: Record<ScenarioType, { vessels: VesselDef[]; caption: string }>
   'sail-vs-sail': {
     caption: 'Rule 12 — with the wind on different sides, the vessel with the wind on her port side keeps clear.',
     vessels: [
-      { x: 95,  y: 105, rotation: 20,  role: 'give-way', label: 'Wind to Port',  showArrow: true, arrowDx: 14, arrowDy: 26 },
+      // Rotated to face her own course arrow, down and to the right. At 20
+      // degrees her bow pointed up the page while the arrow ran the other way.
+      { x: 95,  y: 105, rotation: 152, role: 'give-way', label: 'Wind to Port',  showArrow: true, arrowDx: 14, arrowDy: 26 },
       { x: 205, y: 185, rotation: -20, role: 'stand-on', label: 'Wind to Stbd',  showArrow: true, arrowDx: -14, arrowDy: -26 },
     ],
   },
