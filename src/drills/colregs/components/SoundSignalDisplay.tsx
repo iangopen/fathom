@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Volume2 } from 'lucide-react';
+import { SvgA11y, imgProps, countWord } from '../../../lib/visualA11y';
 
 // 'stroke' is one separate stroke on the bell - Rule 35(h)'s three strokes
 // before and after the rapid ringing of a vessel aground.
@@ -11,6 +12,7 @@ interface SoundSignalDisplayProps {
   // Silence between blasts, in seconds. Defaults to GAP_S; Rule 35(b) sets its
   // own interval, so that signal passes an override rather than reusing this.
   gapS?: number;
+  a11y?: SvgA11y;
 }
 
 // Rule 32 durations, in seconds.
@@ -46,10 +48,48 @@ function markWidth(mark: BlastMark): number {
   return BELL_W;
 }
 
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from the sequence and gap the diagram is laid out from: the marks
+// left to right, runs of the same mark counted together, a gap that is not
+// the usual one, and the legend - which the diagram prints, and only for the
+// marks it contains. It never says what the signal means.
+const MARK_WORDS: Record<BlastMark, [string, string]> = {
+  short: ['short blast', 'short blasts'],
+  prolonged: ['prolonged blast', 'prolonged blasts'],
+  bell: ['rapid ringing of the bell', 'rapid ringings of the bell'],
+  stroke: ['stroke on the bell', 'strokes on the bell'],
+};
+
+export function describeSoundSignal(sequence: BlastMark[], gapS: number = GAP_S): string {
+  const runs: { mark: BlastMark; n: number }[] = [];
+  for (const mark of sequence) {
+    const last = runs[runs.length - 1];
+    if (last && last.mark === mark) last.n += 1;
+    else runs.push({ mark, n: 1 });
+  }
+  const phrases = runs.map(({ mark, n }) => `${countWord(n)} ${MARK_WORDS[mark][n === 1 ? 0 : 1]}`);
+  const order = phrases.length === 1 ? phrases[0] : `${phrases.slice(0, -1).join(', then ')}, then ${phrases[phrases.length - 1]}`;
+  const gap = gapS !== GAP_S ? `, with a gap of about ${gapS} seconds between them` : '';
+
+  // The legend as printed, and only the entries the diagram prints for it.
+  const key: string[] = [];
+  if (sequence.includes('short')) key.push(`short blast, ${SHORT_S} second`);
+  if (sequence.includes('prolonged')) key.push('prolonged blast, 4 to 6 seconds');
+  if (sequence.includes('bell')) key.push(`rapid ringing, ${BELL_S} seconds`);
+  if (sequence.includes('stroke')) key.push('one stroke, a single upright tick');
+
+  return (
+    `Marks along a time line, read left to right: ${order}${gap}. ` +
+    `Key: ${key.join('; ')}. A Play button below sounds the signal.`
+  );
+}
+
 export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
   sequence,
   label,
   gapS = GAP_S,
+  a11y,
 }) => {
   const [playing, setPlaying] = useState(false);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -197,6 +237,7 @@ export const SoundSignalDisplay: React.FC<SoundSignalDisplayProps> = ({
           viewBox={`0 0 ${totalW} ${VIEW_H}`}
           className="w-full"
           xmlns="http://www.w3.org/2000/svg"
+          {...imgProps(a11y)}
         >
           {/* Time axis */}
           <line

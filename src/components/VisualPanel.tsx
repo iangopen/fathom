@@ -19,7 +19,7 @@ import { LightDisplay, describeLights } from '../drills/colregs/components/Light
 import { DayShapeDisplay, describeDayShapes } from '../drills/colregs/components/DayShapeDisplay';
 import { VesselProfile } from '../drills/colregs/components/VesselProfile';
 import { VesselScenario } from '../drills/colregs/components/VesselScenario';
-import { SoundSignalDisplay } from '../drills/colregs/components/SoundSignalDisplay';
+import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/components/SoundSignalDisplay';
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
 import { BuoyDisplay, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
 import { DistressDisplay, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
@@ -131,12 +131,17 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   if (sounds) {
     return node(
       'sounds',
-      () => <SoundSignalDisplay
-        key={questionId}
-        sequence={sounds}
-        gapS={QUESTION_SOUND_GAPS[questionId]}
-        label="Blast Sequence"
-      />
+      (a11y) => (
+        <SoundSignalDisplay
+          key={questionId}
+          sequence={sounds}
+          gapS={QUESTION_SOUND_GAPS[questionId]}
+          label="Blast Sequence"
+          a11y={a11y}
+        />
+      ),
+      undefined,
+      describeSoundSignal(sounds, QUESTION_SOUND_GAPS[questionId])
     );
   }
 

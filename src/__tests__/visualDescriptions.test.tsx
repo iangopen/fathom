@@ -6,7 +6,15 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { colourName, countWord } from '../lib/visualA11y';
 import { visualDescription } from '../components/VisualPanel';
-import { QUESTION_LIGHTS, QUESTION_SHAPES, DayShapeSpec } from '../drills/colregs';
+import {
+  QUESTION_LIGHTS,
+  QUESTION_SHAPES,
+  QUESTION_SOUNDS,
+  QUESTION_SOUND_GAPS,
+  QUESTION_VISUAL_AFTER_ANSWER,
+  DayShapeSpec,
+} from '../drills/colregs';
+import { SoundSignalDisplay, BlastMark } from '../drills/colregs/components/SoundSignalDisplay';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -134,6 +142,83 @@ describe('day shapes', () => {
     expect(visualDescription('ds-07', false)).toBe(
       'Seen from above, bow at the top, with one mast labelled Fore Mast. ' +
         'Three shapes, all black, are shown on it in a vertical line, from top to bottom: ball, ball and ball.'
+    );
+  });
+});
+
+// The marks a sound diagram paints, left to right, read off the SVG: every
+// mark is a rect of height 16 on the axis. 16 wide is a short blast, 62 a
+// prolonged one, and 3.2 a tick - nine ticks at close spacing are the rapid
+// ringing, a tick standing apart is one stroke.
+function paintedMarks(root: Element): BlastMark[] {
+  const rects = [...root.querySelectorAll('rect[height="16"]')]
+    .map(r => ({ x: num(r, 'x'), w: num(r, 'width') }))
+    .sort((a, b) => a.x - b.x);
+  const out: BlastMark[] = [];
+  let i = 0;
+  while (i < rects.length) {
+    const { w } = rects[i];
+    if (w === 16) { out.push('short'); i += 1; continue; }
+    if (w === 62) { out.push('prolonged'); i += 1; continue; }
+    let j = i + 1;
+    while (j < rects.length && rects[j].w === rects[i].w && rects[j].x - rects[j - 1].x < 10) j += 1;
+    if (j - i === 9) out.push('bell');
+    else for (let k = i; k < j; k += 1) out.push('stroke');
+    i = j;
+  }
+  return out;
+}
+
+// "two prolonged blasts, then one short blast" -> the marks it names, in order.
+const NUMBER = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+function marksSaid(description: string): BlastMark[] {
+  const list = /read left to right: (.*?)(, with a gap|\. Key)/.exec(description)?.[1] ?? '';
+  return list.split(', then ').flatMap(phrase => {
+    const [n, ...rest] = phrase.split(' ');
+    const words = rest.join(' ');
+    const mark: BlastMark = words.startsWith('short')
+      ? 'short'
+      : words.startsWith('prolonged')
+        ? 'prolonged'
+        : words.startsWith('rapid')
+          ? 'bell'
+          : 'stroke';
+    return Array<BlastMark>(NUMBER.indexOf(n)).fill(mark);
+  });
+}
+
+describe('sound signals', () => {
+  const before = entries<BlastMark[]>(QUESTION_SOUNDS).filter(([id]) => !QUESTION_VISUAL_AFTER_ANSWER.has(id));
+
+  it('has a description for every sound question shown before an answer, and none for the held-back ones', () => {
+    for (const [id] of before) expect(visualDescription(id, false), id).toBeTruthy();
+    for (const id of QUESTION_VISUAL_AFTER_ANSWER) {
+      expect(visualDescription(id, false), id).toBeNull();
+      expect(visualDescription(id, true), id).toBeTruthy();
+    }
+  });
+
+  it('names every mark the diagram paints, in order, and only the legend it prints', () => {
+    for (const [id, sequence] of entries<BlastMark[]>(QUESTION_SOUNDS)) {
+      const gap = QUESTION_SOUND_GAPS[id];
+      const { container } = render(<SoundSignalDisplay sequence={sequence} gapS={gap} />);
+      const painted = paintedMarks(container);
+      const legend = [...container.querySelectorAll('text')].map(t => t.textContent ?? '').join(' ');
+      cleanup();
+      const description = visualDescription(id, QUESTION_VISUAL_AFTER_ANSWER.has(id))!;
+      expect(marksSaid(description), id).toEqual(painted);
+      expect(description.includes('short blast, 1 second'), id).toBe(legend.includes('short 1s'));
+      expect(description.includes('prolonged blast, 4 to 6 seconds'), id).toBe(legend.includes('prolonged 4-6s'));
+      expect(description.includes('rapid ringing, 5 seconds'), id).toBe(legend.includes('rapid bell 5s'));
+      expect(description.includes('with a gap of about'), id).toBe(gap !== undefined && gap !== 1);
+    }
+  });
+
+  it('reads ss-15 as written', () => {
+    expect(visualDescription('ss-15', false)).toBe(
+      'Marks along a time line, read left to right: three strokes on the bell, then one rapid ringing of the bell, ' +
+        'then three strokes on the bell. Key: rapid ringing, 5 seconds; one stroke, a single upright tick. ' +
+        'A Play button below sounds the signal.'
     );
   });
 });
