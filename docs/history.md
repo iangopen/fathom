@@ -3,6 +3,25 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-09 - Follow-ups to the drawing-leak session
+
+- Test environment: Node 25 failed 27 tests (CLAUDE.md said 24; later tests
+  added to the count). Root cause read from Vitest's `getWindowKeys`: a key
+  already on the Node global is only overridden if it is on Vitest's fixed
+  KEYS list. Fixed with a setup file, not `execArgv`. Found while verifying
+  that Node 26.11.1 is out and fails the same way; both pass now. Node 22,
+  25 and 26 were run from the `node` npm package installed in a scratch
+  directory, so the system Node 24 was left alone.
+- ds-12: 30(g) -> 30(e). Rule text from the eCFR API (the eCFR site itself
+  redirected to a bot check).
+- Day shapes: 9 -> 15 questions via `alsoOn` on vt-01 to vt-06. The card's
+  blurb said those shapes were drilled on Vessel types; reworded, and a
+  "NUC, RAM, CBD and fishing" topic added.
+- index.html: the Space Grotesk link removed. The Claude in Chrome extension
+  was not connected, so the before/after check drove headless Chrome over CDP
+  with Node's built-in WebSocket (`CSS.getPlatformFontsForNode` gives the
+  font actually drawn, which computed style cannot).
+
 ## 2026-10-06 - Answering, for keyboard and screen-reader users
 
 - Closed the audit's last finding. Both drills now share one contract

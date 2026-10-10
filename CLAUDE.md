@@ -68,6 +68,31 @@ https://iangopen.github.io/fathom/
 - Adding a drill = new folder + register in src/drills/index.ts + point a
   syllabus category at it in drillTargetFor().
 
+### A question on more than one card
+A colregs question has one home, its `category`: the bucket it is written in
+(`COLREGS_QUESTIONS_BY_CATEGORY`, still an exact partition of the bank), the
+card its answers are credited to and the label shown beside it. It can also
+name other cards in **`alsoOn`**. `COLREGS_DECK_BY_CATEGORY` is what a card
+drills: its own bucket, then every question that names it, as the same
+objects, never copies. `getPool`, `questionCount` and `itemsForCategory` read
+the deck, so the count, the drill and the weak-spot list all follow.
+- vt-01 to vt-06 (NUC, RAM, CBD, fishing, sail alone, the long-tow diamond)
+  are `alsoOn: ['day-shapes']`. Day shapes is 15 questions (its own 9 plus
+  those 6), Vessel types 6, the whole bank still 320. That replaces the five
+  day-shape copies dropped in the drawing-leak session.
+- **One record per question.** The ledger keys items by question id, and the
+  category tally goes to the question's HOME card (`progressIdFor` reads the
+  question, not the run's filter). So a vt question answered on Day shapes
+  moves Vessel types' mastery bar, and still shows up in Day shapes' weak-spot
+  list. Nothing sums card counts, so nothing double-counts on screen.
+- `crossListing.test.tsx` holds every card and every plan's queue (default,
+  counts, weak spots, with an empty and an all-weak ledger) to one copy of
+  each id, and walks a whole Day shapes exam in jsdom checking the stored
+  ledger: each id answered once, tallies summing to the run. Deliberately
+  breaking `planQueue` (top-up drawn from the whole pool) and the deck builder
+  (home questions listed twice) both fail it. `picker.test.ts` still requires
+  each pool to be exactly its home questions plus its declared cross-listings.
+
 ## Sessions, plans and the ledger
 - `src/lib/progress.ts` is the one ledger. It keeps a per-category tally
   (mastery, drilled total, last drilled) **and** a per-item tally keyed by
@@ -224,9 +249,14 @@ Still open:
   they can be answered without the picture, but most drawn questions cannot.
   Describing them is content work and must not describe the answer (the
   lights, not the vessel).
-- **ds-12 cites Rule 30(g)** for the under-7-metre anchor exemption. It is
-  Rule 30(e) in both the International and the Inland text. Found while
-  checking the drawing fix and left alone, because ds-12 was not part of it.
+
+Resolved (2026-10-09): **ds-12 cites Rule 30(e)**, not 30(g). It asks for the
+under-7-metre anchor exemption, which is 30(e) in both the International
+Rules and 33 CFR 83.30(e) (checked against the eCFR text). Inland 30(g) is a
+different exemption, under 20 metres at anchor in a Coast Guard special
+anchorage, and the explanation now names it as the reason the "under 20
+metres, anywhere" option is wrong. `citationFormat.test.ts` pins it by hand,
+since the format checks cannot tell a wrong rule from a right one.
 
 Resolved (2026-10-09): **no drawing shows its own answer.** 31 questions used
 to: day shapes that asked "which shape?" and drew it, sound signals that asked
@@ -358,21 +388,36 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - index.html is finalized - do not modify it under any circumstances. A
   one-off authorization (the Tailwind build move, 2026-10-06) made exactly two
   edits: the `cdn.tailwindcss.com` script tag was removed and `<title>` changed
-  from NauticalMaster to Fathom. It has no meta description or og tags.
+  from NauticalMaster to Fathom. A second (2026-10-09) made one: the unused
+  Space Grotesk `<link>` was deleted. It has no meta description or og tags,
+  and no font links: every font comes from `src/lib/fonts.ts`.
   installTitle() in src/lib/title.ts still sets the title at runtime, as a
   backstop.
-  - **Open, for the next time index.html is authorized:** remove the Space
-    Grotesk `<link>`. Nothing in src uses that font (0 references), so it is
-    a wasted request on every load.
+  - The font removal was checked on `npm run preview` in headless Chrome over
+    CDP: the Space Grotesk stylesheet request is gone, no Space Grotesk face
+    was ever downloaded, and the computed font-family of every element, the
+    loaded faces and the platform fonts rendered for the headings, body and
+    cards were identical before and after.
 - Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
   (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
   build toolchain - nothing a user's browser loads.
-- Tests: 13 files / 1026 tests (2026-10-09, after the drawing-leak session:
-  7 questions dropped took 14 per-question citation cases, and 4 tests were
-  added). On Node 25 run them as `NODE_OPTIONS=--no-experimental-webstorage
-  npx vitest run`: Node 25 has a global `localStorage` of its own that
-  shadows jsdom's, and 24 jsdom tests fail without the flag. CI is on Node 22
-  and needs nothing.
+- Tests: 14 files / 1048 tests (2026-10-09). Plain `npm test`, no flags, on
+  any Node from 22 up.
+- **Node versions.** CI runs Node 22; `.nvmrc` says 22 and `engines` says
+  `>=22`. `npm test` passes unflagged on 22, 24, 25 and 26 (verified on
+  Windows, with the npm script itself running on each version).
+  - **Why `src/__tests__/setup/jsdomStorage.ts` exists:** from Node 25, Node
+    has a global `localStorage` / `sessionStorage` of its own, and without
+    `--localstorage-file` it is useless (an empty object on 25, `undefined` on
+    26). Vitest's jsdom environment does not override a global the Node global
+    already has unless it is on Vitest's own key list, and storage is not, so
+    Node's won, and `window` is the global there, so the app's
+    `window.localStorage` got it too. 28 tests failed on 25 and 26. The setup
+    file puts jsdom's storage back on jsdom files only. It feature-detects
+    instead of passing `--no-experimental-webstorage`, because Node could
+    rename or drop an experimental flag, and an unknown flag stops every
+    worker from starting. It is plain JS with no shell syntax, so it behaves
+    the same on macOS. The old `NODE_OPTIONS=...` instruction is retired.
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub
