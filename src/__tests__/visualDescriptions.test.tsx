@@ -24,6 +24,8 @@ import { SignalFlagDisplay, FlagName } from '../drills/colregs/components/Signal
 import { DistressDisplay, DistressSignalName, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
 import { QUESTION_DISTRESS, QUESTION_PFDS } from '../drills/colregs';
 import { PfdDisplay, PfdFormName, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
+import { BoatPartDisplay, BoatPartName } from '../drills/colregs/components/BoatPartDisplay';
+import { QUESTION_BOAT_PARTS } from '../drills/colregs';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -634,6 +636,92 @@ describe('PFDs (the drawn ones)', () => {
     expect(visualDescription('pf-01', false)).toBe(
       'A wearable piece of orange foam, seen from the front: a deep collar curving up behind where the head ' +
         'would be, and below it two thick chest panels, joined across the front by two straps.'
+    );
+  });
+});
+
+// The highlighted part of a boat diagram, read off its SVG: the elements
+// painted in the brass MARK colour, what form they take, and where they sit
+// against the hull outline and the dashed water line drawn in the same SVG.
+const MARK = 'rgba(212,169,74,0.95)';
+const MARK_WASH = 'rgba(212,169,74,0.18)';
+function boxOfPoints(pts: number[][]) {
+  const xs = pts.map(p => p[0]);
+  const ys = pts.map(p => p[1]);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+const centre = (b: { minX: number; maxX: number; minY: number; maxY: number }) => ({
+  x: (b.minX + b.maxX) / 2,
+  y: (b.minY + b.maxY) / 2,
+});
+
+function paintedHighlight(root: Element): string[] {
+  const svg = root.querySelector('svg')!;
+  const hull = svg.querySelector('path[fill="rgb(15,23,42)"][stroke-width="1.3"]')!;
+  const hullBox = boxOfPoints(pointsOf(hull.getAttribute('d')!));
+  const hullC = centre(hullBox);
+  const plan = svg.querySelector('line[stroke-dasharray="5 4"]') === null; // only the side view draws the water
+  const waterY = plan ? NaN : num(svg.querySelector('line[stroke-dasharray="5 4"]')!, 'y1');
+  const side = (x: number) => (x < hullC.x ? 'left-hand' : 'right-hand');
+
+  const marked = [...svg.querySelectorAll('*')].filter(
+    e => e.getAttribute('stroke') === MARK || fillOf(e) === MARK || fillOf(e) === MARK_WASH
+  );
+  const heads = marked.filter(e => e.tagName === 'polygon');
+  const dashed = marked.find(e => e.tagName === 'line' && e.getAttribute('stroke-dasharray'));
+  const washes = marked.filter(e => e.tagName === 'path' && fillOf(e) === MARK_WASH);
+  const strokes = marked.filter(e => e.tagName === 'path' && fillOf(e) !== MARK_WASH && e.getAttribute('stroke') === MARK);
+
+  if (heads.length === 2) {
+    const l = marked.find(e => e.tagName === 'line')!;
+    if (num(l, 'x1') === num(l, 'x2')) {
+      const landmark = (y: number) => (y === waterY ? 'the surface of the water' : y < waterY ? 'the top edge of the side' : 'the lowest point of the hull');
+      const [a, b] = [num(l, 'y1'), num(l, 'y2')].sort((p, q) => p - q);
+      return ['double-headed arrow running straight down', `from ${landmark(a)} to ${landmark(b)}`];
+    }
+    const spans = num(l, 'x1') <= hullBox.minX && num(l, 'x2') >= hullBox.maxX;
+    return ['double-headed arrow straight across the hull', spans ? 'at its widest point' : 'UNMATCHED'];
+  }
+  if (marked.some(e => e.tagName === 'rect')) return ['bar crossing the inside of the hull'];
+  if (dashed && dashed.getAttribute('stroke-dasharray') === '8 5') return ['dashed line running right across the picture'];
+  if (dashed) return ['shaded band across the hull', 'dashed line across its centre'];
+  if (washes.length === 1 && strokes.length === 1) {
+    const b = boxOfPoints(pointsOf(washes[0].getAttribute('d')!));
+    return plan ? [`the ${side(centre(b).x)} half of the hull is shaded`] : [`the ${side(centre(b).x)} end of the hull is shaded`];
+  }
+  if (washes.length === 1) {
+    const b = boxOfPoints(pointsOf(washes[0].getAttribute('d')!));
+    return [`small blade hanging below the ${side(centre(b).x)} end`, b.maxY > waterY ? 'below the surface of the water' : 'UNMATCHED'];
+  }
+  const edge = boxOfPoints(pointsOf(strokes[0].getAttribute('d')!));
+  if (edge.maxX - edge.minX < 15) return [`short, nearly upright edge that closes the ${side(centre(edge).x)} end`];
+  return [centre(edge).y < hullC.y ? 'top edge of the hull' : 'bottom edge of the hull'];
+}
+
+describe('boat parts', () => {
+  it('has a description for every boat-part question, held back with the drawing for dk-13', () => {
+    for (const [id] of entries(QUESTION_BOAT_PARTS)) {
+      expect(visualDescription(id, true), id).toBeTruthy();
+      expect(visualDescription(id, false) === null, id).toBe(QUESTION_VISUAL_AFTER_ANSWER.has(id));
+    }
+  });
+
+  it('says what form the highlight takes and where it sits, as the drawing paints it', () => {
+    for (const [id, part] of entries<BoatPartName>(QUESTION_BOAT_PARTS)) {
+      const { container } = render(<BoatPartDisplay part={part} />);
+      const expected = paintedHighlight(container);
+      cleanup();
+      const d = visualDescription(id, true)!;
+      for (const piece of expected) expect(d, `${id} (${part})`).toContain(piece);
+    }
+  });
+
+  it('reads dk-06 as written', () => {
+    expect(visualDescription('dk-06', false)).toBe(
+      'Side view of a small open boat on the water. Her right-hand end rises to a tall point; her left-hand end ' +
+        'is cut off flat, with a small blade hanging below it. A dashed line marks the surface of the water. ' +
+        'Picked out in yellow: a double-headed arrow running straight down from the top edge of the side to the ' +
+        'surface of the water.'
     );
   });
 });

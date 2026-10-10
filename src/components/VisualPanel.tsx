@@ -24,7 +24,7 @@ import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/Ancho
 import { BuoyDisplay, BUOY_IMAGES, describeBuoy } from '../drills/colregs/components/BuoyDisplay';
 import { DistressDisplay, DISTRESS_IMAGES, describeDistress } from '../drills/colregs/components/DistressDisplay';
 import { PfdDisplay, PFD_IMAGES, describePfd } from '../drills/colregs/components/PfdDisplay';
-import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
+import { BoatPartDisplay, describeBoatPart } from '../drills/colregs/components/BoatPartDisplay';
 import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
 import { SignalFlagDisplay, describeFlag } from '../drills/colregs/components/SignalFlagDisplay';
 import { creditFor, ImageCredit, PhotoKind } from '../lib/imageCredits';
@@ -214,7 +214,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
-  if (boatPart) return node('boat-part', () => <BoatPartDisplay part={boatPart} label="Highlighted" />);
+  if (boatPart) {
+    return node(
+      'boat-part',
+      (a11y) => <BoatPartDisplay part={boatPart} label="Highlighted" a11y={a11y} />,
+      undefined,
+      describeBoatPart(boatPart)
+    );
+  }
 
   const cloud = QUESTION_CLOUDS[questionId];
   if (cloud) return node('cloud', () => <CloudDisplay type={cloud} label="Sky" />, photo('cloud', cloud, CLOUD_IMAGES));

@@ -45,7 +45,7 @@ describe('the visual panel and the diagram maps agree', () => {
   // The drawings held back until the answer. Written out by hand, so adding
   // to the set is a decision this test has to be told about.
   it('holds back exactly the drawings that would answer their own question', () => {
-    expect([...QUESTION_VISUAL_AFTER_ANSWER].sort()).toEqual(['ss-07', 'ss-16']);
+    expect([...QUESTION_VISUAL_AFTER_ANSWER].sort()).toEqual(['dk-13', 'ss-07', 'ss-16']);
     for (const id of QUESTION_VISUAL_AFTER_ANSWER) {
       expect(hasVisual(id)).toBe(false);
       expect(markup(id)).toBe('');

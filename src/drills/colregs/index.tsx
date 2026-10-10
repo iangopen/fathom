@@ -186,7 +186,13 @@ export const QUESTION_SOUNDS: Partial<Record<string, BlastMark[]>> = {
 // ("short 1s", "prolonged 4-6s"). Asked the other way they would be the same
 // question. So the drawing is the explanation's illustration, not the
 // stimulus: VisualPanel draws nothing for them until `revealed` is true.
-export const QUESTION_VISUAL_AFTER_ANSWER: ReadonlySet<string> = new Set(['ss-07', 'ss-16']);
+//
+// dk-13 joined them when the drawings were given text equivalents. It asks
+// which side is the port side and answers "the left-hand side" - and the
+// drawing picks out the left-hand half of the hull. A description of it could
+// not avoid saying "left", and the picture was saying it to sighted players
+// all along. It draws once the question is answered, as the illustration.
+export const QUESTION_VISUAL_AFTER_ANSWER: ReadonlySet<string> = new Set(['ss-07', 'ss-16', 'dk-13']);
 
 // Gap between blasts, in seconds, for signals whose rule states its own
 // interval. Anything absent here uses SoundSignalDisplay's default 1s gap.

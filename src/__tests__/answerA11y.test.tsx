@@ -435,7 +435,7 @@ const SUBJECT_VOCABULARY: Partial<Record<VisualKind, RegExp>> = {
     /\b(distress|emergency|mayday|assistance|help|sos|rocket\w*|flares?|parachute|november|charlie|code)\b/,
   pfd: /\b(type|offshore|throwable|special-use|inflatable|flotation|life ?jacket|vest|buoyancy|cushion|ring)\b/,
   'boat-part':
-    /\b(bows?|stern|transom|keel|gunwales?|freeboard|drau?g?ht|rudder|waterline|beam|thwarts?|amidships|athwartships|port|starboard|forward|fore|aft|after|abaft|abeam|stem|sheer)\b/,
+    /\b(bows?|stern|transom|keel|gunwales?|freeboard|drau?g?ht|rudder|water ?line|beam|thwarts?|amidships|athwartships|port|starboard|forward|fore|aft|after|abaft|abeam|stem|sheer)\b/,
   flag: /\b(letter|code|meaning|signal)\b/,
 };
 
