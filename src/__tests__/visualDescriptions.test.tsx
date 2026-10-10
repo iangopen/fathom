@@ -15,6 +15,8 @@ import {
   DayShapeSpec,
 } from '../drills/colregs';
 import { SoundSignalDisplay, BlastMark } from '../drills/colregs/components/SoundSignalDisplay';
+import { VesselProfile, VesselTypeName } from '../drills/colregs/components/VesselProfile';
+import { QUESTION_VESSEL_TYPES } from '../drills/colregs';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -219,6 +221,44 @@ describe('sound signals', () => {
       'Marks along a time line, read left to right: three strokes on the bell, then one rapid ringing of the bell, ' +
         'then three strokes on the bell. Key: rapid ringing, 5 seconds; one stroke, a single upright tick. ' +
         'A Play button below sounds the signal.'
+    );
+  });
+});
+
+// The list after "from top to bottom:" or after the colon of a single shape.
+function shapesSaid(description: string): string[] {
+  const many = /from top to bottom: (.*?)\./.exec(description)?.[1];
+  const one = /shape hangs near the top of the mast: (.*?)\./.exec(description)?.[1];
+  const list = many ?? one;
+  return list ? list.split(/, | and /) : [];
+}
+
+describe('vessel profiles', () => {
+  it('has a description for every vessel-type question', () => {
+    for (const [id] of entries(QUESTION_VESSEL_TYPES)) expect(visualDescription(id, false), id).toBeTruthy();
+  });
+
+  it('names the shapes the profile paints, top to bottom, and only the rig and gear it draws', () => {
+    for (const [id, type] of entries<VesselTypeName>(QUESTION_VESSEL_TYPES)) {
+      const { container } = render(<VesselProfile type={type} />);
+      const painted = paintedShapes(container).map(s => s.word);
+      const sails = container.querySelector('g[fill="rgba(203,213,225,0.13)"]') !== null;
+      const trailing = container.querySelector('path[stroke-dasharray="2 2"]') !== null;
+      const secondHull = container.querySelector('path[opacity="0.75"]') !== null;
+      cleanup();
+      const description = visualDescription(id, false)!;
+      expect(shapesSaid(description), id).toEqual(painted);
+      expect(description.includes('No shapes'), id).toBe(painted.length === 0);
+      expect(description.includes('sails are set'), id).toBe(sails);
+      expect(description.includes('lines trail'), id).toBe(trailing);
+      expect(description.includes('second, smaller hull'), id).toBe(secondHull);
+    }
+  });
+
+  it('reads vt-02 as written', () => {
+    expect(visualDescription('vt-02', false)).toBe(
+      'Side view of a hull on the water, with one mast near the middle. Three shapes, all black, hang in a ' +
+        'vertical line on the mast, from top to bottom: ball, diamond and ball.'
     );
   });
 });

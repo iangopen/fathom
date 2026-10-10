@@ -17,7 +17,7 @@ import {
 } from '../drills/colregs';
 import { LightDisplay, describeLights } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay, describeDayShapes } from '../drills/colregs/components/DayShapeDisplay';
-import { VesselProfile } from '../drills/colregs/components/VesselProfile';
+import { VesselProfile, describeVesselProfile } from '../drills/colregs/components/VesselProfile';
 import { VesselScenario } from '../drills/colregs/components/VesselScenario';
 import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/components/SoundSignalDisplay';
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
@@ -115,7 +115,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   ): ResolvedVisual => ({ kind, node: n, photo: p, description });
 
   const vesselType = QUESTION_VESSEL_TYPES[questionId];
-  if (vesselType) return node('vessel', () => <VesselProfile type={vesselType} label="Vessel" />);
+  if (vesselType) {
+    return node(
+      'vessel',
+      (a11y) => <VesselProfile type={vesselType} label="Vessel" a11y={a11y} />,
+      undefined,
+      describeVesselProfile(vesselType)
+    );
+  }
 
   const lights = QUESTION_LIGHTS[questionId];
   if (lights) {

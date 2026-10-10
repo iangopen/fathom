@@ -85,6 +85,16 @@ const SHAPE_LABELS: Record<DayShapeName, string> = {
   'cylinder':  'Cylinder',
 };
 
+// A shape as the description says it - the drawing's own label, except that
+// "Cone, apex down" reads as two list items when spoken in a list, so the
+// comma becomes "with its". Shared with VesselProfile, which draws the same
+// shapes through shapeNode.
+export function shapeWord(s: DayShapeName): string {
+  return SHAPE_LABELS[s].toLowerCase().replace(', ', ' with its ');
+}
+
+export const SHAPE_COLOUR_WORD = colourName(SHAPE_FILL);
+
 // ── The text equivalent ──────────────────────────────────────────────────
 //
 // Generated from the same spec the drawing is placed from: which mast, which
@@ -98,10 +108,8 @@ export function describeDayShapes(
   arrangement: ShapeArrangement = 'vertical'
 ): string {
   const mast = `Seen from above, bow at the top, with one mast labelled ${MAST_POSITIONS[position].label}`;
-  const colour = colourName(SHAPE_FILL);
-  // "Cone, apex down" reads as two list items when spoken in a list, so the
-  // label's comma becomes "with its".
-  const word = (s: DayShapeName) => SHAPE_LABELS[s].toLowerCase().replace(', ', ' with its ');
+  const colour = SHAPE_COLOUR_WORD;
+  const word = shapeWord;
 
   if (shapes.length === 0) return `${mast}. No shapes are shown on it.`;
 

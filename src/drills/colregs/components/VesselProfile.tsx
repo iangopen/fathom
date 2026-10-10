@@ -1,5 +1,6 @@
 import React from 'react';
-import { DayShapeName, shapeNode } from './DayShapeDisplay';
+import { DayShapeName, shapeNode, shapeWord, SHAPE_COLOUR_WORD } from './DayShapeDisplay';
+import { SvgA11y, imgProps, capitalise, counted, joinList } from '../../../lib/visualA11y';
 
 export type VesselTypeName =
   | 'nuc'       // Rule 27(a) — not under command
@@ -12,6 +13,7 @@ export type VesselTypeName =
 interface VesselProfileProps {
   type: VesselTypeName;
   label?: string;
+  a11y?: SvgA11y;
 }
 
 // Side elevation, 220×170. The player is asked to name the vessel type from
@@ -63,7 +65,38 @@ const PROFILES: Record<VesselTypeName, Profile> = {
 const HULL_PATH =
   `M 34 ${DECK_Y} L 186 ${DECK_Y} L 176 ${WATERLINE_Y + 10} C 130 ${WATERLINE_Y + 16}, 74 ${WATERLINE_Y + 16}, 44 ${WATERLINE_Y + 10} Z`;
 
-export const VesselProfile: React.FC<VesselProfileProps> = ({ type, label }) => {
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from PROFILES, which the drawing is built from: the shapes on the
+// mast top to bottom, the rig, and what trails astern. Everything is said as
+// it looks - "lines trailing into the water", "a second, smaller hull" - and
+// never as what it is, because what she is is the question.
+export function describeVesselProfile(type: VesselTypeName): string {
+  const { shapes, rig, gear } = PROFILES[type];
+  const parts = ['Side view of a hull on the water, with one mast near the middle.'];
+
+  if (shapes.length === 0) parts.push('No shapes are shown on the mast.');
+  else if (shapes.length === 1) parts.push(`One ${SHAPE_COLOUR_WORD} shape hangs near the top of the mast: ${shapeWord(shapes[0])}.`);
+  else {
+    parts.push(
+      `${capitalise(counted(shapes.length, 'shape'))}, all ${SHAPE_COLOUR_WORD}, hang in a vertical line on the mast, ` +
+        `from top to bottom: ${joinList(shapes.map(shapeWord))}.`
+    );
+  }
+
+  if (rig === 'sail') {
+    parts.push('Two sails are set: a larger one on the left of the mast, above a boom, and a smaller one on the right.');
+  }
+  if (gear === 'trawl') {
+    parts.push('Two lines trail from the left-hand end of the hull down into the water, to a dashed outline below the surface.');
+  }
+  if (gear === 'tow') {
+    parts.push('A second, smaller hull sits on the water off the left-hand end, joined to it by a short line.');
+  }
+  return parts.join(' ');
+}
+
+export const VesselProfile: React.FC<VesselProfileProps> = ({ type, label, a11y }) => {
   const profile = PROFILES[type];
 
   return (
@@ -73,7 +106,7 @@ export const VesselProfile: React.FC<VesselProfileProps> = ({ type, label }) => 
       )}
 
       <div className="w-full max-w-[240px] rounded-xl border border-slate-800 bg-slate-900/60 p-3 backdrop-blur-sm">
-        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg" {...imgProps(a11y)}>
           {/* Waterline */}
           <line
             x1={6} y1={WATERLINE_Y} x2={214} y2={WATERLINE_Y}
