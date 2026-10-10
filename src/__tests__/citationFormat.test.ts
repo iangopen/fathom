@@ -151,3 +151,15 @@ describe('non-COLREGS categories are labelled, not cited', () => {
     }
   });
 });
+
+// Pinned by hand, because the format checks above cannot see a wrong rule.
+// ds-12 cited 30(g) for the under-7-metre anchor exemption. That is 30(e) in
+// both the International Rules and the Inland Rules (33 CFR 83.30(e)); Inland
+// 30(g) is the different, under-20-metre special-anchorage exemption.
+describe('citations corrected by hand', () => {
+  it('cites Rule 30(e) for the under-7-metre anchor exemption (ds-12)', () => {
+    const q = COLREGS_QUESTIONS.find((x) => x.id === 'ds-12');
+    expect(q).toBeDefined();
+    expect(citationOf(q!)).toBe('Rule 30(e)');
+  });
+});

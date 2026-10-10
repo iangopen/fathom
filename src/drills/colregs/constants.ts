@@ -1192,7 +1192,7 @@ const dayShapesQuestions: ColregsQuestion[] = [
     ],
     correctAnswer: 'A vessel of less than 7 metres, not in or near a narrow channel, fairway or anchorage',
     explanation:
-      'Rule 30(g): A vessel of less than 7 metres in length, when at anchor and not in or near a narrow channel, fairway or anchorage, or where other vessels normally navigate, is not required to exhibit the anchor light or shape.',
+      'Rule 30(e): A vessel of less than 7 metres in length, when at anchor, not in or near a narrow channel, fairway or anchorage, or where other vessels normally navigate, is not required to exhibit the lights or shape prescribed in Rule 30(a) and (b). The International and Inland Rules say the same. The Inland Rules add 30(g), which excuses a vessel of less than 20 metres only when at anchor in a special anchorage area designated by the Coast Guard - never anywhere.',
   },
   {
     id: 'ds-13',
