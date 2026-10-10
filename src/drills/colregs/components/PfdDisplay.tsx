@@ -1,4 +1,5 @@
 import React from 'react';
+import { SvgA11y, imgProps, colourName, countWord } from '../../../lib/visualA11y';
 
 import flotationAid from '../../../assets/pfd/flotation-aid.jpg';
 import ringBuoy from '../../../assets/pfd/ring-buoy.jpg';
@@ -17,6 +18,8 @@ type DrawnForm = Exclude<PfdFormName, PhotoForm>;
 interface PfdDisplayProps {
   form: PfdFormName;
   label?: string;
+  // Applied to a drawn device only; a photograph has its own alt text.
+  a11y?: SvgA11y;
 }
 
 // PHOTOGRAPHS where a licensed one passes, 220x170 drawings elsewhere, to the
@@ -67,6 +70,39 @@ const foam = {
   strokeLinejoin: 'round' as const,
 };
 
+// ── What each drawn device is made of ────────────────────────────────────
+//
+// The parts of each drawing that can be counted - panels, straps, the
+// cylinder and its tab - live in these tables. The drawing paints from them
+// and describePfd reads them, so the two cannot disagree about how many
+// straps there are.
+
+type Line = [number, number, number, number];
+
+const YOKE = {
+  collar:
+    'M 62 74 C 58 34, 80 20, 110 20 C 140 20, 162 34, 158 74 L 138 74 C 142 46, 130 36, 110 36 C 90 36, 78 46, 82 74 Z',
+  panels: [
+    'M 66 74 L 100 74 L 100 138 C 86 142, 74 142, 66 136 Z',
+    'M 120 74 L 154 74 L 154 136 C 146 142, 134 142, 120 138 Z',
+  ],
+  straps: [
+    [100, 94, 120, 94],
+    [100, 120, 120, 120],
+  ] as Line[],
+};
+
+const PAD = {
+  grabStraps: ['M 54 66 C 40 74, 40 98, 54 106', 'M 166 66 C 180 74, 180 98, 166 106'],
+};
+
+const WORN_FLAT = {
+  shoulderStraps: ['M 86 46 C 78 62, 76 86, 78 118', 'M 134 46 C 142 62, 144 86, 142 118'],
+  waistStrap: [72, 126, 148, 126] as Line,
+};
+
+const line = ([x1, y1, x2, y2]: Line, key: number) => <line key={key} x1={x1} y1={y1} x2={x2} y2={y2} />;
+
 function pfdBody(form: DrawnForm): React.ReactNode {
   switch (form) {
     // The offshore yoke: a deep collar that sits behind the head, and two
@@ -76,17 +112,14 @@ function pfdBody(form: DrawnForm): React.ReactNode {
       return (
         <g>
           {/* Collar, behind the head */}
-          <path
-            d="M 62 74 C 58 34, 80 20, 110 20 C 140 20, 162 34, 158 74 L 138 74 C 142 46, 130 36, 110 36 C 90 36, 78 46, 82 74 Z"
-            {...foam}
-          />
+          <path d={YOKE.collar} {...foam} />
           {/* Chest panels */}
-          <path d="M 66 74 L 100 74 L 100 138 C 86 142, 74 142, 66 136 Z" {...foam} />
-          <path d="M 120 74 L 154 74 L 154 136 C 146 142, 134 142, 120 138 Z" {...foam} />
+          {YOKE.panels.map((d, i) => (
+            <path key={i} d={d} {...foam} />
+          ))}
           {/* Body straps */}
           <g stroke={STRAP} strokeWidth="3" strokeLinecap="round">
-            <line x1={100} y1={94} x2={120} y2={94} />
-            <line x1={100} y1={120} x2={120} y2={120} />
+            {YOKE.straps.map(line)}
           </g>
           <g stroke={DETAIL} strokeWidth="1">
             <line x1={72} y1={92} x2={94} y2={92} />
@@ -103,8 +136,9 @@ function pfdBody(form: DrawnForm): React.ReactNode {
         <g>
           <rect x={54} y={44} width={112} height={84} rx={10} {...foam} />
           <g fill="none" stroke={STRAP} strokeWidth="3.4" strokeLinecap="round">
-            <path d="M 54 66 C 40 74, 40 98, 54 106" />
-            <path d="M 166 66 C 180 74, 180 98, 166 106" />
+            {PAD.grabStraps.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
           </g>
           {/* Seam round the edge, and the quilting that keeps the foam put */}
           <rect
@@ -134,9 +168,10 @@ function pfdBody(form: DrawnForm): React.ReactNode {
           />
           {/* Suspender straps over the shoulders and round the waist */}
           <g fill="none" stroke={STRAP} strokeWidth="3" strokeLinecap="round">
-            <path d="M 86 46 C 78 62, 76 86, 78 118" />
-            <path d="M 134 46 C 142 62, 144 86, 142 118" />
-            <line x1={72} y1={126} x2={148} y2={126} />
+            {WORN_FLAT.shoulderStraps.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+            {line(WORN_FLAT.waistStrap, 0)}
           </g>
           <rect x={102} y={121} width={16} height={11} rx={2} fill={PLATE_FILL} stroke={HARDWARE} strokeWidth="1.2" />
           {/* Gas cylinder, and the pull tab that fires it */}
@@ -162,6 +197,37 @@ function pfdBody(form: DrawnForm): React.ReactNode {
   }
 }
 
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// For the drawn devices only, generated from the tables above. It says what
+// the device looks like and never what it is called: every word for a kind
+// of PFD - life jacket, vest, cushion, ring, inflatable, the type codes - is
+// what these questions ask for. A photographed device returns null; its alt
+// text describes the frame.
+export function describePfd(form: PfdFormName): string | null {
+  if (form in PFD_IMAGES) return null;
+  const foamColour = colourName(FOAM_FILL);
+  switch (form as DrawnForm) {
+    case 'offshore-vest':
+      return (
+        `A wearable piece of ${foamColour} foam, seen from the front: a deep collar curving up behind where ` +
+        `the head would be, and below it ${countWord(YOKE.panels.length)} thick chest panels, joined across ` +
+        `the front by ${countWord(YOKE.straps.length)} straps.`
+      );
+    case 'throwable-cushion':
+      return (
+        `A square ${foamColour} pad with rounded corners, a stitched seam running round inside its edge and a ` +
+        `line of stitching down the middle, with ${countWord(PAD.grabStraps.length)} looped straps, one on each side.`
+      );
+    case 'inflatable':
+      return (
+        `A flat, folded ${foamColour} panel worn on the chest, with ${countWord(WORN_FLAT.shoulderStraps.length)} ` +
+        `straps over the shoulders and one round the waist, fastened by a buckle. A small dark cylinder sits low ` +
+        `on the right with a pull tab hanging from it, and a tube runs down on the left.`
+      );
+  }
+}
+
 // Sources and licences are in src/lib/imageCredits.ts. Each is 640x480.
 const PFD_IMAGES: Record<PhotoForm, string> = {
   'flotation-aid': flotationAid,
@@ -177,7 +243,7 @@ function isPhoto(form: PfdFormName): form is PhotoForm {
   return form in PFD_IMAGES;
 }
 
-export const PfdDisplay: React.FC<PfdDisplayProps> = ({ form, label }) => (
+export const PfdDisplay: React.FC<PfdDisplayProps> = ({ form, label, a11y }) => (
   <div className="flex flex-col items-center gap-3 select-none w-full">
     {label && (
       <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-mono">{label}</div>
@@ -195,7 +261,7 @@ export const PfdDisplay: React.FC<PfdDisplayProps> = ({ form, label }) => (
           style={{ display: 'block', aspectRatio: '4 / 3', objectFit: 'cover' }}
         />
       ) : (
-        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 220 170" className="w-full" xmlns="http://www.w3.org/2000/svg" {...imgProps(a11y)}>
           {pfdBody(form)}
         </svg>
       )}

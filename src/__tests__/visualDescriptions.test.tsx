@@ -22,7 +22,8 @@ import { BuoyDisplay, BuoyName, BUOY_IMAGES } from '../drills/colregs/components
 import { QUESTION_BUOYS, QUESTION_FLAGS } from '../drills/colregs';
 import { SignalFlagDisplay, FlagName } from '../drills/colregs/components/SignalFlagDisplay';
 import { DistressDisplay, DistressSignalName, DISTRESS_IMAGES } from '../drills/colregs/components/DistressDisplay';
-import { QUESTION_DISTRESS } from '../drills/colregs';
+import { QUESTION_DISTRESS, QUESTION_PFDS } from '../drills/colregs';
+import { PfdDisplay, PfdFormName, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -568,6 +569,71 @@ describe('distress signals (the drawn ones)', () => {
       'Two flags on one halyard, one above the other. The upper flag is a chequerboard of four by four squares, ' +
         'alternating blue and white. The lower flag has five horizontal stripes, from top to bottom: blue, white, ' +
         'red, white and blue.'
+    );
+  });
+});
+
+// The countable parts of each drawn device, read off its SVG. The foam is one
+// colour; straps are drawn in STRAP, a light grey, as lines or open paths.
+const FOAM = '#b95f31';
+const STRAP_STROKE = 'rgba(203,213,225,0.8)';
+function paintedPfd(form: PfdFormName, root: Element): string[] {
+  const svg = root.querySelector('svg')!;
+  const foamColour = colourName(FOAM);
+  const foam = [...svg.querySelectorAll('path, rect')].filter(e => fillOf(e) === FOAM);
+  const strapGroup = svg.querySelector(`g[stroke="${STRAP_STROKE}"]`);
+  switch (form) {
+    case 'offshore-vest':
+      // The collar, then the chest panels.
+      return [
+        `${foamColour} foam`,
+        `${countWord(foam.length - 1)} thick chest panels`,
+        `${countWord(strapGroup!.querySelectorAll('line').length)} straps`,
+      ];
+    case 'throwable-cushion':
+      return [`square ${foamColour} pad`, `${countWord(strapGroup!.querySelectorAll('path').length)} looped straps`];
+    case 'inflatable': {
+      const shoulders = strapGroup!.querySelectorAll('path').length;
+      const waist = strapGroup!.querySelectorAll('line').length;
+      const cylinder = svg.querySelector('rect[rx="6"]') !== null;
+      const tab = svg.querySelector('circle') !== null;
+      return [
+        `${foamColour} panel`,
+        `${countWord(shoulders)} straps over the shoulders`,
+        waist === 1 ? 'one round the waist' : 'UNMATCHED',
+        cylinder && tab ? 'small dark cylinder sits low on the right with a pull tab' : 'UNMATCHED',
+      ];
+    }
+    default:
+      return [];
+  }
+}
+
+describe('PFDs (the drawn ones)', () => {
+  const drawn = entries<PfdFormName>(QUESTION_PFDS).filter(([, f]) => !(f in PFD_IMAGES));
+
+  it('describes every drawn device, and leaves the photographs to their alt text', () => {
+    expect(drawn.length).toBeGreaterThan(0);
+    for (const [id, f] of entries<PfdFormName>(QUESTION_PFDS)) {
+      expect(visualDescription(id, false) === null, id).toBe(f in PFD_IMAGES);
+    }
+  });
+
+  it('counts the panels, straps and fittings the drawing paints', () => {
+    for (const [id, form] of drawn) {
+      const { container } = render(<PfdDisplay form={form} />);
+      const expected = paintedPfd(form, container);
+      cleanup();
+      expect(expected.length, id).toBeGreaterThan(0);
+      const d = visualDescription(id, false)!;
+      for (const part of expected) expect(d, id).toContain(part);
+    }
+  });
+
+  it('reads pf-01 as written', () => {
+    expect(visualDescription('pf-01', false)).toBe(
+      'A wearable piece of orange foam, seen from the front: a deep collar curving up behind where the head ' +
+        'would be, and below it two thick chest panels, joined across the front by two straps.'
     );
   });
 });

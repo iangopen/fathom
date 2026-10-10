@@ -23,7 +23,7 @@ import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/compo
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
 import { BuoyDisplay, BUOY_IMAGES, describeBuoy } from '../drills/colregs/components/BuoyDisplay';
 import { DistressDisplay, DISTRESS_IMAGES, describeDistress } from '../drills/colregs/components/DistressDisplay';
-import { PfdDisplay, PFD_IMAGES } from '../drills/colregs/components/PfdDisplay';
+import { PfdDisplay, PFD_IMAGES, describePfd } from '../drills/colregs/components/PfdDisplay';
 import { BoatPartDisplay } from '../drills/colregs/components/BoatPartDisplay';
 import { CloudDisplay, CLOUD_IMAGES } from '../drills/colregs/components/CloudDisplay';
 import { SignalFlagDisplay, describeFlag } from '../drills/colregs/components/SignalFlagDisplay';
@@ -204,7 +204,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const pfd = QUESTION_PFDS[questionId];
-  if (pfd) return node('pfd', () => <PfdDisplay form={pfd} label="Device" />, photo('pfd', pfd, PFD_IMAGES));
+  if (pfd) {
+    return node(
+      'pfd',
+      (a11y) => <PfdDisplay form={pfd} label="Device" a11y={a11y} />,
+      photo('pfd', pfd, PFD_IMAGES),
+      describePfd(pfd) ?? undefined
+    );
+  }
 
   const boatPart = QUESTION_BOAT_PARTS[questionId];
   if (boatPart) return node('boat-part', () => <BoatPartDisplay part={boatPart} label="Highlighted" />);
