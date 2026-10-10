@@ -5,7 +5,8 @@ import React from 'react';
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { colourName, countWord } from '../lib/visualA11y';
-import { visualDescription } from '../components/VisualPanel';
+import { visualDescription, visualKind, photoCreditFor } from '../components/VisualPanel';
+import { COLREGS_QUESTIONS } from '../drills/colregs/constants';
 import {
   QUESTION_LIGHTS,
   QUESTION_SHAPES,
@@ -41,6 +42,31 @@ import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 // with the rest of the leak guards in answerA11y.test.tsx.
 
 afterEach(cleanup);
+
+// Every drawing has a text equivalent, and only drawings: a photograph's alt
+// already describes its frame, and a drawing held back until the answer has
+// nothing to describe before it. A new drawn type, or a new question on an old
+// one, fails here until its generator covers it.
+describe('coverage', () => {
+  it('describes every drawn visual, before the answer and after, and no photograph', () => {
+    let drawn = 0;
+    for (const q of COLREGS_QUESTIONS) {
+      for (const revealed of [false, true]) {
+        const kind = visualKind(q.id, revealed);
+        if (kind === null) {
+          expect(visualDescription(q.id, revealed), `${q.id} revealed=${revealed}`).toBeNull();
+          continue;
+        }
+        const isPhoto = photoCreditFor(q.id) !== undefined;
+        expect(visualDescription(q.id, revealed) === null, `${q.id} (${kind}) revealed=${revealed}`).toBe(isPhoto);
+        if (!isPhoto && !revealed) drawn += 1;
+      }
+    }
+    // 104 drawn visuals at the time of writing, less dk-13, ss-07 and ss-16,
+    // which draw only once answered.
+    expect(drawn).toBe(101);
+  });
+});
 
 const entries = <T,>(m: Partial<Record<string, T>>) => Object.entries(m) as [string, T][];
 
