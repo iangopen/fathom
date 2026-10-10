@@ -18,7 +18,7 @@ import {
 import { LightDisplay, describeLights } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay, describeDayShapes } from '../drills/colregs/components/DayShapeDisplay';
 import { VesselProfile, describeVesselProfile } from '../drills/colregs/components/VesselProfile';
-import { VesselScenario } from '../drills/colregs/components/VesselScenario';
+import { VesselScenario, describeScenario } from '../drills/colregs/components/VesselScenario';
 import { SoundSignalDisplay, describeSoundSignal } from '../drills/colregs/components/SoundSignalDisplay';
 import { AnchorDisplay, ANCHOR_IMAGES } from '../drills/colregs/components/AnchorDisplay';
 import { BuoyDisplay, BUOY_IMAGES } from '../drills/colregs/components/BuoyDisplay';
@@ -84,11 +84,11 @@ interface ResolvedVisual {
 // The accessible name of each kind of drawing. It names the KIND of picture,
 // never what is in it; the description says what is in it.
 export const VISUAL_NAMES: Record<VisualKind, string> = {
-  vessel: 'Vessel diagram, side view',
+  vessel: 'Profile diagram, side view',
   lights: 'Lights diagram, seen from above',
   sounds: 'Sound signal diagram',
   shapes: 'Day shapes diagram, seen from above',
-  scenario: 'Vessel encounter diagram, seen from above',
+  scenario: 'Encounter diagram, seen from above',
   anchor: 'Anchor',
   buoy: 'Navigation mark diagram',
   distress: 'Signal diagram',
@@ -171,7 +171,14 @@ function resolveVisual(questionId: string, revealed: boolean): ResolvedVisual | 
   }
 
   const scenario = QUESTION_SCENARIOS[questionId];
-  if (scenario) return node('scenario', () => <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} />);
+  if (scenario) {
+    return node(
+      'scenario',
+      (a11y) => <VesselScenario scenario={scenario} label="Scenario" revealed={revealed} a11y={a11y} />,
+      undefined,
+      describeScenario(scenario, revealed)
+    );
+  }
 
   const anchor = QUESTION_ANCHORS[questionId];
   if (anchor) return node('anchor', () => <AnchorDisplay type={anchor} label="Anchor" />, photo('anchor', anchor, ANCHOR_IMAGES));

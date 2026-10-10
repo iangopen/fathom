@@ -210,10 +210,10 @@ describe('compass: answering', () => {
 // ── No accessible name answers the question ─────────────────────────────
 
 // What a screen reader can reach, in two parts. `names` are the ones only
-// assistive tech gets - alt, aria-label, title, and the text an
-// aria-describedby points at - which this layer is responsible for. `text` is
-// the text in the drawing, which a sighted reader sees too (a description is
-// visually hidden, so it is in `names` and is held to that stricter check).
+// assistive tech gets - alt, aria-label, title - which this layer is
+// responsible for. `text` is the text in the panel, which includes a drawing's
+// visually hidden description, so the two checks on `text` below hold
+// descriptions too. Descriptions get their own, stricter block further down.
 function heard(root: Element): { names: string; text: string } {
   const names: string[] = [];
   const text: string[] = [];
@@ -223,9 +223,6 @@ function heard(root: Element): { names: string; text: string } {
       for (const a of ['alt', 'aria-label', 'title']) {
         const v = n.getAttribute(a);
         if (v) names.push(v);
-      }
-      for (const id of (n.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)) {
-        names.push(document.getElementById(id)?.textContent ?? '');
       }
     } else if (n.nodeType === Node.TEXT_NODE) {
       text.push(n.textContent ?? '');
@@ -444,6 +441,17 @@ const SUBJECT_VOCABULARY: Partial<Record<VisualKind, RegExp>> = {
 
 const wordsOf = (s: string) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
 
+// Words that can be "only the answer's" by accident and still say nothing:
+// "the vessel WITH the other on her starboard side", "BOTH vessels alter
+// course". A description needs them to be a sentence. Function words and the
+// word "vessel" only - every word that could name or locate an answer is
+// still checked, and vessel classes have their own rule above.
+const FUNCTION_WORDS = new Set([
+  'with', 'both', 'other', 'that', 'this', 'from', 'have', 'into', 'each', 'their',
+  'there', 'which', 'when', 'where', 'then', 'than', 'them', 'they', 'only', 'also',
+  'vessel', 'vessels',
+]);
+
 function descriptionLeaks(
   q: (typeof COLREGS_QUESTIONS)[number],
   kind: VisualKind,
@@ -456,7 +464,8 @@ function descriptionLeaks(
 
   const alreadySaid = new Set([...wordsOf(q.prompt), ...wordsOf(printed)]);
   for (const w of distinctiveWords(q.correctAnswer, q.options)) {
-    if (!alreadySaid.has(w) && new RegExp(`\\b${w}`).test(d)) leaks.push(`"${w}"`);
+    if (FUNCTION_WORDS.has(w) || alreadySaid.has(w)) continue;
+    if (new RegExp(`\\b${w}`).test(d)) leaks.push(`"${w}"`);
   }
 
   const described = classesIn(d);
@@ -487,7 +496,9 @@ describe('no description gives away its own answer', () => {
       // taken out, so a description cannot excuse itself.
       const { container } = render(<VisualPanel questionId={q.id} revealed={false} />);
       container.querySelectorAll('.sr-only').forEach(n => n.remove());
-      const printed = container.textContent ?? '';
+      // Text node by text node: textContent runs neighbouring SVG labels
+      // together ("Wind to PortWind to Stbd"), which hides words.
+      const printed = heard(container).text;
       cleanup();
       for (const l of descriptionLeaks(q, kind, description, printed)) leaks.push(`${q.id}: ${l}`);
     }

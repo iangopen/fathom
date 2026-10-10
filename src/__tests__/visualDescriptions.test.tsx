@@ -16,7 +16,8 @@ import {
 } from '../drills/colregs';
 import { SoundSignalDisplay, BlastMark } from '../drills/colregs/components/SoundSignalDisplay';
 import { VesselProfile, VesselTypeName } from '../drills/colregs/components/VesselProfile';
-import { QUESTION_VESSEL_TYPES } from '../drills/colregs';
+import { QUESTION_VESSEL_TYPES, QUESTION_SCENARIOS } from '../drills/colregs';
+import { VesselScenario, ScenarioType } from '../drills/colregs/components/VesselScenario';
 import { LightDisplay, LightName } from '../drills/colregs/components/LightDisplay';
 import { DayShapeDisplay } from '../drills/colregs/components/DayShapeDisplay';
 
@@ -259,6 +260,80 @@ describe('vessel profiles', () => {
     expect(visualDescription('vt-02', false)).toBe(
       'Side view of a hull on the water, with one mast near the middle. Three shapes, all black, hang in a ' +
         'vertical line on the mast, from top to bottom: ball, diamond and ball.'
+    );
+  });
+});
+
+// Each vessel a scenario diagram paints: its hull's translate and rotate, its
+// label text, and its course arrow if it has one, read off the SVG.
+const SECTORS = [
+  'up the page', 'up and to the right', 'to the right', 'down and to the right',
+  'down the page', 'down and to the left', 'to the left', 'up and to the left',
+];
+const sector = (deg: number) => SECTORS[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+
+interface PaintedVessel { x: number; y: number; label: string; heading: string; arrow: boolean }
+function paintedVessels(root: Element): PaintedVessel[] {
+  const out: PaintedVessel[] = [];
+  for (const hull of root.querySelectorAll('g[transform^="translate"]')) {
+    const m = /translate\(([-\d.]+), ([-\d.]+)\) rotate\(([-\d.]+)\)/.exec(hull.getAttribute('transform') ?? '')!;
+    const group = hull.parentElement!;
+    const line = group.querySelector('line');
+    const heading = line
+      ? sector((Math.atan2(num(line, 'x2') - num(line, 'x1'), -(num(line, 'y2') - num(line, 'y1'))) * 180) / Math.PI)
+      : sector(Number(m[3]));
+    out.push({
+      x: Number(m[1]),
+      y: Number(m[2]),
+      label: group.querySelector('text')?.textContent ?? '',
+      heading,
+      arrow: line !== null,
+    });
+  }
+  return out.sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
+function vesselsSaid(description: string) {
+  const list = /from top to bottom: (.*?)\.(?: A key| Caption|$)/.exec(description)?.[1] ?? '';
+  return list.split('; ').map(seg => {
+    const m = /^(?:a vessel labelled (.+?)|an unlabelled vessel) at the .+?, (?:with an arrow pointing (.+)|pointing (.+), with no arrow)$/.exec(seg);
+    if (!m) throw new Error(`unparsed vessel: ${seg}`);
+    return { label: m[1] ?? '', heading: m[2] ?? m[3], arrow: m[2] !== undefined };
+  });
+}
+
+describe('scenarios', () => {
+  it('has a description for every scenario question, before and after the answer', () => {
+    for (const [id] of entries(QUESTION_SCENARIOS)) {
+      expect(visualDescription(id, false), id).toBeTruthy();
+      expect(visualDescription(id, true), id).toBeTruthy();
+    }
+  });
+
+  it('names every vessel the diagram paints, top to bottom, with its label and heading', () => {
+    for (const [id, scenario] of entries<ScenarioType>(QUESTION_SCENARIOS)) {
+      for (const revealed of [false, true]) {
+        const { container } = render(<VesselScenario scenario={scenario} revealed={revealed} />);
+        const painted = paintedVessels(container);
+        const caption = container.querySelector('p')?.textContent ?? null;
+        cleanup();
+        const description = visualDescription(id, revealed)!;
+        const said = vesselsSaid(description);
+        expect(said, `${id} revealed=${revealed}`).toEqual(
+          painted.map(p => ({ label: p.label, heading: p.heading, arrow: p.arrow }))
+        );
+        // The caption states the outcome: only once it is drawn.
+        expect(caption === null ? !description.includes('Caption:') : description.endsWith(`Caption: ${caption}`), id).toBe(true);
+        expect(description.includes('same grey'), id).toBe(!revealed);
+      }
+    }
+  });
+
+  it('reads vh-03 as written', () => {
+    expect(visualDescription('vh-03', false)).toBe(
+      'Seen from above. Two vessels, both drawn in the same grey, from top to bottom: ' +
+        'a vessel labelled Other at the middle right, with an arrow pointing to the left; ' +
+        'a vessel labelled Own at the bottom left, with an arrow pointing up the page.'
     );
   });
 });

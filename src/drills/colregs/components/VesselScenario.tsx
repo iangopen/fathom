@@ -1,5 +1,6 @@
 import React from 'react';
 import { buildScenarioView, ScenarioType, VesselRole } from '../scenarioView';
+import { SvgA11y, imgProps, colourName, capitalise, counted } from '../../../lib/visualA11y';
 
 // Re-exported so existing importers keep using this module's public surface.
 export type { ScenarioType } from '../scenarioView';
@@ -11,6 +12,7 @@ interface VesselScenarioProps {
   // False until the player has answered. Everything that states or colour-codes
   // the give-way outcome is withheld until then - see REVEALED_ONLY below.
   revealed?: boolean;
+  a11y?: SvgA11y;
 }
 
 // A simple top-down vessel silhouette as an SVG path in a local 0–20 coordinate space.
@@ -45,7 +47,61 @@ const ROLE_COLORS: Record<VesselRole, {
   },
 };
 
-export const VesselScenario: React.FC<VesselScenarioProps> = ({ scenario, label, revealed = false }) => {
+// ── The text equivalent ──────────────────────────────────────────────────
+//
+// Generated from buildScenarioView - the same gated view the SVG is drawn
+// from - so it inherits the leak rule for free: before the answer every
+// vessel is grey, a `typeAfterAnswer` vessel is unlabelled, and there is no
+// caption or legend, because the view holds none of those to describe.
+
+// A direction on the page, in degrees clockwise from straight up.
+function pageDirection(deg: number): string {
+  const words = [
+    'up the page', 'up and to the right', 'to the right', 'down and to the right',
+    'down the page', 'down and to the left', 'to the left', 'up and to the left',
+  ];
+  return words[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+}
+
+function pagePlace(x: number, y: number): string {
+  const across = x < 130 ? 'left' : x > 170 ? 'right' : '';
+  const down = y <= 105 ? 'top' : y >= 165 ? 'bottom' : '';
+  if (across && down) return `${down} ${across}`;
+  if (down) return down === 'top' ? 'top centre' : 'bottom centre';
+  return across ? `middle ${across}` : 'centre';
+}
+
+export function describeScenario(scenario: ScenarioType, revealed: boolean): string {
+  const view = buildScenarioView(scenario, revealed);
+  const vessels = [...view.vessels].sort((a, b) => a.y - b.y || a.x - b.x);
+
+  const one = (v: (typeof vessels)[number]) => {
+    const name = v.label ? `a vessel labelled ${v.label}` : 'an unlabelled vessel';
+    // The arrow is what reads as her heading; with none, say which way
+    // the hull points.
+    const going = v.showArrow
+      ? `with an arrow pointing ${pageDirection((Math.atan2(v.arrowDx, -v.arrowDy) * 180) / Math.PI)}`
+      : `pointing ${pageDirection(v.rotation)}, with no arrow`;
+    const colour = revealed ? `, drawn in ${colourName(ROLE_COLORS[v.colorRole].stroke)}` : '';
+    return `${name} at the ${pagePlace(v.x, v.y)}${colour}, ${going}`;
+  };
+
+  const colours = revealed ? '' : `, ${vessels.length === 2 ? 'both' : 'all'} drawn in the same grey`;
+  const parts = [
+    `Seen from above. ${capitalise(counted(vessels.length, 'vessel'))}${colours}, from top to bottom: ` +
+      `${vessels.map(one).join('; ')}.`,
+  ];
+  if (view.showLegend) {
+    parts.push(
+      `A key matches ${colourName(ROLE_COLORS['give-way'].stroke)} to Give-Way and ` +
+        `${colourName(ROLE_COLORS['stand-on'].stroke)} to Stand-On.`
+    );
+  }
+  if (view.caption) parts.push(`Caption: ${view.caption}`);
+  return parts.join(' ');
+}
+
+export const VesselScenario: React.FC<VesselScenarioProps> = ({ scenario, label, revealed = false, a11y }) => {
   // All answer-gating lives in buildScenarioView; this component renders
   // whatever it is handed and makes no reveal decisions of its own.
   const view = buildScenarioView(scenario, revealed);
@@ -61,6 +117,7 @@ export const VesselScenario: React.FC<VesselScenarioProps> = ({ scenario, label,
           viewBox="0 0 300 280"
           className="w-full"
           xmlns="http://www.w3.org/2000/svg"
+          {...imgProps(a11y)}
         >
           {/* Background grid */}
           <defs>
