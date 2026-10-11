@@ -1312,6 +1312,10 @@ const vesselTypesQuestions: ColregsQuestion[] = [
     explanation:
       'Rule 25: A sailing vessel proceeding under sail alone carries no day shape. It is only when she is under sail AND being propelled by machinery that Rule 25(e) requires a cone, apex downwards - she is then treated as a power-driven vessel.',
   },
+  // Not a copy of ds-04, though both sit on Day shapes (2026-10-10): ds-04
+  // draws the diamond alone and asks what it means (either end of a long
+  // tow); this one draws the tow astern, so she is the towing vessel and the
+  // diamond says the tow is over 200 metres.
   {
     id: 'vt-06',
     category: 'vessel-types',
