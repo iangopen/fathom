@@ -3,6 +3,28 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-10 - Five leftovers: bars, a duplicate check, labels, README, license
+
+- Mastery bars now read the per-item tallies of the card's missing-list
+  items. The CSV export follows the bar. Tests 1082 -> 1154 (16 files):
+  3 bar tests, 69 for the scenario labels and arrowheads.
+- vt-06 / ds-04: different drawing (lone diamond vs tow drawn astern) and
+  different right answer; both kept.
+- Scenario labels: measured with getBBox in headless Chrome over CDP (the
+  arrowhead is a marker, so the probe inserted a path with the marker's
+  geometry to measure it). 31 of 34 overlapped; 0 after. The screenshots
+  also showed answered arrows had no heads, a marker-id mismatch; fixed in
+  its own commit.
+- Found and left: weak-spot runs play the weak questions last (the deck is
+  read from its end). Recorded as open in CLAUDE.md.
+- README counted with a scratch script bundled by esbuild from the real
+  modules. `npm install --package-lock-only` for the license field also
+  wrote last session's `engines` into the lockfile.
+- Gotchas: Bash heredocs and `node -e` mangle `${...}` and backticks; use
+  the Edit tool for TypeScript. And `git checkout -- <file>` to undo a
+  deliberate break also undoes any uncommitted real change in that file:
+  copy the file aside first, as the later breaks did.
+
 ## 2026-10-09 - Text equivalents for the drawings
 
 - Inventory first: 104 drawn visuals across ten types (lights 13, day shapes

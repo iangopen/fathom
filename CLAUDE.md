@@ -31,11 +31,12 @@ https://iangopen.github.io/fathom/
   About and Settings.
 - The **Hub is a welcome screen**, not the whole index: intro, stats, the two
   drill shortcuts, then **one card per SECTION**. `src/lib/syllabus.ts`
-  describes every category under one of five sections — Navigation, Rules of
-  the road, Signals and communication, Aids to navigation, Seamanship — and
-  `sections()` is what the hub and About both read, so adding a sixth to
-  SECTION_ORDER adds a card and an About line with no other edit. Nothing
-  hardcodes the section count.
+  describes every category under one of six sections — Navigation, Rules of
+  the road, Signals and communication, Aids to navigation, Seamanship,
+  Weather and tides — and `sections()` is what the hub and About both read,
+  so adding a seventh to SECTION_ORDER adds a card and an About line with no
+  other edit. Nothing hardcodes the section count. (18 cards: 16 on the
+  question bank, 2 on the compass rose; counted 2026-10-10.)
 - A section card opens `SectionScreen`, that section's own category list.
   `drillTargetFor()` says which drill answers a category, and there are more
   cards than drills, on purpose.
@@ -82,9 +83,20 @@ the deck, so the count, the drill and the weak-spot list all follow.
   day-shape copies dropped in the drawing-leak session.
 - **One record per question.** The ledger keys items by question id, and the
   category tally goes to the question's HOME card (`progressIdFor` reads the
-  question, not the run's filter). So a vt question answered on Day shapes
-  moves Vessel types' mastery bar, and still shows up in Day shapes' weak-spot
-  list. Nothing sums card counts, so nothing double-counts on screen.
+  question, not the run's filter). Totals (`overallPct`, `totalAnswered`)
+  sum the category tallies, so a shared question is counted once there.
+- **The bar-counting rule (2026-10-10): a card's mastery bar counts exactly
+  what its "What you are missing" list counts.** `cardMasteryPct(p, cat)` in
+  syllabus.ts reads the per-item tallies of `itemsForCategory(cat)` -
+  cross-listed questions included - through `itemsMasteryPct`, which
+  de-duplicates the ids. So Day shapes' bar measures all 15; answering a vt
+  question on any card moves the bar of every card it is on, from its one
+  record, and never counts it twice within one bar. Hub cards, the category
+  screen and the CSV export all use it; nothing else should call
+  `masteryPct` for a bar. The category tally is read only as the fallback
+  when none of a card's items has a per-item record (a ledger from before
+  the per-item grain), so that history does not read as 0%. "Last drilled"
+  is still the category tally's timestamp, so it follows the home card.
 - `crossListing.test.tsx` holds every card and every plan's queue (default,
   counts, weak spots, with an empty and an all-weak ledger) to one copy of
   each id, and walks a whole Day shapes exam in jsdom checking the stored
@@ -92,6 +104,14 @@ the deck, so the count, the drill and the weak-spot list all follow.
   breaking `planQueue` (top-up drawn from the whole pool) and the deck builder
   (home questions listed twice) both fail it. `picker.test.ts` still requires
   each pool to be exactly its home questions plus its declared cross-listings.
+  The same file holds the bar rule: on every card the bar reads exactly the
+  missing list's items, and a vt question answered on Day shapes (rendered in
+  jsdom) moves both bars from one stored record. Recording the answer once
+  per card it is on, adding the category tally to the bar, and dropping the
+  de-duplication each fail it.
+- vt-06 and ds-04 were compared (2026-10-10) and are not duplicates: ds-04
+  draws a lone diamond (either end of a long tow), vt-06 draws the tow astern
+  (the towing vessel, tow over 200 m). A comment beside vt-06 says so.
 
 ## Sessions, plans and the ledger
 - `src/lib/progress.ts` is the one ledger. It keeps a per-category tally
@@ -246,9 +266,23 @@ Still open:
   not by listening.
 - **Whether sighted players get a "Describe" toggle** for the drawing
   descriptions is a product decision; they are visually hidden for now.
-- **Scenario labels sit on their own arrowheads** in some diagrams (the
-  label is offset 22-26px along the arrow, which is about the arrow's
-  length; plainly visible in sail-vs-sail). Cosmetic, noticed and left.
+- **Weak-spot runs ask the weak questions last**, not first: `planQueue`
+  puts them at the front of the queue, but the colregs drill plays a deck
+  from its END (`queue[queue.length - 1]`, then `pop()`). A count that cuts
+  the queue still keeps the weak ones, so only the order is wrong. Found
+  2026-10-10 while writing the bar test; not fixed, it was out of scope.
+
+Resolved (2026-10-10): **scenario labels no longer sit on their arrows.**
+`labelY()` in VesselScenario puts the label on the side of the hull away
+from her arrow (below for an arrow up the page, above otherwise). Measured
+with getBBox on `npm run preview`, 31 of the 34 labelled drawings (17
+questions, unanswered and answered) overlapped their own arrowhead before;
+after, every label's intersection with its own arrowhead, arrow and hull and
+with every other vessel is 0. `scenarioLabels.test.ts` holds all 17 to it
+from the drawing geometry. The same screenshots showed the answered orange
+and cyan arrows had no heads (marker ids `arrow-giveway` / `arrow-standon`
+against `arrow-give-way` / `arrow-stand-on` on the lines); fixed, and the
+same test file requires every marker-end to name a marker that exists.
 
 ### Text equivalents for the drawings (2026-10-09)
 Every drawn visual - 101 before an answer, plus the three held back until
@@ -460,7 +494,15 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
   (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
   build toolchain - nothing a user's browser loads.
-- Tests: 15 files / 1082 tests (2026-10-09, after the drawing descriptions). Plain `npm test`, no flags, on
+- **License.** The code is MIT (`LICENSE`, holder `iangopenbusinessai` from
+  git's user.name since package.json has no author; package.json `license`
+  is `MIT`). The photographs are NOT under it: they keep their own PD / CC
+  licences, credited in the app and in IMAGE-CREDITS.md, and the README says
+  so. GitHub detects the repo as MIT.
+- README numbers come from a one-off count of the syllabus and bank, not
+  from memory (2026-10-10: 320 questions, 16 bank cards summing to 326 with
+  the 6 cross-listed, 6 sections, 18 cards). Recount when the bank changes.
+- Tests: 16 files / 1154 tests (2026-10-10, after the bar rule and the scenario labels). Plain `npm test`, no flags, on
   any Node from 22 up.
 - **Node versions.** CI runs Node 22; `.nvmrc` says 22 and `engines` says
   `>=22`. `npm test` passes unflagged on 22, 24, 25 and 26 (verified on
