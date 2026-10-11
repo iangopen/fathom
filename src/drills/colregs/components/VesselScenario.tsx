@@ -71,6 +71,15 @@ function pagePlace(x: number, y: number): string {
   return across ? `middle ${across}` : 'centre';
 }
 
+// Where a vessel's label sits: on the side of the hull away from her arrow -
+// below it when the arrow points up the page, above it otherwise. It used to
+// go on the arrow's own side, about one arrow length out, which put it on the
+// arrowhead. The text is centred on the hull's x; this is its baseline.
+export const LABEL_FONT_SIZE = 8;
+export function labelY(v: { y: number; arrowDy: number }): number {
+  return v.y + (v.arrowDy < 0 ? 26 : -22);
+}
+
 export function describeScenario(scenario: ScenarioType, revealed: boolean): string {
   const view = buildScenarioView(scenario, revealed);
   const vessels = [...view.vessels].sort((a, b) => a.y - b.y || a.x - b.x);
@@ -183,9 +192,9 @@ export const VesselScenario: React.FC<VesselScenarioProps> = ({ scenario, label,
                 {/* Label */}
                 <text
                   x={v.x}
-                  y={v.y + (v.arrowDy > 0 ? 26 : -22)}
+                  y={labelY(v)}
                   textAnchor="middle"
-                  fontSize="8"
+                  fontSize={LABEL_FONT_SIZE}
                   fill={colors.text}
                   fontFamily="monospace"
                   opacity="0.85"
