@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { QUESTION_SCENARIOS } from '../drills/colregs';
 import { buildScenarioView, ScenarioVesselView } from '../drills/colregs/scenarioView';
-import { LABEL_FONT_SIZE, labelY } from '../drills/colregs/components/VesselScenario';
+import { LABEL_FONT_SIZE, VesselScenario, labelY } from '../drills/colregs/components/VesselScenario';
 
 // No scenario label may sit on its own arrow, or on anything else drawn.
 //
@@ -93,6 +95,24 @@ describe('scenario labels clear the drawing', () => {
           });
         });
         expect(hits).toEqual([]);
+      });
+    }
+  }
+});
+
+// Every arrow names a marker that exists. The coloured ones used to ask for
+// arrow-give-way / arrow-stand-on while the markers were arrow-giveway /
+// arrow-standon, so once answered the orange and cyan arrows had no heads.
+describe('every scenario arrow has its arrowhead', () => {
+  for (const [id, scenario] of QUESTIONS) {
+    for (const revealed of [false, true]) {
+      it(`${id} (${revealed ? 'answered' : 'unanswered'})`, () => {
+        const html = renderToStaticMarkup(createElement(VesselScenario, { scenario, revealed }));
+        const defined = [...html.matchAll(/<marker id="([^"]+)"/g)].map((m) => m[1]);
+        const used = [...html.matchAll(/marker-end="url\(#([^)]+)\)"/g)].map((m) => m[1]);
+        const arrows = buildScenarioView(scenario, revealed).vessels.filter((v) => v.showArrow).length;
+        expect(used).toHaveLength(arrows);
+        for (const m of used) expect(defined, m).toContain(m);
       });
     }
   }

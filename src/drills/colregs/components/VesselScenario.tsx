@@ -133,10 +133,10 @@ export const VesselScenario: React.FC<VesselScenarioProps> = ({ scenario, label,
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
               <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" />
             </pattern>
-            <marker id="arrow-giveway" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <marker id="arrow-give-way" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
               <path d="M 0 0 L 6 3 L 0 6 Z" fill={ROLE_COLORS['give-way'].arrow} />
             </marker>
-            <marker id="arrow-standon" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <marker id="arrow-stand-on" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
               <path d="M 0 0 L 6 3 L 0 6 Z" fill={ROLE_COLORS['stand-on'].arrow} />
             </marker>
             <marker id="arrow-neutral" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
