@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { DISPLAY, MONO } from '../lib/theme';
 import {
   ChartCategory,
+  cardMasteryPct,
   drillTargetFor,
   itemsForCategory,
   questionCount,
@@ -12,7 +13,6 @@ import {
   WEAK_MIN_ATTEMPTS,
   itemsAnswered,
   lastDrilledLabel,
-  masteryPct,
   weakSpots,
 } from '../lib/progress';
 import {
@@ -225,7 +225,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({
           <div style={panel}>
             <div style={panelLabel}>Mastery</div>
             <div style={{ ...panelValue, color: 'var(--ct-brass)' }}>
-              {masteryPct(progress, category.id)}%
+              {cardMasteryPct(progress, category)}%
             </div>
           </div>
           <div style={panel}>

@@ -147,6 +147,25 @@ export function masteryPct(p: Progress, categoryId: string): number {
   return Math.round((c.correct / c.answered) * 100);
 }
 
+// Mastery over a set of items: every answer recorded against any of them,
+// read from the per-item tallies. This is what a card's bar shows, so the bar
+// and the weak-spot list are always about the same questions. The ids are
+// de-duplicated, so an id listed twice can never be counted twice in one bar.
+// `null` means none of them has been answered yet - the caller decides what
+// that reads as.
+export function itemsMasteryPct(p: Progress, itemIds: readonly string[]): number | null {
+  let answered = 0;
+  let correct = 0;
+  for (const id of new Set(itemIds)) {
+    const item = p.items[id];
+    if (!item) continue;
+    answered += item.answered;
+    correct += item.correct;
+  }
+  if (answered === 0) return null;
+  return Math.round((correct / answered) * 100);
+}
+
 export function overallPct(p: Progress): number {
   let answered = 0;
   let correct = 0;

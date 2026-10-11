@@ -1,5 +1,6 @@
 import { ColregsCategory, COLREGS_DECK_BY_CATEGORY } from '../drills/colregs/constants';
 import { COMPASS_POINTS, RELATIVE_POINTS } from '../drills/compass/constants';
+import { Progress, itemsMasteryPct, masteryPct } from './progress';
 
 // The chart table indexes the syllabus, not just the question bank, so a
 // category can appear here before it has any questions behind it. `status`
@@ -476,4 +477,15 @@ export function itemsForCategory(cat: ChartCategory): SyllabusItem[] {
     return points.map((pt) => ({ id: itemIdForPoint(cat.id, pt.abbr), label: pt.full }));
   }
   return [];
+}
+
+// A card's mastery bar. It reads the per-item tallies of exactly the items
+// `itemsForCategory` lists - the same set as "What you are missing" - so a
+// cross-listed question counts on every card it is drilled on, from its one
+// ledger record. The per-category tally is still where an answer is credited
+// (its home card), and is only read here as the fallback for a ledger written
+// before per-item tallies existed, so that history does not read as 0%.
+export function cardMasteryPct(p: Progress, cat: ChartCategory): number {
+  const fromItems = itemsMasteryPct(p, itemsForCategory(cat).map((i) => i.id));
+  return fromItems ?? masteryPct(p, cat.id);
 }

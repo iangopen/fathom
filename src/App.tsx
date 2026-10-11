@@ -6,12 +6,12 @@ import { Hub } from './components/Hub';
 import { SectionScreen } from './components/SectionScreen';
 import { SettingGroup, SettingsScreen } from './components/SettingsScreen';
 import { DRILLS } from './drills';
-import { CATEGORIES, categoryById, drillTargetFor, sectionByName } from './lib/syllabus';
+import { CATEGORIES, cardMasteryPct, categoryById, drillTargetFor, sectionByName } from './lib/syllabus';
 import { SessionPlan } from './lib/session';
 import { DrillStart, GameMode } from './types';
 import { PrefsProvider, usePrefs } from './lib/prefs';
 import { themeName } from './lib/theme';
-import { Progress, clearProgress, masteryPct, readProgress } from './lib/progress';
+import { Progress, clearProgress, readProgress } from './lib/progress';
 
 // One route at a time, and the drill route carries the syllabus category the
 // hub card was for, so a drill opens on that category instead of on its own
@@ -86,7 +86,7 @@ function Shell() {
           cat.name,
           String(c.answered),
           String(c.correct),
-          String(masteryPct(progress, cat.id)),
+          String(cardMasteryPct(progress, cat)),
           c.last ? new Date(c.last).toISOString() : '',
         ]);
       }

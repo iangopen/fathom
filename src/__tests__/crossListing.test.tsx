@@ -10,8 +10,13 @@ import {
 } from '../drills/colregs/constants';
 import { PrefsProvider } from '../lib/prefs';
 import { DEFAULT_PLAN, SessionPlan, planQueue } from '../lib/session';
-import { Progress, readProgress } from '../lib/progress';
-import { categoryBySource } from '../lib/syllabus';
+import { Progress, itemsMasteryPct, readProgress } from '../lib/progress';
+import {
+  CATEGORIES as CARDS,
+  cardMasteryPct,
+  categoryBySource,
+  itemsForCategory,
+} from '../lib/syllabus';
 
 // A question can be drilled on more than one card (`alsoOn`), under its one
 // id. Day shapes lost five questions when they were dropped as copies of the
@@ -144,5 +149,114 @@ describe('a shared question keeps one record', () => {
     expect(p.cats[vesselTypes].answered).toBe(6);
     const total = Object.values(p.cats).reduce((n, c) => n + c.answered, 0);
     expect(total).toBe(deck.length);
+  });
+});
+
+// A card's mastery bar counts the same questions as its "What you are
+// missing" list (itemsForCategory), cross-listed ones included. A shared
+// question still has one record; every card it is on reads that record.
+describe("a card's bar counts what its missing list counts", () => {
+  it('on every card, the bar reads exactly the missing list items and nothing else', () => {
+    const everyId = new Set(CARDS.flatMap((c) => itemsForCategory(c).map((i) => i.id)));
+    for (const card of CARDS) {
+      const mine = new Set(itemsForCategory(card).map((i) => i.id));
+      if (mine.size === 0) continue;
+      // Right every time on this card's items, wrong every time on the rest:
+      // the bar is 100 only if it reads all of these and none of those.
+      const p: Progress = {
+        cats: {},
+        items: Object.fromEntries(
+          [...everyId].map((id) => [
+            id,
+            mine.has(id) ? { answered: 1, correct: 1 } : { answered: 1, correct: 0 },
+          ])
+        ),
+        days: [],
+      };
+      expect(cardMasteryPct(p, card), card.id).toBe(100);
+      // And it reads every one of them: one miss anywhere in the list moves it.
+      for (const id of mine) {
+        const one: Progress = { ...p, items: { ...p.items, [id]: { answered: 1, correct: 0 } } };
+        expect(cardMasteryPct(one, card), `${card.id} ignores ${id}`).toBeLessThan(100);
+      }
+    }
+    // Day shapes measures all 15: its own 9 and the 6 vessel-types questions.
+    expect(itemsForCategory(categoryBySource('day-shapes')!)).toHaveLength(15);
+  });
+});
+
+describe('answering a vessel-types question on Day shapes', () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    localStorage.clear();
+  });
+
+  it('moves both bars, from one record counted once in each', () => {
+    const dayShapes = categoryBySource('day-shapes')!;
+    const vesselTypes = categoryBySource('vessel-types')!;
+    const q = COLREGS_QUESTIONS_BY_CATEGORY['vessel-types'][1];
+
+    // Two earlier misses make it the only weak spot, so a one-question
+    // weak-spots run on Day shapes is that question. The Vessel types tally
+    // also holds ten older answers with no per-item record, so a bar that
+    // read the category tally as well as the items would come out different.
+    localStorage.setItem(
+      'nauticalmaster:charttable:progress',
+      JSON.stringify({
+        cats: { [vesselTypes.id]: { answered: 12, correct: 10, last: 1 } },
+        items: { [q.id]: { answered: 2, correct: 0 } },
+        days: [],
+      })
+    );
+    const before = readProgress();
+    expect(before.items[q.id]).toEqual({ answered: 2, correct: 0 });
+    expect(cardMasteryPct(before, dayShapes)).toBe(0);
+    expect(cardMasteryPct(before, vesselTypes)).toBe(0);
+
+    act(() => {
+      root.render(
+        <PrefsProvider>
+          <ColregsDrill
+            focus="day-shapes"
+            start={{ mode: 'practice', plan: { ...DEFAULT_PLAN, weakSpotsOnly: true, count: 1 } }}
+          />
+        </PrefsProvider>
+      );
+    });
+    expect(container.querySelector('h2')?.textContent).toContain(q.prompt);
+    const right = [...container.querySelectorAll<HTMLElement>('.ct-option')]
+      .filter((b) => (b.textContent ?? '').includes(q.correctAnswer))
+      .sort((a, b) => (a.textContent ?? '').length - (b.textContent ?? '').length)[0];
+    act(() => { right.click(); });
+
+    const after = readProgress();
+    // One record under its own id: three answers, not two plus one per card.
+    expect(after.items[q.id]).toEqual({ answered: 3, correct: 1 });
+    expect(Object.keys(after.items)).toEqual([q.id]);
+    const raw = localStorage.getItem('nauticalmaster:charttable:progress') ?? '';
+    expect(raw.split(`"${q.id}"`).length - 1, `records stored for ${q.id}`).toBe(1);
+    // Both bars read that one record: 1 right of 3 is 33% on each.
+    expect(cardMasteryPct(after, dayShapes)).toBe(33);
+    expect(cardMasteryPct(after, vesselTypes)).toBe(33);
+    // The category tally still goes to the home card alone.
+    expect(after.cats[vesselTypes.id].answered).toBe(13);
+    expect(after.cats[dayShapes.id]).toBeUndefined();
+  });
+
+  it('never counts one id twice in a bar, however often it is listed', () => {
+    const p: Progress = { cats: {}, items: { a: { answered: 3, correct: 1 }, b: { answered: 1, correct: 1 } }, days: [] };
+    expect(itemsMasteryPct(p, ['a', 'b'])).toBe(50);
+    expect(itemsMasteryPct(p, ['a', 'a', 'b'])).toBe(50);
+    expect(itemsMasteryPct(p, ['c'])).toBeNull();
   });
 });

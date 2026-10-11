@@ -3,10 +3,11 @@ import { MONO } from '../lib/theme';
 import {
   ChartCategory,
   SyllabusSection,
+  cardMasteryPct,
   drillTargetFor,
   questionCount,
 } from '../lib/syllabus';
-import { Progress, masteryPct } from '../lib/progress';
+import { Progress } from '../lib/progress';
 
 interface SectionScreenProps {
   section: SyllabusSection;
@@ -76,7 +77,7 @@ export const SectionScreen: React.FC<SectionScreenProps> = ({
 
       <div className="ct-cardgrid">
         {section.categories.map((cat) => {
-          const pct = masteryPct(progress, cat.id);
+          const pct = cardMasteryPct(progress, cat);
           const target = drillTargetFor(cat);
 
           return (
