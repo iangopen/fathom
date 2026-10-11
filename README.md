@@ -126,3 +126,10 @@ given rule is the correct authority for its question. If you find a citation
 that is shaped correctly but attached to the wrong rule, the tests will not
 have caught it.
 
+## License
+
+The code is under the [MIT License](LICENSE).
+
+The photographs keep their own licenses (public domain or Creative Commons).
+Each one is credited in the app, under the photo and on the About screen, and
+in [IMAGE-CREDITS.md](IMAGE-CREDITS.md).
