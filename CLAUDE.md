@@ -135,6 +135,31 @@ the deck, so the count, the drill and the weak-spot list all follow.
 - Widening is deliberate: a weak-spots run puts the weak questions first and
   tops the queue up from the rest of the pool, so asking for 20 when only 6 are
   weak still gives 20.
+- **The queue convention is FRONT-FIRST (2026-10-11): index 0 is asked
+  first, in both drills and every run type.** A builder puts what a run is
+  for at the front, and a count cuts from the back. `planQueue` orders the
+  weak ones weakest first (lowest accuracy, then most answered; shuffled
+  before a stable sort, so exact ties stay random), then the shuffled
+  top-up. The colregs deck (`showQuestion(queue[0])`, `slice(1)` on Next)
+  and the compass exam (`const [front, ...rest] = deck`) both play from the
+  front. The compass weak-spot exam keeps planQueue's order rather than
+  reshuffling it. Never read a queue from its end again.
+  - Before this, the builders were front-first (the slice, and unplanned
+    practice's `queue[0]`) while both deck players were back-first, so a
+    weak-spot run asked its top-up first and its weak questions last. The
+    players were the odd ones out and were flipped. Under a fixed
+    `Math.random`, the shuffled runs (exam, count, timer, compass exam)
+    still draw the same questions, now played from the other end of the same
+    shuffle. Unplanned practice and compass practice and timed runs ask
+    identical sequences. No run was ever deliberately in order. Option
+    shuffling is untouched.
+  - `weakSpotOrder.test.tsx` pins both halves. A weak-spot run asks the
+    weakest first: colregs practice (count and no count), the exam, Day
+    shapes with a cross-listed weak vt question, and the compass exam. Every
+    other run asks its queue front-first: with the shuffle a no-op, the exam,
+    count, timer and compass-exam runs ask in bank or rose order. Sorting
+    weakest-last fails 6 of its 8 tests, and reading the colregs deck from
+    the end fails 5.
 - Exam mode's 15s per question is fixed and a plan does not override it; the
   plan's timer sets up a *timed practice* run instead. On the compass, a count
   applies to the exam only - practice and timed attack are sixty-second runs,
@@ -266,11 +291,12 @@ Still open:
   not by listening.
 - **Whether sighted players get a "Describe" toggle** for the drawing
   descriptions is a product decision; they are visually hidden for now.
-- **Weak-spot runs ask the weak questions last**, not first: `planQueue`
-  puts them at the front of the queue, but the colregs drill plays a deck
-  from its END (`queue[queue.length - 1]`, then `pop()`). A count that cuts
-  the queue still keeps the weak ones, so only the order is wrong. Found
-  2026-10-10 while writing the bar test; not fixed, it was out of scope.
+
+Resolved (2026-10-11): **weak-spot runs ask the weakest questions first.**
+They used to ask them last, because both deck players read the queue from
+its end. See "The queue convention is FRONT-FIRST" under Sessions, plans and
+the ledger. Checked on `npm run preview` from a seeded ledger: the first two
+questions asked were nl-05 (0 of 4) and nl-02 (1 of 4).
 
 Resolved (2026-10-10): **scenario labels no longer sit on their arrows.**
 `labelY()` in VesselScenario puts the label on the side of the hull away
@@ -502,7 +528,7 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
 - README numbers come from a one-off count of the syllabus and bank, not
   from memory (2026-10-10: 320 questions, 16 bank cards summing to 326 with
   the 6 cross-listed, 6 sections, 18 cards). Recount when the bank changes.
-- Tests: 16 files / 1154 tests (2026-10-10, after the bar rule and the scenario labels). Plain `npm test`, no flags, on
+- Tests: 17 files / 1162 tests (2026-10-11, after the weak-spot order fix). Plain `npm test`, no flags, on
   any Node from 22 up.
 - **Node versions.** CI runs Node 22; `.nvmrc` says 22 and `engines` says
   `>=22`. `npm test` passes unflagged on 22, 24, 25 and 26 (verified on

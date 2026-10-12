@@ -3,6 +3,23 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-11 - Weak-spot runs ask the weakest first
+
+- The test was written and committed first, failing 8 of 8 on the old code.
+  It showed two causes: both deck players read the queue from the end, and
+  planQueue shuffled the weak ones instead of ordering them by weakness.
+- The inventory used a temporary probe test (not committed): seeded
+  `Math.random`, every run type rendered in jsdom, and the ids asked
+  recorded before and after. The fix was stashed to get the "before" run.
+  Whole-run comparison: shuffled runs ask the same questions played from
+  the other end; unplanned practice, compass practice and compass timed are
+  identical. The compass weak-spot practice draws the same five points the
+  same number of times, under different indices.
+- Preview check: the "Focus on weak spots" label is a sibling span of its
+  button, whose text is just On/Off. Clicking by label text found nothing
+  the first time, and the run that followed was a plain one.
+- Tests 1154 -> 1162 (17 files).
+
 ## 2026-10-10 - Five leftovers: bars, a duplicate check, labels, README, license
 
 - Mastery bars now read the per-item tallies of the card's missing-list
