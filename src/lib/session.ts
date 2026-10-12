@@ -51,12 +51,19 @@ export function timerLabel(ms: number | null): string {
 
 // Builds the queue for a run: which items, in what order, how many.
 //
+// THE QUEUE CONVENTION IS FRONT-FIRST: index 0 is asked first, in every drill
+// and every run type. A count cuts from the back, so whatever a run is for
+// sits at the front. Both players read it that way (the colregs deck and the
+// compass exam); they used to read from the end, which asked a weak-spot run's
+// weak questions last.
+//
 // The widening is the important part. Asking for 20 questions focused on weak
 // spots when only 6 are weak must not hand back a 6 question run silently, and
 // must not hand back an empty one when nothing is weak yet: the weak ones lead,
-// the rest of the pool follows in random order, and the slice takes what it
-// needs from the front. So the run is as weak-focused as the ledger can make
-// it and no shorter than asked for.
+// weakest first, the rest of the pool follows in random order, and the slice
+// takes what it needs from the front. So the run is as weak-focused as the
+// ledger can make it and no shorter than asked for, and someone who stops
+// early has had the weakest ones.
 export function planQueue<T>(
   pool: readonly T[],
   idOf: (item: T) => string,
@@ -72,7 +79,18 @@ export function planQueue<T>(
     const weak = pool.filter((item) => isWeakItem(progress, idOf(item)));
     const rest = pool.filter((item) => !isWeakItem(progress, idOf(item)));
     weakCount = weak.length;
-    ordered = [...shuffle(weak), ...shuffle(rest)];
+    // Weakest first: lowest accuracy, then the one answered more often (more
+    // evidence it is weak). Shuffled before the stable sort, so exact ties
+    // still come out in random order.
+    const accuracy = (item: T) => {
+      const t = progress.items[idOf(item)];
+      return t.correct / t.answered;
+    };
+    const answered = (item: T) => progress.items[idOf(item)].answered;
+    const weakestFirst = shuffle(weak).sort(
+      (a, b) => accuracy(a) - accuracy(b) || answered(b) - answered(a)
+    );
+    ordered = [...weakestFirst, ...shuffle(rest)];
   } else {
     ordered = shuffle(pool);
   }

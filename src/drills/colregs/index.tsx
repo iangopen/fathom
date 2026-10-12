@@ -564,15 +564,16 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
     setTimeExpired(false);
 
     if (usesDeck) {
-      const next = [...currentDeck];
-      next.pop();
+      // Front-first: the question on screen is deck[0], so moving on drops it
+      // and asks the new front. See planQueue in ../../lib/session.
+      const next = currentDeck.slice(1);
       if (next.length === 0) {
         setDrillState('finished');
         setDeck([]);
         return;
       }
       setDeck(next);
-      showQuestion(next[next.length - 1]);
+      showQuestion(next[0]);
     } else {
       showQuestion(pickExcluding(getPool(categoryFilter), currentIdRef.current));
     }
@@ -683,7 +684,7 @@ export default function ColregsDrill({ focus, start, onExit }: DrillProps) {
     if (usesDeck) {
       setDeck(queue);
       setDeckTotal(queue.length);
-      showQuestion(queue[queue.length - 1]);
+      showQuestion(queue[0]);
     } else {
       setDeck([]);
       setDeckTotal(0);

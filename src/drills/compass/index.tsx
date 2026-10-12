@@ -111,10 +111,14 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
     return queued.length > 0 ? queued : all;
   }, []);
 
-  // Indices into `points`, shuffled, cut to the plan's count. Unplanned this
-  // is the same full 32-index shuffle the exam always used.
+  // Indices into `points`, cut to the plan's count, played front-first (index
+  // 0 is asked first - the convention in ../../lib/session). Unplanned this is
+  // the same full 32-index shuffle the exam always used. A weak-spots run is
+  // NOT reshuffled: `points` is already planQueue's order, weakest first and
+  // then the top-up, and that order is the point of the run.
   const buildDeck = useCallback((points: CompassPoint[], runPlan: SessionPlan) => {
     const deck = [...points.keys()];
+    if (runPlan.weakSpotsOnly) return runPlan.count === null ? deck : deck.slice(0, runPlan.count);
     for (let i = deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -182,8 +186,8 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
             endGame();
             return;
         }
-        const nextDeck = [...examDeck];
-        nextTargetIndex = nextDeck.pop()!;
+        const [front, ...nextDeck] = examDeck;
+        nextTargetIndex = front;
         setExamDeck(nextDeck);
 
         // Reset timer for the new question
@@ -234,8 +238,7 @@ export default function CompassDrill({ focus, start, onExit }: DrillProps) {
         setTimeLeft(perQuestion);
 
         // Manual first round init
-        const firstDeck = [...deck];
-        const firstIdx = firstDeck.pop()!;
+        const [firstIdx, ...firstDeck] = deck;
         setExamDeck(firstDeck);
         setTargetPoint(activePoints[firstIdx]);
         setClickedIndex(null);
