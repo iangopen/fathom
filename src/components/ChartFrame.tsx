@@ -162,6 +162,26 @@ a.ct-icon { text-decoration: none; }
 .ct-credit a:hover { text-decoration-color: currentColor; }
 .ct-credit a:focus-visible { outline: 1px solid #d4a94a; outline-offset: 2px; border-radius: 2px; }
 
+/* The Describe toggle under a drawing, and the description it shows. Fixed
+   colours for the navy panel, like the credit line: the day theme's ink would
+   vanish on it. The button is at least 44px tall, a full touch target. The
+   text is the slate the credit uses but lighter (about 9:1 on navy), and
+   capped at a reading width so a wide panel does not run it into one line. */
+.ct-describe {
+  min-height: 44px; min-width: 44px; padding: 0 16px; align-self: center;
+  background: transparent; border: 1px solid rgba(212,169,74,0.45);
+  border-radius: 10px; color: #d4a94a;
+  font-family: ${MONO}; font-size: 10.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.ct-describe:hover { border-color: #d4a94a; background: rgba(212,169,74,0.08); }
+.ct-describe:focus-visible { outline: 2px solid #d4a94a; outline-offset: 2px; }
+.ct-describe-text {
+  margin: 0; max-width: 46ch; align-self: center;
+  font-size: 13.5px; line-height: 1.55; color: #c9d4e0; text-align: left;
+}
+
 /* The full credits list on the About screen. This one is on the chart table,
    not the instrument, so it does use the theme tokens. Commons titles can run
    to a hundred characters with no spaces worth breaking at, so they wrap

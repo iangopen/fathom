@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import {
   QUESTION_LIGHTS,
   QUESTION_SCENARIOS,
@@ -30,6 +30,7 @@ import { SignalFlagDisplay, describeFlag } from '../drills/colregs/components/Si
 import { creditFor, ImageCredit, PhotoKind } from '../lib/imageCredits';
 import { PhotoCredit } from './PhotoCredit';
 import { SvgA11y } from '../lib/visualA11y';
+import { usePrefs } from '../lib/prefs';
 
 // 75 of the 78 bank questions are answered from a picture rather than from the
 // prompt text - "identify this vessel from what she is showing". The canvas
@@ -275,6 +276,13 @@ export const VisualPanel: React.FC<VisualPanelProps> = ({ questionId, revealed }
   // render the same markup, and the id would be the one difference.
   const descriptionId = useId();
   const resolved = resolveVisual(questionId, revealed);
+  // Whether the description is shown as visible text. It follows the
+  // "Show drawing descriptions" setting until this drawing's own Describe
+  // button is pressed, and from then on the button decides. The caller keys
+  // the panel on the question id, so each question starts from the setting.
+  const { prefs } = usePrefs();
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  const open = chosen ?? prefs.showDescriptions;
 
   // A question with no mapping draws nothing at all. That is necessary but it
   // was not sufficient: this panel and the ScenarioCard beside it are siblings,
@@ -291,13 +299,28 @@ export const VisualPanel: React.FC<VisualPanelProps> = ({ questionId, revealed }
     <div className="ct-instrument">
       <div className="ct-instrument-label">Observed</div>
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>{resolved.node(a11y)}</div>
-      {/* Read after the drawing's name, through aria-describedby. Hidden from
-          sight for now: whether sighted players get a "Describe" toggle is a
-          product decision still to make. */}
+      {/* The description is read after the drawing's name, through
+          aria-describedby. Describe shows that SAME node as visible text; it
+          never renders a second copy, so aria-describedby resolves to one node
+          open or closed and a screen reader's view of the panel is unchanged
+          apart from aria-expanded. Photographs have no description, so they
+          get no button; a drawing held back until the answer has no resolved
+          visual before it, so its button arrives with it. */}
       {resolved.description && (
-        <p id={descriptionId} className="sr-only">
-          {resolved.description}
-        </p>
+        <>
+          <button
+            type="button"
+            className="ct-describe"
+            aria-expanded={open}
+            aria-controls={descriptionId}
+            onClick={() => setChosen(!open)}
+          >
+            {open ? 'Hide description' : 'Describe'}
+          </button>
+          <p id={descriptionId} className={open ? 'ct-describe-text' : 'sr-only'}>
+            {resolved.description}
+          </p>
+        </>
       )}
       {credit && <PhotoCredit credit={credit} revealed={revealed} />}
     </div>
