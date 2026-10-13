@@ -57,3 +57,19 @@ describe('the default lighting', () => {
     expect(prefs.haptics).toBe(true);
   });
 });
+
+describe('the drawing descriptions setting', () => {
+  beforeEach(() => store.clear());
+
+  it('is off when nothing has been chosen', () => {
+    expect(DEFAULT_PREFS.showDescriptions).toBe(false);
+    expect(readPrefs().showDescriptions).toBe(false);
+  });
+
+  it('reads back on only when it was stored as true', () => {
+    store.set(KEY, JSON.stringify({ ...DEFAULT_PREFS, showDescriptions: true }));
+    expect(readPrefs().showDescriptions).toBe(true);
+    store.set(KEY, JSON.stringify({ ...DEFAULT_PREFS, showDescriptions: 'yes' }));
+    expect(readPrefs().showDescriptions).toBe(false);
+  });
+});
