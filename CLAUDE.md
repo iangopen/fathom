@@ -284,13 +284,14 @@ itself; and axe-core (16 rules evaluated) finding zero violations on an
 unanswered and an answered colregs, photo and compass question. axe cannot
 judge colour contrast in jsdom; it reports it as incomplete, not passed.
 
-Still open:
+Still open - the last open accessibility item:
 - **A real screen-reader pass by hand** (NVDA or VoiceOver) has not been
   done. Everything above, and the drawing descriptions below, is verified in
   jsdom and in Chrome's computed accessibility tree on `npm run preview`,
   not by listening.
-- **Whether sighted players get a "Describe" toggle** for the drawing
-  descriptions is a product decision; they are visually hidden for now.
+
+Resolved (2026-10-13): **sighted players get a Describe toggle.** See
+"Describe, and the one-node rule" under the drawing descriptions below.
 
 Resolved (2026-10-11): **weak-spot runs ask the weakest questions first.**
 They used to ask them last, because both deck players read the queue from
@@ -343,6 +344,41 @@ palettes.
   description against what the SVG actually paints (counts, colours, order,
   arrangement), pins one question per type word for word, and fails any
   drawn visual without a description or any photo with one.
+
+### Describe, and the one-node rule (2026-10-13)
+Every drawing with a description has a **Describe** button under it in
+VisualPanel: a real `<button type="button">` with `aria-expanded` and
+`aria-controls`, labelled "Describe" closed and "Hide description" open,
+styled `.ct-describe` in ChartFrame (fixed brass on the navy panel, 44px
+minimum height, its own brass focus ring). It matters most to red-green
+colour-blind players on the lights questions.
+- **The one-node rule: a description is ONE element.** Describe switches the
+  existing `<p>` between `sr-only` and `.ct-describe-text`; it never renders
+  a visible copy. So `aria-describedby` resolves to exactly one node open or
+  closed, `aria-controls` names that same node, and a screen reader's tree is
+  the same either way apart from `aria-expanded`. Never add a second copy.
+- Photographs get no button (they have no description, only frame alt
+  text). A drawing held back until the answer (`QUESTION_VISUAL_AFTER_ANSWER`)
+  has no resolved visual before it, so its button arrives with the drawing.
+- **Settings -> Display -> "Show drawing descriptions"** (`showDescriptions`
+  in prefs, stored in `charttable:prefs`, off by default, on only for an
+  explicit `true`) opens every description. A panel follows the setting until
+  its own button is pressed; the panel is keyed per question, so the next
+  question starts from the setting again.
+- `describeToggle.test.tsx` pins it: a button on every drawing and none on
+  the 21 photos; aria-expanded, label and visible text equal to the
+  generated description; aria-describedby resolving to one node (and no other
+  node with that text) open and closed, on every drawing before and after an
+  answer; no button on a held-back drawing before the answer; the setting
+  opening every description, set through the Settings screen and read back
+  after an unmount. Rendering a visible second copy fails two of its tests.
+- Checked on `npm run preview` in headless Chrome over CDP: a lights
+  question open in both themes and at 375px (no horizontal scroll), the
+  setting on after a reload, and the keyboard path prompt -> Tab to Describe
+  -> Enter (focus stays on the button, now "Hide description",
+  aria-expanded=true) -> Tab to the first option.
+- The button text sits in the panel text the leak guards read; they are
+  unchanged and still pass.
 
 **The extended leak guard** is the description block in
 `answerA11y.test.tsx`, with no allowlist. Before the answer, a description
@@ -522,13 +558,15 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
   build toolchain - nothing a user's browser loads.
 - **License.** The code is MIT (`LICENSE`, holder `iangopenbusinessai` from
   git's user.name since package.json has no author; package.json `license`
-  is `MIT`). The photographs are NOT under it: they keep their own PD / CC
+  is `MIT`). **Open:** the holder should be Ian's full name, with a matching
+  package.json `author` and git `user.name`. The 2026-10-13 session prompt
+  still said "YOUR FULL NAME" as a placeholder, so nothing was changed. The photographs are NOT under it: they keep their own PD / CC
   licences, credited in the app and in IMAGE-CREDITS.md, and the README says
   so. GitHub detects the repo as MIT.
 - README numbers come from a one-off count of the syllabus and bank, not
   from memory (2026-10-10: 320 questions, 16 bank cards summing to 326 with
   the 6 cross-listed, 6 sections, 18 cards). Recount when the bank changes.
-- Tests: 17 files / 1162 tests (2026-10-11, after the weak-spot order fix). Plain `npm test`, no flags, on
+- Tests: 18 files / 1171 tests (2026-10-13, after the Describe toggle). Plain `npm test`, no flags, on
   any Node from 22 up.
 - **Node versions.** CI runs Node 22; `.nvmrc` says 22 and `engines` says
   `>=22`. `npm test` passes unflagged on 22, 24, 25 and 26 (verified on
@@ -545,6 +583,11 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
     rename or drop an experimental flag, and an unknown flag stops every
     worker from starting. It is plain JS with no shell syntax, so it behaves
     the same on macOS. The old `NODE_OPTIONS=...` instruction is retired.
+  - **Still open: a plain `npm test` on macOS** has not been confirmed
+    since the setup file landed. The 2026-10-13 session was asked to close it
+    but ran on Windows (`uname -a`: MINGW64_NT-10.0-26200, Node v24.14.1),
+    where the plain run passed 18 files / 1171. Run it on the MacBook with
+    NODE_OPTIONS unset to close it.
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub

@@ -3,6 +3,20 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-13 - Describe toggle and setting
+
+- Describe button under every drawing, plus Settings -> "Show drawing
+  descriptions". The button reveals the existing sr-only description node
+  instead of rendering a copy. A deliberate break (visible second copy) failed
+  two tests in describeToggle.test.tsx and was reverted.
+- Preview check ran in headless Chrome over CDP from a scratch script,
+  because the Chrome extension was not connected. The first question in a
+  shuffled lights run can be text-only, so the script answered and pressed
+  Next until a drawn question came up.
+- Not done: the license holder / package.json author / git user.name change.
+  The prompt held the literal placeholder "YOUR FULL NAME". The macOS
+  `npm test` check is also not done: this session ran on Windows.
+
 ## 2026-10-11 - Weak-spot runs ask the weakest first
 
 - The test was written and committed first, failing 8 of 8 on the old code.
