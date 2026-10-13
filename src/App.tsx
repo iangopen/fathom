@@ -104,7 +104,7 @@ function Shell() {
 
   const settingGroups: SettingGroup[] = useMemo(() => {
     const toggle = (
-      key: 'colorblind' | 'haptics' | 'showCitations',
+      key: 'colorblind' | 'haptics' | 'showCitations' | 'showDescriptions',
       label: string,
       help: string
     ) => ({
@@ -136,6 +136,11 @@ function Shell() {
             'colorblind',
             'Colourblind marks',
             'Adds text labels wherever port red and starboard green carry meaning.'
+          ),
+          toggle(
+            'showDescriptions',
+            'Show drawing descriptions',
+            'Opens the written description under every drawing: its colours, shapes and positions in words. Each drawing keeps its own Describe button either way.'
           ),
         ],
       },

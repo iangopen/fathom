@@ -19,6 +19,10 @@ export interface Prefs {
   colorblind: boolean;
   haptics: boolean;
   showCitations: boolean;
+  // Opens every drawing's written description under it - see VisualPanel.
+  // Off by default: the descriptions are always there for screen readers, and
+  // each drawing has its own Describe button for anyone who wants one.
+  showDescriptions: boolean;
   examLength: number;
 }
 
@@ -31,6 +35,7 @@ export const DEFAULT_PREFS: Prefs = {
   colorblind: false,
   haptics: false,
   showCitations: true,
+  showDescriptions: false,
   examLength: DEFAULT_EXAM_LENGTH,
 };
 
@@ -48,6 +53,7 @@ export function readPrefs(): Prefs {
     colorblind: r.colorblind === true,
     haptics: r.haptics === true,
     showCitations: r.showCitations !== false,
+    showDescriptions: r.showDescriptions === true,
     examLength:
       typeof r.examLength === 'number' && EXAM_LENGTHS.includes(r.examLength)
         ? r.examLength
