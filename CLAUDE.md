@@ -515,6 +515,21 @@ accessibility tree of an unanswered question.
 How to source, vet, crop and wire one up - and the credits files those rules
 are enforced by - is in the `fathom-imagery` skill, not here.
 
+## Link preview card (2026-10-16)
+ is 1200x630 (42 KB), served at
+https://iangopen.github.io/fathom/og-image.png (Vite base is /fathom/). It is
+the app's night-helm palette in flat colours: navy #0a1929 ground, brass
+#d4a94a wordmark in Big Shoulders Stencil, tagline in Fraunces, the
+icon-wheel.svg mark on the left, all inside the central 1000x500 safe area.
+No offline, verified-content or user-number claims. It was rendered from a
+throwaway HTML file in the OS temp folder with the machine's own Chrome
+(); the HTML is not committed and Playwright is
+not a dependency. To change the card, redo it the same way. index.html holds
+the og: and twitter: tags (absolute URLs, LinkedIn ignores relative ones).
+sw.js and manifest.json were not touched.
+- **Open:** refresh LinkedIn's cache at linkedin.com/post-inspector.
+- **Open:** the licence holder is still undecided (see Notes).
+
 ## Deployment
 Pushing to main deploys automatically - see .github/workflows/ci.yml, which
 runs tsc, build and test on every push and then runs this same `deploy` script
@@ -548,6 +563,8 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
   and no font links: every font comes from `src/lib/fonts.ts`.
   installTitle() in src/lib/title.ts still sets the title at runtime, as a
   backstop.
+  A third (2026-10-16) added the Open Graph and Twitter tags after <title>; see
+  "Link preview card".
   - The font removal was checked on `npm run preview` in headless Chrome over
     CDP: the Space Grotesk stylesheet request is gone, no Space Grotesk face
     was ever downloaded, and the computed font-family of every element, the
