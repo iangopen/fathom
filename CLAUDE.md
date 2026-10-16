@@ -516,14 +516,14 @@ How to source, vet, crop and wire one up - and the credits files those rules
 are enforced by - is in the `fathom-imagery` skill, not here.
 
 ## Link preview card (2026-10-16)
- is 1200x630 (42 KB), served at
+`public/og-image.png` is 1200x630 (42 KB), served at
 https://iangopen.github.io/fathom/og-image.png (Vite base is /fathom/). It is
 the app's night-helm palette in flat colours: navy #0a1929 ground, brass
 #d4a94a wordmark in Big Shoulders Stencil, tagline in Fraunces, the
 icon-wheel.svg mark on the left, all inside the central 1000x500 safe area.
 No offline, verified-content or user-number claims. It was rendered from a
 throwaway HTML file in the OS temp folder with the machine's own Chrome
-(); the HTML is not committed and Playwright is
+(`--headless=new --screenshot`); the HTML is not committed and Playwright is
 not a dependency. To change the card, redo it the same way. index.html holds
 the og: and twitter: tags (absolute URLs, LinkedIn ignores relative ones).
 sw.js and manifest.json were not touched.
@@ -559,7 +559,7 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
   one-off authorization (the Tailwind build move, 2026-10-06) made exactly two
   edits: the `cdn.tailwindcss.com` script tag was removed and `<title>` changed
   from NauticalMaster to Fathom. A second (2026-10-09) made one: the unused
-  Space Grotesk `<link>` was deleted. It has no meta description or og tags,
+  Space Grotesk `<link>` was deleted. It has no meta description,
   and no font links: every font comes from `src/lib/fonts.ts`.
   installTitle() in src/lib/title.ts still sets the title at runtime, as a
   backstop.
