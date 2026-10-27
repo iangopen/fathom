@@ -537,6 +537,19 @@ on main only. The workflow calls the npm script rather than restating the
 gh-pages flags, so the --remove fix below lives in exactly one place. Running
 `npm run deploy` by hand still works but is no longer necessary.
 
+**Workflow pins (2026-10-27, commit c135f8a, run 40455816421):** the job runs on
+`ubuntu-24.04` (not `ubuntu-latest`, which moves to Ubuntu 26.04 between
+2026-10-19 and 2026-11-19; bump it deliberately), Node 22, `npm ci`,
+`actions/checkout@v7` and `actions/setup-node@v7` (Node 24 action runtime). The
+job has a concurrency group: `pages` on main, `ci-<ref>` elsewhere, with
+`cancel-in-progress: false`, so gh-pages pushes never overlap or get cancelled
+mid-push. checkout v6+ no longer leaves credentials in `.git/config`; the deploy
+step never relied on that (it puts `GITHUB_TOKEN` in the origin URL).
+Verified on that run: 0 annotations, image ubuntu-24.04, 18 files / 1171 tests,
+deployed bundle identical to a fresh `npm ci` build (only `.nojekyll` extra).
+**Restore the previous workflow** (the commit before the change is 91f3312):
+`git checkout 91f3312 -- .github/workflows/ci.yml` then commit and push.
+
 `npm run deploy` is `gh-pages -d dist --nojekyll` plus an explicit `--remove`
 glob. gh-pages' default remove pattern (`.`) does not match dotfiles, so any
 dotfile that ever lands on the gh-pages branch survives every later deploy —

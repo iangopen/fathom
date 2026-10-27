@@ -3,6 +3,21 @@
 Newest first. CLAUDE.md describes the current state; this file is the log of
 how it got there.
 
+## 2026-10-27 - CI runner and action pins
+
+- ci.yml: ubuntu-latest -> ubuntu-24.04, checkout and setup-node v4 -> v7,
+  concurrency group (`pages` on main, `ci-<ref>` otherwise,
+  cancel-in-progress false). Node 22 and npm ci were already in place.
+- Release notes read. Relevant: checkout v6 persists credentials in a separate
+  file instead of .git/config (deploy step uses a token in the origin URL, so
+  unaffected); setup-node v5/v6 auto-cache changes do not apply (cache: npm is
+  explicit). The workflow header comment was corrected to match.
+- Run 40455816421 passed: 0 annotations, ubuntu-24.04 image, 18 files / 1171
+  tests. Deployed bundle matched a fresh npm ci build on all 33 files (only
+  .nojekyll extra). Live site: title Fathom, About lists 21 photo credits, an
+  anchor practice question shows its image and credit line.
+- Restore: `git checkout 91f3312 -- .github/workflows/ci.yml`.
+
 ## 2026-10-13 - Describe toggle and setting
 
 - Describe button under every drawing, plus Settings -> "Show drawing
