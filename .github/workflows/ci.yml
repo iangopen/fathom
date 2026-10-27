@@ -9,18 +9,26 @@ on:
       - gh-pages
 
 # gh-pages pushes the built site to the gh-pages branch from inside the job,
-# using the token actions/checkout leaves behind in .git/config.
+# using the GITHUB_TOKEN, which the deploy step puts in the origin URL itself
+# (checkout v6+ no longer leaves credentials in .git/config).
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest, so a new default image can't change the deploy
+    # by surprise. Bumping it is a deliberate step (see CLAUDE.md, Deployment).
+    runs-on: ubuntu-24.04
+    # Deploys to gh-pages serialise and are never cancelled mid-push. Other
+    # branches get their own group so they don't queue behind (or evict) main.
+    concurrency:
+      group: ${{ github.ref == 'refs/heads/main' && 'pages' || format('ci-{0}', github.ref) }}
+      cancel-in-progress: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
