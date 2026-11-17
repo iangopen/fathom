@@ -1,5 +1,7 @@
 # Fathom
 
+**Latest audit: `docs/audit-2026-11.md` (2026-11-16)** - findings F-01..F-20, opportunities and the proposed fix order. Read it before starting work.
+
 Vite + React + TypeScript app deployed to GitHub Pages at:
 https://iangopen.github.io/fathom/
 
@@ -283,6 +285,8 @@ visuals drawn before an answer (2026-10-09, dk-13 now held back) carrying a word
 itself; and axe-core (16 rules evaluated) finding zero violations on an
 unanswered and an answered colregs, photo and compass question. axe cannot
 judge colour contrast in jsdom; it reports it as incomplete, not passed.
+In a real browser (2026-11-16 audit, F-03/F-04) axe does find contrast,
+`landmark-one-main`, `region` and `page-has-heading-one` violations.
 
 Still open - the last open accessibility item:
 - **A real screen-reader pass by hand** (NVDA or VoiceOver) has not been
@@ -528,7 +532,7 @@ not a dependency. To change the card, redo it the same way. index.html holds
 the og: and twitter: tags (absolute URLs, LinkedIn ignores relative ones).
 sw.js and manifest.json were not touched.
 - **Open:** refresh LinkedIn's cache at linkedin.com/post-inspector.
-- **Open:** the licence holder is still undecided (see Notes).
+- Resolved (2026-11-02, a79bb61): the licence holder is Ian Gopen (see Notes).
 
 ## Deployment
 Pushing to main deploys automatically - see .github/workflows/ci.yml, which
@@ -583,14 +587,13 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
     was ever downloaded, and the computed font-family of every element, the
     loaded faces and the platform fonts rendered for the headings, body and
     cards were identical before and after.
-- Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 14
-  (vite <=6.4.2, @babel/core, braces, undici and others), all in the dev and
-  build toolchain - nothing a user's browser loads.
-- **License.** The code is MIT (`LICENSE`, holder `iangopenbusinessai` from
-  git's user.name since package.json has no author; package.json `license`
-  is `MIT`). **Open:** the holder should be Ian's full name, with a matching
-  package.json `author` and git `user.name`. The 2026-10-13 session prompt
-  still said "YOUR FULL NAME" as a placeholder, so nothing was changed. The photographs are NOT under it: they keep their own PD / CC
+- Dependencies: `npm audit --omit=dev` is clean (0). The full audit lists 8
+  (1 low, 4 moderate, 3 high; vite <=6.4.3, undici and others, 2026-11-16),
+  all in the dev and build toolchain - nothing a user's browser loads. See
+  audit F-10.
+- **License.** The code is MIT (`LICENSE`, holder "Ian Gopen" since a79bb61,
+  matching git `user.name`; package.json `license` is `MIT`). **Open:**
+  package.json still has no `author` field. The photographs are NOT under it: they keep their own PD / CC
   licences, credited in the app and in IMAGE-CREDITS.md, and the README says
   so. GitHub detects the repo as MIT.
 - README numbers come from a one-off count of the syllabus and bank, not
@@ -613,27 +616,26 @@ icon/favicon workflow live in the `fathom-assets` skill, not here.
     rename or drop an experimental flag, and an unknown flag stops every
     worker from starting. It is plain JS with no shell syntax, so it behaves
     the same on macOS. The old `NODE_OPTIONS=...` instruction is retired.
-  - **Still open: a plain `npm test` on macOS** has not been confirmed
-    since the setup file landed. The 2026-10-13 session was asked to close it
-    but ran on Windows (`uname -a`: MINGW64_NT-10.0-26200, Node v24.14.1),
-    where the plain run passed 18 files / 1171. Run it on the MacBook with
-    NODE_OPTIONS unset to close it.
+  - **Closed (2026-11-16): a plain `npm test` on macOS** (Darwin 25.6.0
+    arm64, Node v25.8.2, NODE_OPTIONS unset) passed 18 files / 1171.
 - localStorage keys still use the `nauticalmaster` namespace (src/lib/storage.ts)
   on purpose, so existing best scores survive the rename. Do not "fix" it.
 - The local working directory is still named nauticalmaster; only the GitHub
   repo was renamed.
 - Always run `npm run build` after changes and fix all TS errors before finishing
-- The working copy is `C:\devwork\github projects\nauticalmaster`, **not** inside
+- The working copy was `C:\devwork\github projects\nauticalmaster` on Windows; on the
+  MacBook it is `~/Desktop/project folders/nauticalmaster`. The Windows copy was **not** inside
   OneDrive (`%OneDrive%` is `C:\Users\iango\OneDrive`). A cleanup audit
   (2026-10-06) found no conflict copies, cloud-only placeholders, zero-byte
   files or `~$`/`.tmp` leftovers, and all 11 test files on disk
   (`src/__tests__`) are collected by Vitest: 11 files / 1010 tests passing,
   build clean. Nothing was deleted, hydrated or quarantined, and no
   `.gitignore` entries were added since no such files exist.
-- Account renamed to `iangopen` (Sept 2026). Homepage field, git remote, README
+- Account renamed to `iangopen` (Sept 2026). Homepage field, README
   badge/link and this file all use it now; live site is
   https://iangopen.github.io/fathom/. Old-account strings still exist in git
-  history only (left alone on purpose).
+  history only (left alone on purpose). The MacBook clone's `origin` still
+  points at `iangopenbusinessai-lab/nauticalmaster` (GitHub redirects it; audit F-20).
 - `.claude/settings.local.json` is untracked and gitignored; it was removed from
   tracking earlier (c588140). It is still in history but only held an npm/npx
   permission allowlist, no secrets. History was not rewritten.
